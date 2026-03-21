@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /*.json$
+Disallow: /*?*
+
+Sitemap: https://hauslash.co/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
