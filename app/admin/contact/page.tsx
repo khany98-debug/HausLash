@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAdminAuth } from '../layout'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Mail, Phone, Trash2, Loader2, Check } from 'lucide-react'
+import { Mail, Phone, Trash2, Loader2, Send, ChevronDown } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
+
+interface ContactMessage {
+  id: string
+  message: string
+  sender: 'customer' | 'admin'
+  sender_name: string
+  created_at: string
+}
 
 interface ContactInquiry {
   id: string
@@ -34,6 +34,12 @@ interface ContactInquiry {
   message: string
   status: 'new' | 'replied' | 'archived'
   created_at: string
+  updated_at: string
+}
+
+interface Conversation {
+  inquiry: ContactInquiry
+  messages: ContactMessage[]
 }
 
 // Helper function to safely format dates
@@ -53,14 +59,25 @@ export default function ContactInquiriesAdmin() {
 
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'new' | 'replied' | 'archived'>('new')
+  const [filter, setFilter] = useState<'all' | 'new' | 'replied' | 'archived'>('all')
+  const [selectedInquiry, setSelectedInquiry] = useState<Conversation | null>(null)
+  const [replyText, setReplyText] = useState('')
+  const [replySending, setReplySending] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deleteDialog, setDeleteDialog] = useState<string | null>(null)
-  const [detailDialog, setDetailDialog] = useState<ContactInquiry | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchInquiries()
   }, [filter])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [selectedInquiry])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   async function fetchInquiries() {
     try {
@@ -71,12 +88,56 @@ export default function ContactInquiriesAdmin() {
       const response = await fetch(`/api/contact?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setInquiries(data.inquiries)
+        setInquiries(data.inquiries.sort((a: ContactInquiry, b: ContactInquiry) => 
+          new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+        ))
       }
     } catch (error) {
       console.error('Error fetching inquiries:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function fetchConversation(id: string) {
+    try {
+      const response = await fetch(`/api/contact/${id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSelectedInquiry(data)
+      }
+    } catch (error) {
+      console.error('Error fetching conversation:', error)
+    }
+  }
+
+  async function sendReply() {
+    if (!replyText.trim() || !selectedInquiry) return
+
+    try {
+      setReplySending(true)
+      const response = await fetch('/api/contact/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inquiryId: selectedInquiry.inquiry.id,
+          email: selectedInquiry.inquiry.email,
+          customerName: selectedInquiry.inquiry.name,
+          replyMessage: replyText,
+        }),
+      })
+
+      if (response.ok) {
+        setReplyText('')
+        // Refetch conversation
+        await fetchConversation(selectedInquiry.inquiry.id)
+        // Refetch inquiries to update status
+        await fetchInquiries()
+      }
+    } catch (error) {
+      console.error('Error sending reply:', error)
+    } finally {
+      setReplySending(false)
     }
   }
 
@@ -93,6 +154,9 @@ export default function ContactInquiriesAdmin() {
         setInquiries(inquiries.map(i =>
           i.id === id ? { ...i, status } : i
         ))
+        if (selectedInquiry?.inquiry.id === id) {
+          await fetchConversation(id)
+        }
       }
     } catch (error) {
       console.error('Error updating inquiry:', error)
@@ -110,6 +174,9 @@ export default function ContactInquiriesAdmin() {
 
       if (response.ok) {
         setInquiries(inquiries.filter(i => i.id !== id))
+        if (selectedInquiry?.inquiry.id === id) {
+          setSelectedInquiry(null)
+        }
       }
     } catch (error) {
       console.error('Error deleting inquiry:', error)
@@ -133,197 +200,219 @@ export default function ContactInquiriesAdmin() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-serif text-foreground mb-2">Contact Inquiries</h1>
-        <p className="text-muted-foreground">
-          Manage customer contact form submissions
-        </p>
+    <div className="h-screen w-full flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="border-b bg-background px-6 py-4">
+        <h1 className="text-2xl font-serif text-foreground">Contact Inquiries</h1>
+        <p className="text-sm text-muted-foreground">Manage customer messages</p>
       </div>
 
-      {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap">
-        {(['all', 'new', 'replied', 'archived'] as const).map((status) => (
-          <Button
-            key={status}
-            variant={filter === status ? 'default' : 'outline'}
-            onClick={() => setFilter(status)}
-            className="capitalize"
-          >
-            {status}
-          </Button>
-        ))}
-      </div>
+      {/* Main Content - Split View */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Contact List */}
+        <div className="w-96 border-r flex flex-col overflow-hidden bg-muted/20">
+          {/* Filter Buttons */}
+          <div className="flex gap-2 p-4 border-b overflow-x-auto">
+            {(['all', 'new', 'replied', 'archived'] as const).map((status) => (
+              <Button
+                key={status}
+                variant={filter === status ? 'default' : 'outline'}
+                onClick={() => setFilter(status)}
+                className="capitalize text-xs whitespace-nowrap"
+                size="sm"
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
 
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : inquiries.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">
-            No inquiries found
-          </p>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {inquiries.map((inquiry) => (
-            <Card key={inquiry.id} className="p-6">
-              <div className="space-y-4">
-                {/* Header */}
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-foreground text-lg">
-                      {inquiry.name}
-                    </h3>
-                    <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                      <a
-                        href={`mailto:${inquiry.email}`}
-                        className="hover:text-foreground flex items-center gap-1"
-                      >
-                        <Mail className="h-4 w-4" />
-                        {inquiry.email}
-                      </a>
-                      <a
-                        href={`tel:${inquiry.phone}`}
-                        className="hover:text-foreground flex items-center gap-1"
-                      >
-                        <Phone className="h-4 w-4" />
-                        {inquiry.phone}
-                      </a>
+          {/* Contact List */}
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : inquiries.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground">
+                No inquiries found
+              </div>
+            ) : (
+              <div className="divide-y">
+                {inquiries.map((inquiry) => (
+                  <button
+                    key={inquiry.id}
+                    onClick={() => fetchConversation(inquiry.id)}
+                    className={`w-full p-4 text-left transition-colors ${
+                      selectedInquiry?.inquiry.id === inquiry.id
+                        ? 'bg-primary/10 border-l-2 border-primary'
+                        : 'hover:bg-muted'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-semibold text-sm text-foreground truncate">
+                        {inquiry.name}
+                      </h3>
+                      <Badge className={`text-xs flex-shrink-0 ${getStatusColor(inquiry.status)}`}>
+                        {inquiry.status === 'new' ? 'New' : inquiry.status === 'replied' ? 'Replied' : 'Archived'}
+                      </Badge>
                     </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {inquiry.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {inquiry.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {formatDistanceToNow(new Date(inquiry.updated_at || inquiry.created_at), { addSuffix: true })}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side - Conversation */}
+        {selectedInquiry ? (
+          <div className="flex-1 flex flex-col overflow-hidden bg-background">
+            {/* Conversation Header */}
+            <div className="border-b bg-muted/50 px-6 py-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {selectedInquiry.inquiry.name}
+                  </h2>
+                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                    <a
+                      href={`mailto:${selectedInquiry.inquiry.email}`}
+                      className="hover:text-foreground flex items-center gap-1"
+                    >
+                      <Mail className="h-4 w-4" />
+                      {selectedInquiry.inquiry.email}
+                    </a>
+                    <a
+                      href={`tel:${selectedInquiry.inquiry.phone}`}
+                      className="hover:text-foreground flex items-center gap-1"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {selectedInquiry.inquiry.phone}
+                    </a>
                   </div>
-                  <Badge className={getStatusColor(inquiry.status)}>
-                    {inquiry.status}
-                  </Badge>
                 </div>
-
-                {/* Message Preview */}
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-foreground text-sm">
-                    {inquiry.message.length > 200
-                      ? `${inquiry.message.substring(0, 200)}...`
-                      : inquiry.message}
-                  </p>
-                </div>
-
-                {/* Footer */}
-                <div className="flex justify-between items-center pt-4 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(inquiry.created_at)}
-                  </p>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
+                <div className="flex gap-2">
+                  {selectedInquiry.inquiry.status === 'new' && (
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={actionLoading === inquiry.id}
-                      onClick={() => setDetailDialog(inquiry)}
+                      onClick={() => updateStatus(selectedInquiry.inquiry.id, 'replied')}
+                      disabled={actionLoading === selectedInquiry.inquiry.id}
                     >
-                      View Details
+                      Mark Replied
                     </Button>
-
-                    {inquiry.status === 'new' && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        disabled={actionLoading === inquiry.id}
-                        onClick={() => updateStatus(inquiry.id, 'replied')}
-                        className="gap-2"
-                      >
-                        <Check className="h-4 w-4" />
-                        Mark Replied
-                      </Button>
-                    )}
-
+                  )}
+                  {selectedInquiry.inquiry.status === 'replied' && (
                     <Button
                       size="sm"
-                      variant="destructive"
-                      disabled={actionLoading === inquiry.id}
-                      onClick={() => setDeleteDialog(inquiry.id)}
-                      className="gap-2"
+                      variant="outline"
+                      onClick={() => updateStatus(selectedInquiry.inquiry.id, 'archived')}
+                      disabled={actionLoading === selectedInquiry.inquiry.id}
                     >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
+                      Archive
                     </Button>
-                  </div>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setDeleteDialog(selectedInquiry.inquiry.id)}
+                    disabled={actionLoading === selectedInquiry.inquiry.id}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Detail Dialog */}
-      <Dialog open={detailDialog !== null} onOpenChange={(open) => !open && setDetailDialog(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{detailDialog?.name}</DialogTitle>
-            <DialogDescription>
-              Inquiry from {formatDate(detailDialog?.created_at || '', 'MMM d, yyyy')}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Email</p>
-                <a
-                  href={`mailto:${detailDialog?.email}`}
-                  className="text-sm font-medium text-blue-600 hover:underline"
-                >
-                  {detailDialog?.email}
-                </a>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Phone</p>
-                <a
-                  href={`tel:${detailDialog?.phone}`}
-                  className="text-sm font-medium text-blue-600 hover:underline"
-                >
-                  {detailDialog?.phone}
-                </a>
-              </div>
             </div>
 
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Message</p>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-foreground whitespace-pre-wrap">
-                  {detailDialog?.message}
-                </p>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Initial customer message */}
+              <div className="flex gap-3 justify-start">
+                <div className="flex-1">
+                  <div className="rounded-lg bg-muted p-4">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">
+                      {selectedInquiry.inquiry.message}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedInquiry.inquiry.name} • {formatDate(selectedInquiry.inquiry.created_at, 'MMM d, yyyy - HH:mm')}
+                  </p>
+                </div>
               </div>
+
+              {/* Conversation messages */}
+              {selectedInquiry.messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex gap-3 ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex-1 max-w-md ${msg.sender === 'admin' ? 'text-right' : ''}`}>
+                    <div
+                      className={`rounded-lg p-4 whitespace-pre-wrap ${
+                        msg.sender === 'admin'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.message}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {msg.sender === 'admin' ? 'You' : msg.sender_name} •{' '}
+                      {formatDate(msg.created_at, 'MMM d, yyyy - HH:mm')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              <div ref={messagesEndRef} />
             </div>
 
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Status</p>
-              <Badge className={getStatusColor(detailDialog?.status || '')}>
-                {detailDialog?.status}
-              </Badge>
+            {/* Reply Input */}
+            <div className="border-t bg-background p-4">
+              <div className="flex gap-2">
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                      sendReply()
+                    }
+                  }}
+                  placeholder="Type your reply... (Ctrl+Enter to send)"
+                  className="flex-1 p-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  rows={3}
+                />
+                <Button
+                  onClick={sendReply}
+                  disabled={!replyText.trim() || replySending}
+                  className="self-end gap-2"
+                >
+                  {replySending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDetailDialog(null)}>
-              Close
-            </Button>
-            {detailDialog?.status === 'new' && (
-              <Button
-                onClick={() => {
-                  if (detailDialog?.id) {
-                    updateStatus(detailDialog.id, 'replied')
-                    setDetailDialog(null)
-                  }
-                }}
-              >
-                Mark as Replied
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <Mail className="h-12 w-12 mx-auto mb-4 opacity-40" />
+              <p>Select a message to view the conversation</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialog !== null} onOpenChange={(open) => !open && setDeleteDialog(null)}>

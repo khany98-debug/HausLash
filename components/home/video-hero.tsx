@@ -42,7 +42,7 @@ export function VideoHero({
   }, [videoBasePath])
 
   return (
-    <div className={`relative flex-1 overflow-hidden rounded-2xl bg-black ${className}`}>
+    <div className={`relative flex-1 overflow-hidden rounded-2xl bg-black ${className}`} style={{ willChange: 'auto', backfaceVisibility: 'hidden' }}>
       {videoSrc ? (
         <>
           <video
@@ -51,6 +51,7 @@ export function VideoHero({
             muted
             playsInline
             className="w-full h-full object-cover"
+            style={{ display: 'block', backfaceVisibility: 'hidden', objectPosition: 'center' }}
             aria-label={alt}
           >
             <source src={videoSrc} type={videoSrc.endsWith('.mp4') ? 'video/mp4' : 'video/quicktime'} />

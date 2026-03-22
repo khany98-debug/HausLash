@@ -9,7 +9,7 @@ export function HeroSection() {
       <div className="mx-auto flex flex-col items-center max-w-3xl gap-10">
         {/* Centered Video */}
         <div className="w-full flex justify-center">
-          <div className="w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-black/10 bg-black transition-all duration-300">
+          <div className="w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-black/10 bg-black" style={{ willChange: 'auto', backfaceVisibility: 'hidden', perspective: '1000px' }}>
             <VideoHero
               videoBasePath="/videos/logo-animation"
               alt="HausLash Logo Animation"
