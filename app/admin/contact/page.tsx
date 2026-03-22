@@ -124,6 +124,7 @@ export default function ContactInquiriesAdmin() {
       console.log('Sending reply:', {
         inquiryId: selectedInquiry.inquiry.id,
         email: selectedInquiry.inquiry.email,
+        customerName: selectedInquiry.inquiry.name,
         replyMessage: replyText,
       })
 
@@ -138,7 +139,14 @@ export default function ContactInquiriesAdmin() {
         }),
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', e)
+        data = { error: 'Invalid response from server' }
+      }
+
       console.log('Reply response:', response.status, data)
 
       if (response.ok) {
@@ -152,9 +160,10 @@ export default function ContactInquiriesAdmin() {
         // Refetch inquiries to update status
         await fetchInquiries()
       } else {
+        const errorMsg = data?.error || data?.details || `Server error: ${response.statusText}`
         toast({
           title: 'Error',
-          description: data?.error || 'Failed to send reply',
+          description: errorMsg,
           variant: 'destructive',
         })
         console.error('Reply failed:', response.status, data)
@@ -162,7 +171,7 @@ export default function ContactInquiriesAdmin() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to send reply. Check console for details.',
+        description: String(error),
         variant: 'destructive',
       })
       console.error('Error sending reply:', error)

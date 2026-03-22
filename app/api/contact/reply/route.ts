@@ -4,10 +4,10 @@ import { resend } from '@/lib/email'
 import { z } from 'zod'
 
 const replySchema = z.object({
-  inquiryId: z.string(),
-  email: z.string().email(),
-  customerName: z.string().min(2),
-  replyMessage: z.string().min(1).max(5000),
+  inquiryId: z.string().min(1, 'Inquiry ID is required'),
+  email: z.string().email('Valid email is required'),
+  customerName: z.string().min(2, 'Name must be at least 2 characters'),
+  replyMessage: z.string().min(1, 'Reply message cannot be empty').max(5000, 'Message too long'),
 })
 
 export async function POST(request: NextRequest) {
@@ -19,8 +19,14 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       console.error('Validation failed:', parsed.error.flatten())
+      const errorMessages = Object.entries(parsed.error.flatten().fieldErrors)
+        .map(([field, errors]) => `${field}: ${errors?.join(', ') || 'Invalid'}`)
+        .join(' | ')
       return NextResponse.json(
-        { error: 'Invalid reply data', details: parsed.error.flatten() },
+        { 
+          error: 'Validation failed', 
+          details: errorMessages || 'Unknown validation error'
+        },
         { status: 400 }
       )
     }
