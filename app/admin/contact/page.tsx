@@ -121,8 +121,11 @@ export default function ContactInquiriesAdmin() {
 
     try {
       setReplySending(true)
+      
+      const inquiryId = String(selectedInquiry.inquiry.id)
+      
       console.log('Sending reply:', {
-        inquiryId: selectedInquiry.inquiry.id,
+        inquiryId,
         email: selectedInquiry.inquiry.email,
         customerName: selectedInquiry.inquiry.name,
         replyMessage: replyText,
@@ -132,7 +135,7 @@ export default function ContactInquiriesAdmin() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          inquiryId: selectedInquiry.inquiry.id,
+          inquiryId,
           email: selectedInquiry.inquiry.email,
           customerName: selectedInquiry.inquiry.name,
           replyMessage: replyText,
@@ -156,7 +159,7 @@ export default function ContactInquiriesAdmin() {
         })
         setReplyText('')
         // Refetch conversation
-        await fetchConversation(selectedInquiry.inquiry.id)
+        await fetchConversation(inquiryId)
         // Refetch inquiries to update status
         await fetchInquiries()
       } else {
