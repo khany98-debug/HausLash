@@ -47,14 +47,36 @@ export async function POST(request: NextRequest) {
 
     // Store the reply message in contact_messages table
     try {
+      // Ensure the table exists
+      await sql`
+        CREATE TABLE IF NOT EXISTS contact_messages (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          inquiry_id TEXT NOT NULL,
+          message TEXT NOT NULL,
+          sender TEXT NOT NULL CHECK (sender IN ('customer', 'admin')),
+          sender_name TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `
+      
+      // Create indexes if they don't exist
+      try {
+        await sql`
+          CREATE INDEX IF NOT EXISTS idx_contact_messages_inquiry_id ON contact_messages(inquiry_id)
+        `
+      } catch (e) {
+        // Index might already exist
+      }
+
+      // Now insert the message
       await sql`
         INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
         VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
       `
       console.log('Message stored successfully')
     } catch (tableError) {
-      // Table might not exist yet, log warning but continue
-      console.warn('Messages table may not exist yet, continuing without storing message:', tableError)
+      console.error('Error storing message:', tableError)
+      // Continue even if message storage fails - email was sent
     }
 
     console.log('Sending email to:', email)

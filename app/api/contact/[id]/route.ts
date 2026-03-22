@@ -26,6 +26,23 @@ export async function GET(
     // Get all messages in the conversation
     let messages: any[] = []
     try {
+      // Ensure the table exists
+      try {
+        await sql`
+          CREATE TABLE IF NOT EXISTS contact_messages (
+            id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+            inquiry_id TEXT NOT NULL,
+            message TEXT NOT NULL,
+            sender TEXT NOT NULL CHECK (sender IN ('customer', 'admin')),
+            sender_name TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          )
+        `
+      } catch (createError) {
+        // Table might already exist, that's fine
+        console.warn('Could not create messages table:', createError)
+      }
+
       messages = await sql`
         SELECT id, message, sender, sender_name, created_at
         FROM contact_messages
@@ -33,8 +50,7 @@ export async function GET(
         ORDER BY created_at ASC
       `
     } catch (dbError) {
-      // Table might not exist yet, that's okay
-      console.warn('Messages table may not exist yet, continuing without messages')
+      console.debug('Could not fetch messages (table may not exist yet):', dbError)
       messages = []
     }
 
