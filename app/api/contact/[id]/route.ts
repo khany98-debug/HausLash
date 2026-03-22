@@ -11,7 +11,7 @@ export async function GET(
 
     // Get the inquiry
     const inquiry = await sql`
-      SELECT id, name, email, phone, message, status, created_at, updated_at
+      SELECT id, name, email, phone, message, status, created_at
       FROM contact_inquiries
       WHERE id = ${id}
     `
@@ -73,7 +73,7 @@ export async function PATCH(
     const sql = getDb()
     await sql`
       UPDATE contact_inquiries
-      SET status = ${status}, updated_at = now()
+      SET status = ${status}
       WHERE id = ${id}
     `
 

@@ -34,7 +34,6 @@ interface ContactInquiry {
   message: string
   status: 'new' | 'replied' | 'archived'
   created_at: string
-  updated_at: string
 }
 
 interface Conversation {
@@ -89,7 +88,7 @@ export default function ContactInquiriesAdmin() {
       if (response.ok) {
         const data = await response.json()
         setInquiries(data.inquiries.sort((a: ContactInquiry, b: ContactInquiry) => 
-          new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ))
       }
     } catch (error) {
@@ -267,7 +266,7 @@ export default function ContactInquiriesAdmin() {
                       {inquiry.message}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {formatDistanceToNow(new Date(inquiry.updated_at || inquiry.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(inquiry.created_at), { addSuffix: true })}
                     </p>
                   </button>
                 ))}

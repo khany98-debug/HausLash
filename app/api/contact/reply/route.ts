@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
       console.warn('Messages table may not exist yet, continuing without storing message')
     }
 
-    // Update inquiry status to 'replied' and update timestamp
+    // Update inquiry status to 'replied'
     await sql`
       UPDATE contact_inquiries
-      SET status = 'replied', updated_at = now()
+      SET status = 'replied'
       WHERE id = ${inquiryId}
     `
 

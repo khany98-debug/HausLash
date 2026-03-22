@@ -126,18 +126,18 @@ export async function GET(request: NextRequest) {
     let inquiries
     if (status && status !== 'all') {
       inquiries = await sql`
-        SELECT id, name, email, phone, message, status, created_at, updated_at
+        SELECT id, name, email, phone, message, status, created_at
         FROM contact_inquiries
         WHERE status = ${status}
-        ORDER BY COALESCE(updated_at, created_at) DESC
+        ORDER BY created_at DESC
         LIMIT ${limit}
       `
     } else {
       // Fetch all inquiries regardless of status
       inquiries = await sql`
-        SELECT id, name, email, phone, message, status, created_at, updated_at
+        SELECT id, name, email, phone, message, status, created_at
         FROM contact_inquiries
-        ORDER BY COALESCE(updated_at, created_at) DESC
+        ORDER BY created_at DESC
         LIMIT ${limit}
       `
     }
