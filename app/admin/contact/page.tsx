@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAdminAuth } from '../layout'
+import { useToast } from '@/hooks/use-toast'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -55,6 +56,7 @@ const formatDate = (dateString: string | null | undefined, formatStr: string = '
 
 export default function ContactInquiriesAdmin() {
   useAdminAuth()
+  const { toast } = useToast()
 
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([])
   const [loading, setLoading] = useState(true)
@@ -140,15 +142,29 @@ export default function ContactInquiriesAdmin() {
       console.log('Reply response:', response.status, data)
 
       if (response.ok) {
+        toast({
+          title: 'Success!',
+          description: 'Reply sent to customer',
+        })
         setReplyText('')
         // Refetch conversation
         await fetchConversation(selectedInquiry.inquiry.id)
         // Refetch inquiries to update status
         await fetchInquiries()
       } else {
+        toast({
+          title: 'Error',
+          description: data?.error || 'Failed to send reply',
+          variant: 'destructive',
+        })
         console.error('Reply failed:', response.status, data)
       }
     } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to send reply. Check console for details.',
+        variant: 'destructive',
+      })
       console.error('Error sending reply:', error)
     } finally {
       setReplySending(false)
