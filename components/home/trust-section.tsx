@@ -26,7 +26,7 @@ const TRUST_ITEMS = [
 export function TrustSection() {
   return (
     <section className="border-y border-border/60 bg-card">
-      <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-20">
         <div className="mb-12 text-center">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Why Hauslash
@@ -36,13 +36,18 @@ export function TrustSection() {
           </h2>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {TRUST_ITEMS.map((item) => (
-            <div key={item.title} className="flex flex-col items-center gap-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
-                <item.icon className="h-5 w-5 text-accent-foreground" />
+            <div
+              key={item.title}
+              className="flex flex-col items-center gap-4 text-center rounded-xl bg-card/80 p-6 transition-shadow hover:shadow-lg focus-within:shadow-lg outline-none"
+              tabIndex={0}
+              aria-label={item.title + ': ' + item.description}
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent mb-2">
+                <item.icon className="h-6 w-6 text-accent-foreground" aria-hidden="true" />
               </div>
-              <h3 className="font-medium text-foreground">{item.title}</h3>
+              <h3 className="font-semibold text-foreground text-lg">{item.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {item.description}
               </p>

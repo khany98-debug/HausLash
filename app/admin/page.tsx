@@ -192,11 +192,11 @@ export default function AdminBookingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl text-foreground">Bookings</h1>
+    <div className="flex flex-col gap-6 md:gap-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
+        <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px] focus-visible:ring-2 focus-visible:ring-primary">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -260,7 +260,7 @@ export default function AdminBookingsPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleRescheduleClick(b)}
-                              className="text-xs"
+                              className="text-xs focus-visible:ring-2 focus-visible:ring-primary"
                             >
                               Reschedule
                             </Button>
@@ -268,7 +268,7 @@ export default function AdminBookingsPage() {
                               size="sm"
                               variant="destructive"
                               onClick={() => handleCancelClick(b)}
-                              className="text-xs"
+                              className="text-xs focus-visible:ring-2 focus-visible:ring-primary"
                             >
                               Cancel
                             </Button>
@@ -279,7 +279,7 @@ export default function AdminBookingsPage() {
                             size="sm"
                             variant="destructive"
                             onClick={() => handleCancelClick(b)}
-                            className="text-xs"
+                            className="text-xs focus-visible:ring-2 focus-visible:ring-primary"
                           >
                             Cancel
                           </Button>
@@ -343,7 +343,7 @@ export default function AdminBookingsPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleRescheduleClick(b)}
-                        className="flex-1 text-xs h-9"
+                        className="flex-1 text-xs h-9 focus-visible:ring-2 focus-visible:ring-primary"
                       >
                         Reschedule
                       </Button>
@@ -351,7 +351,7 @@ export default function AdminBookingsPage() {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleCancelClick(b)}
-                        className="flex-1 text-xs h-9"
+                        className="flex-1 text-xs h-9 focus-visible:ring-2 focus-visible:ring-primary"
                       >
                         Cancel
                       </Button>
@@ -362,7 +362,7 @@ export default function AdminBookingsPage() {
                       size="sm"
                       variant="destructive"
                       onClick={() => handleCancelClick(b)}
-                      className="w-full text-xs h-9"
+                      className="w-full text-xs h-9 focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       Cancel
                     </Button>

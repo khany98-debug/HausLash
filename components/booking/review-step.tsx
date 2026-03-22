@@ -62,16 +62,16 @@ export function ReviewStep({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1" disabled={submitting}>
+    <div className="flex flex-col gap-5 md:gap-8">
+      <div className="flex items-center gap-2 mb-2">
+        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 focus-visible:ring-2 focus-visible:ring-primary" disabled={submitting}>
           <ChevronLeft className="h-4 w-4" />
           Back
         </Button>
-        <h2 className="text-lg font-medium text-foreground">Review & Pay</h2>
+        <h2 className="text-lg md:text-xl font-medium text-foreground">Review & Pay</h2>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-card p-6">
+      <div className="rounded-xl border border-border/60 bg-card p-6 md:p-8">
         <h3 className="mb-4 font-medium text-foreground">{service.name}</h3>
         <div className="flex flex-col gap-3 text-sm">
           <div className="flex items-center gap-3 text-muted-foreground">
@@ -121,7 +121,7 @@ export function ReviewStep({
         onClick={handleConfirm}
         disabled={submitting}
         size="lg"
-        className="rounded-full"
+        className="rounded-full focus-visible:ring-2 focus-visible:ring-primary"
       >
         {submitting ? (
           <>

@@ -12,9 +12,9 @@ export function ServiceStep({
   onSelect: (id: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-lg font-medium text-foreground">Choose your treatment</h2>
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4 md:gap-6">
+      <h2 className="text-lg md:text-xl font-medium text-foreground mb-2 md:mb-3">Choose your treatment</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
         {services.map((service) => {
           const isSelected = service.id === selectedId
           return (
@@ -22,11 +22,13 @@ export function ServiceStep({
               key={service.id}
               onClick={() => onSelect(service.id)}
               className={cn(
-                'flex flex-col gap-2 rounded-xl border p-5 text-left transition-all',
+                'flex flex-col gap-2 rounded-xl border p-5 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 isSelected
                   ? 'border-primary bg-primary/5 shadow-sm'
                   : 'border-border/60 bg-card hover:border-primary/40 hover:shadow-sm'
               )}
+              aria-pressed={isSelected}
+              tabIndex={0}
             >
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-medium text-foreground">{service.name}</h3>

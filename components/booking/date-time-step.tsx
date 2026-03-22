@@ -52,23 +52,20 @@ export function DateTimeStep({
   const availableSlots = slots.filter((s) => s.available)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 md:gap-8">
 
       {/* Header */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="gap-1"
+          className="gap-1 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <ChevronLeft className="h-4 w-4" />
           Back
         </Button>
-
-        <h2 className="text-lg font-medium text-foreground">
-          Pick a date & time
-        </h2>
+        <h2 className="text-lg md:text-xl font-medium text-foreground">Pick a date & time</h2>
       </div>
 
       {/* Service info */}
@@ -90,7 +87,7 @@ export function DateTimeStep({
               isBefore(d, today) || d > maxDate
             }
 
-            className="rounded-xl border border-border/60 [&_button]:h-11 [&_button]:w-11 sm:[&_button]:h-9 sm:[&_button]:w-9 [&_button]:text-sm sm:[&_button]:text-xs"
+            className="rounded-xl border border-border/60 [&_button]:h-11 [&_button]:w-11 sm:[&_button]:h-9 sm:[&_button]:w-9 [&_button]:text-sm sm:[&_button]:text-xs focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
 
@@ -133,12 +130,13 @@ export function DateTimeStep({
                       key={slot.start}
                       onClick={() => setChosenTime(timeStr)}
                       className={cn(
-                        'rounded-lg border px-3 py-3 sm:py-2.5 text-sm font-medium transition-all h-12 sm:h-auto',
-
+                        'rounded-lg border px-3 py-3 sm:py-2.5 text-sm font-medium transition-all h-12 sm:h-auto outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         isChosen
                           ? 'border-primary bg-primary text-primary-foreground'
                           : 'border-border/60 bg-card text-foreground hover:border-primary/40'
                       )}
+                      aria-pressed={isChosen}
+                      tabIndex={0}
                     >
                       {timeStr}
                     </button>
@@ -157,7 +155,7 @@ export function DateTimeStep({
                   chosenTime
                 )
               }
-              className="mt-4 w-full rounded-full"
+              className="mt-4 w-full rounded-full focus-visible:ring-2 focus-visible:ring-primary"
             >
               Continue
             </Button>

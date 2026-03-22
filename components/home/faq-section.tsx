@@ -36,8 +36,8 @@ export function FaqSection() {
 
   return (
     <section id="faq" className="border-t border-border/60 bg-card">
-      <div className="mx-auto max-w-3xl px-6 py-16 md:py-20">
-        <div className="mb-12 text-center">
+      <div className="mx-auto max-w-3xl px-2 sm:px-6 py-12 md:py-20">
+        <div className="mb-8 md:mb-12 text-center">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
             FAQ
           </p>
@@ -51,7 +51,10 @@ export function FaqSection() {
             <button
               key={i}
               onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              className="flex w-full flex-col py-5 text-left"
+              className="flex w-full flex-col py-4 md:py-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-expanded={openIndex === i}
+              aria-controls={`faq-panel-${i}`}
+              id={`faq-header-${i}`}
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="text-base font-medium text-foreground">{faq.q}</span>
@@ -60,13 +63,26 @@ export function FaqSection() {
                     'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
                     openIndex === i && 'rotate-180'
                   )}
+                  aria-hidden="true"
                 />
               </div>
-              {openIndex === i && (
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {faq.a}
-                </p>
-              )}
+              <div
+                id={`faq-panel-${i}`}
+                role="region"
+                aria-labelledby={`faq-header-${i}`}
+                className={cn(
+                  'overflow-hidden transition-all duration-300 text-muted-foreground',
+                  openIndex === i
+                    ? 'max-h-40 opacity-100 mt-2'
+                    : 'max-h-0 opacity-0 h-0'
+                )}
+              >
+                {openIndex === i && (
+                  <p className="text-sm md:text-base leading-relaxed">
+                    {faq.a}
+                  </p>
+                )}
+              </div>
             </button>
           ))}
         </div>

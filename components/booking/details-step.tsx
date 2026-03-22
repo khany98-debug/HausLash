@@ -33,13 +33,13 @@ export function DetailsStep({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
+    <div className="flex flex-col gap-5 md:gap-8">
+      <div className="flex items-center gap-2 mb-2">
+        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 focus-visible:ring-2 focus-visible:ring-primary">
           <ChevronLeft className="h-4 w-4" />
           Back
         </Button>
-        <h2 className="text-lg font-medium text-foreground">Your Details</h2>
+        <h2 className="text-lg md:text-xl font-medium text-foreground">Your Details</h2>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -50,6 +50,7 @@ export function DetailsStep({
             placeholder="Jane Smith"
             value={data.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
+            className="focus-visible:ring-2 focus-visible:ring-primary"
           />
           {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
         </div>
@@ -62,6 +63,7 @@ export function DetailsStep({
             placeholder="jane@example.com"
             value={data.email}
             onChange={(e) => onUpdate({ email: e.target.value })}
+            className="focus-visible:ring-2 focus-visible:ring-primary"
           />
           {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
         </div>
@@ -74,6 +76,7 @@ export function DetailsStep({
             placeholder="07xxx xxxxxx"
             value={data.phone}
             onChange={(e) => onUpdate({ phone: e.target.value })}
+            className="focus-visible:ring-2 focus-visible:ring-primary"
           />
           {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
         </div>
@@ -86,13 +89,14 @@ export function DetailsStep({
             value={data.notes}
             onChange={(e) => onUpdate({ notes: e.target.value })}
             rows={3}
+            className="focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
       </div>
 
       <Button
         onClick={() => validate() && onNext()}
-        className="rounded-full"
+        className="rounded-full focus-visible:ring-2 focus-visible:ring-primary"
       >
         Review Booking
       </Button>
