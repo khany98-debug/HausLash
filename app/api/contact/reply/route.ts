@@ -13,9 +13,12 @@ const replySchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('Reply request body:', body)
+
     const parsed = replySchema.safeParse(body)
 
     if (!parsed.success) {
+      console.error('Validation failed:', parsed.error.flatten())
       return NextResponse.json(
         { error: 'Invalid reply data', details: parsed.error.flatten() },
         { status: 400 }
@@ -25,16 +28,7 @@ export async function POST(request: NextRequest) {
     const { inquiryId, email, customerName, replyMessage } = parsed.data
     const sql = getDb()
 
-    // Store the reply message in contact_messages table
-    try {
-      await sql`
-        INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
-        VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
-      `
-    } catch (tableError) {
-      // Table might not exist yet, log warning but continue
-      console.warn('Messages table may not exist yet, continuing without storing message')
-    }
+    console.log('Updating inquiry status for ID:', inquiryId)
 
     // Update inquiry status to 'replied'
     await sql`
@@ -42,6 +36,22 @@ export async function POST(request: NextRequest) {
       SET status = 'replied'
       WHERE id = ${inquiryId}
     `
+
+    console.log('Inquiry status updated, storing message')
+
+    // Store the reply message in contact_messages table
+    try {
+      await sql`
+        INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
+        VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
+      `
+      console.log('Message stored successfully')
+    } catch (tableError) {
+      // Table might not exist yet, log warning but continue
+      console.warn('Messages table may not exist yet, continuing without storing message:', tableError)
+    }
+
+    console.log('Sending email to:', email)
 
     // Send reply email to customer
     try {
@@ -67,10 +77,13 @@ export async function POST(request: NextRequest) {
           </p>
         `,
       })
+      console.log('Email sent successfully')
     } catch (emailError) {
       console.error('Error sending reply email:', emailError)
       // Don't fail the request if email fails
     }
+
+    console.log('Reply processed successfully')
 
     return NextResponse.json({
       success: true,

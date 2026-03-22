@@ -119,6 +119,12 @@ export default function ContactInquiriesAdmin() {
 
     try {
       setReplySending(true)
+      console.log('Sending reply:', {
+        inquiryId: selectedInquiry.inquiry.id,
+        email: selectedInquiry.inquiry.email,
+        replyMessage: replyText,
+      })
+
       const response = await fetch('/api/contact/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,12 +136,17 @@ export default function ContactInquiriesAdmin() {
         }),
       })
 
+      const data = await response.json()
+      console.log('Reply response:', response.status, data)
+
       if (response.ok) {
         setReplyText('')
         // Refetch conversation
         await fetchConversation(selectedInquiry.inquiry.id)
         // Refetch inquiries to update status
         await fetchInquiries()
+      } else {
+        console.error('Reply failed:', response.status, data)
       }
     } catch (error) {
       console.error('Error sending reply:', error)
