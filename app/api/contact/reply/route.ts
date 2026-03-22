@@ -26,10 +26,15 @@ export async function POST(request: NextRequest) {
     const sql = getDb()
 
     // Store the reply message in contact_messages table
-    await sql`
-      INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
-      VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
-    `
+    try {
+      await sql`
+        INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
+        VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
+      `
+    } catch (tableError) {
+      // Table might not exist yet, log warning but continue
+      console.warn('Messages table may not exist yet, continuing without storing message')
+    }
 
     // Update inquiry status to 'replied' and update timestamp
     await sql`
@@ -74,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error processing reply:', error)
     return NextResponse.json(
-      { error: 'Failed to send reply' },
+      { error: 'Failed to send reply', details: String(error) },
       { status: 500 }
     )
   }

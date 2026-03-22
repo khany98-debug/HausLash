@@ -104,7 +104,11 @@ export default function ContactInquiriesAdmin() {
       const response = await fetch(`/api/contact/${id}`)
       if (response.ok) {
         const data = await response.json()
+        console.log('Conversation loaded:', data)
         setSelectedInquiry(data)
+      } else {
+        const error = await response.text()
+        console.error('Failed to fetch conversation:', response.status, error)
       }
     } catch (error) {
       console.error('Error fetching conversation:', error)

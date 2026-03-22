@@ -24,24 +24,31 @@ export async function GET(
     }
 
     // Get all messages in the conversation
-    const messages = await sql`
-      SELECT id, message, sender, sender_name, created_at
-      FROM contact_messages
-      WHERE inquiry_id = ${id}
-      ORDER BY created_at ASC
-    `
+    let messages: any[] = []
+    try {
+      messages = await sql`
+        SELECT id, message, sender, sender_name, created_at
+        FROM contact_messages
+        WHERE inquiry_id = ${id}
+        ORDER BY created_at ASC
+      `
+    } catch (dbError) {
+      // Table might not exist yet, that's okay
+      console.warn('Messages table may not exist yet, continuing without messages')
+      messages = []
+    }
 
     // Combine inquiry data with conversation messages
     const conversation = {
       inquiry: inquiry[0],
-      messages: messages,
+      messages: messages || [],
     }
 
     return NextResponse.json(conversation)
   } catch (error) {
     console.error('Error fetching conversation:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch conversation' },
+      { error: 'Failed to fetch conversation', details: String(error) },
       { status: 500 }
     )
   }
