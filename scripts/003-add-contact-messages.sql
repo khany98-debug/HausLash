@@ -5,8 +5,10 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   message TEXT NOT NULL,
   sender TEXT NOT NULL CHECK (sender IN ('customer', 'admin')),
   sender_name TEXT NOT NULL,
+  email_thread_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_contact_messages_inquiry_id ON contact_messages(inquiry_id);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_email_thread_id ON contact_messages(email_thread_id);

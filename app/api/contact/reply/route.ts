@@ -82,11 +82,13 @@ export async function POST(request: NextRequest) {
     console.log('Sending email to:', email)
 
     // Send reply email to customer
+    let emailMessageId: string | null = null
     try {
-      await resend.emails.send({
+      const emailResponse = await resend.emails.send({
         from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co.uk',
         to: email,
-        subject: 'Re: Your HausLash Inquiry',
+        subject: `Re: Your HausLash Inquiry`,
+        replyTo: `inquiry-${inquiryId}@replies.hauslash.co.uk`,
         html: `
           <h2>We've responded to your inquiry</h2>
           <p>Hi ${customerName},</p>
@@ -96,6 +98,7 @@ export async function POST(request: NextRequest) {
               ${replyMessage.replace(/\n/g, '<br>')}
             </p>
           </div>
+          <p><strong>To reply to this message, simply reply to this email.</strong></p>
           <p>If you have any further questions, please don't hesitate to contact us.</p>
           <p>Best regards,<br/>The HausLash Team</p>
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
