@@ -103,14 +103,14 @@ export function GallerySection() {
 
       {/* Horizontal Scrolling Gallery */}
       <div className="relative group">
-        {/* Scroll Container - with snap scroll on mobile */}
+        {/* Scroll Container - scrolling on all devices with snap centering on mobile */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth pb-4 md:overflow-hidden md:no-scrollbar"
+          className="flex gap-4 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory"
           style={{
             scrollBehavior: 'smooth',
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
+            paddingLeft: 'calc(50vw - 192px)',
+            paddingRight: 'calc(50vw - 192px)',
           }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -118,31 +118,7 @@ export function GallerySection() {
           {galleryImages.map((image) => (
             <div
               key={image.id}
-              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing md:hidden"
-              style={{
-                scrollSnapAlign: 'center',
-                scrollSnapStop: 'always',
-              }}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
-                priority={false}
-                quality={95}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop Static Display */}
-        <div className="hidden md:flex gap-4 overflow-hidden">
-          {galleryImages.slice(0, 4).map((image) => (
-            <div
-              key={image.id}
-              className="flex-1 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing snap-center"
             >
               <Image
                 src={image.src}
