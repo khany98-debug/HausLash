@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,14 +17,18 @@ export default function RotatingGallery({
   autoPlay = true,
   interval = 5000,
   className = '',
+  hideNavButtons = false,
 }: {
   images: GalleryImage[]
   autoPlay?: boolean
   interval?: number
   className?: string
+  hideNavButtons?: boolean
 }) {
   const [current, setCurrent] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   const goToPrevious = useCallback(() => {
     setCurrent((prev) => (prev === 0 ? images.length - 1 : prev - 1))
@@ -33,6 +37,31 @@ export default function RotatingGallery({
   const goToNext = useCallback(() => {
     setCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1))
   }, [images.length])
+
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX
+    handleSwipe()
+  }
+
+  const handleSwipe = () => {
+    const swipeThreshold = 50 // minimum distance for a swipe
+    const diff = touchStartX.current - touchEndX.current
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swiped left - go to next image
+        goToNext()
+      } else {
+        // Swiped right - go to previous image
+        goToPrevious()
+      }
+    }
+  }
 
   // Auto-play effect
   useEffect(() => {
@@ -55,7 +84,11 @@ export default function RotatingGallery({
   const currentImage = images[current]
 
   return (
-    <div className={`relative group overflow-hidden rounded-lg ${className}`}>
+    <div
+      className={`relative group overflow-hidden rounded-lg ${className} cursor-grab active:cursor-grabbing`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Main Image */}
       <div className="relative w-full h-full bg-muted">
         <Image
@@ -85,7 +118,7 @@ export default function RotatingGallery({
         variant="ghost"
         size="icon"
         onClick={goToPrevious}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+        className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${hideNavButtons ? 'hidden' : ''}`}
         aria-label="Previous image"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -95,7 +128,7 @@ export default function RotatingGallery({
         variant="ghost"
         size="icon"
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+        className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${hideNavButtons ? 'hidden' : ''}`}
         aria-label="Next image"
       >
         <ChevronRight className="h-5 w-5" />

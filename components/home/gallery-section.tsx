@@ -1,21 +1,38 @@
-import Image from 'next/image'
+'use client'
 
-const GALLERY_IMAGES = [
-  {
-    src: '/images/work/Model1.jpg',
-    alt: 'Korean lash lift result - beautifully lifted lashes',
-  },
-  {
-    src: '/images/work/Model2.jpeg',
-    alt: 'Professional lash lift result from Hauslash studio',
-  },
-  {
-    src: '/images/work/Model1.jpg',
-    alt: 'Natural lash enhancement result',
-  },
-]
+import { useState, useEffect } from 'react'
+import RotatingGallery from './rotating-gallery'
+
+interface GalleryImage {
+  id: string
+  src: string
+  alt: string
+  title?: string
+}
 
 export function GallerySection() {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('/api/gallery-images')
+        if (response.ok) {
+          const images = await response.json()
+          setGalleryImages(images)
+        }
+      } catch (error) {
+        console.error('Failed to fetch gallery images:', error)
+        setGalleryImages([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchImages()
+  }, [])
+
   return (
     <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-20">
       <div className="mb-12 text-center">
@@ -26,24 +43,13 @@ export function GallerySection() {
           Results that inspire confidence
         </h2>
       </div>
-      <div className="grid gap-5 grid-cols-1 xs:grid-cols-2 md:grid-cols-3">
-        {GALLERY_IMAGES.map((img, idx) => (
-          <div
-            key={img.src + idx}
-            className="relative aspect-[4/5] overflow-hidden rounded-xl shadow-md focus-within:ring-2 focus-within:ring-primary"
-            tabIndex={0}
-            aria-label={img.alt}
-          >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              className="object-cover transition-transform duration-500 hover:scale-105 focus:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          </div>
-        ))}
-      </div>
+      <RotatingGallery
+        images={galleryImages}
+        autoPlay={true}
+        interval={5000}
+        hideNavButtons={true}
+        className="aspect-[4/5] w-full max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
+      />
     </section>
   )
 }
