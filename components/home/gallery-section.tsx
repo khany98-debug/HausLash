@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import RotatingGallery from './rotating-gallery'
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface GalleryImage {
   id: string
@@ -13,6 +15,9 @@ interface GalleryImage {
 export function GallerySection() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -33,8 +38,30 @@ export function GallerySection() {
     fetchImages()
   }, [])
 
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 400
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      })
+    }
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX
+    const diff = touchStartX.current - touchEndX.current
+    if (Math.abs(diff) > 50) {
+      scroll(diff > 0 ? 'right' : 'left')
+    }
+  }
+
   return (
-    <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-20">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
       <div className="mb-12 text-center">
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Our Work
@@ -43,13 +70,55 @@ export function GallerySection() {
           Results that inspire confidence
         </h2>
       </div>
-      <RotatingGallery
-        images={galleryImages}
-        autoPlay={true}
-        interval={5000}
-        hideNavButtons={true}
-        className="aspect-[4/5] w-full max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
-      />
+
+      {/* Horizontal Scrolling Gallery */}
+      <div className="relative group">
+        {/* Scroll Container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-4 overflow-x-auto scroll-smooth pb-4"
+          style={{ scrollBehavior: 'smooth' }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {galleryImages.map((image) => (
+            <div
+              key={image.id}
+              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={400}
+                height={400}
+                className="w-full h-full object-cover"
+                priority={false}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Buttons */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 hidden sm:flex"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 hidden sm:flex"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </Button>
+      </div>
     </section>
   )
 }
