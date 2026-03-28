@@ -21,6 +21,8 @@ export function GallerySection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const isResettingRef = useRef(false)
+  const touchStartXRef = useRef(0)
+  const touchEndXRef = useRef(0)
 
   // Fetch images on mount
   useEffect(() => {
@@ -132,6 +134,26 @@ export function GallerySection() {
     }
   }
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndXRef.current = e.changedTouches[0].clientX
+    const diff = touchStartXRef.current - touchEndXRef.current
+
+    // Swipe threshold of 50px
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swiped left, show next image
+        nextSlide()
+      } else {
+        // Swiped right, show previous image
+        prevSlide()
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
@@ -183,7 +205,11 @@ export function GallerySection() {
       {isMobile ? (
         <div className="relative w-full">
           {/* Main Image Container */}
-          <div className="relative w-full bg-muted rounded-2xl overflow-hidden shadow-2xl mb-6">
+          <div 
+            className="relative w-full bg-muted rounded-2xl overflow-hidden shadow-2xl mb-6 cursor-grab active:cursor-grabbing"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className="relative w-full" style={{ aspectRatio: '9 / 12' }}>
               <Image
                 key={`mobile-${currentIndex}`}
