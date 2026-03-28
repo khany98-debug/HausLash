@@ -16,7 +16,7 @@ export function GallerySection() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState<boolean | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -39,7 +39,7 @@ export function GallerySection() {
     fetchImages()
   }, [])
 
-  // Detect mobile
+  // Detect mobile and set up only once on client
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -51,7 +51,7 @@ export function GallerySection() {
 
   // Auto-scroll for mobile carousel
   useEffect(() => {
-    if (!isMobile || galleryImages.length === 0) return
+    if (isMobile !== true || galleryImages.length === 0) return
 
     const autoScroll = () => {
       setCurrentIndex((prev) => (prev + 1) % galleryImages.length)
@@ -68,7 +68,7 @@ export function GallerySection() {
 
   // Desktop auto-scroll
   useEffect(() => {
-    if (isMobile || galleryImages.length === 0) return
+    if (isMobile !== false || galleryImages.length === 0) return
 
     const autoScroll = () => {
       if (scrollContainerRef.current) {
@@ -120,6 +120,24 @@ export function GallerySection() {
     }
   }
 
+  if (isLoading || galleryImages.length === 0) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
+        <div className="mb-12 text-center">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Our Work
+          </p>
+          <h2 className="mt-3 font-serif text-3xl tracking-tight text-foreground md:text-4xl text-balance">
+            Results that inspire confidence
+          </h2>
+        </div>
+        <div className="flex justify-center items-center h-96">
+          <p className="text-muted-foreground">Loading images...</p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 md:py-20">
       <div className="mb-12 text-center">
@@ -131,131 +149,130 @@ export function GallerySection() {
         </h2>
       </div>
 
-      {/* Mobile Carousel */}
-      {isMobile ? (
-        <div className="relative w-full">
-          {/* Main Image Container */}
-          <div className="relative w-full bg-muted rounded-2xl overflow-hidden shadow-2xl mb-6">
-            <div className="relative w-full aspect-[9/12] md:aspect-[3/4]">
-              {galleryImages.length > 0 && (
-                <Image
-                  src={galleryImages[currentIndex].src}
-                  alt={galleryImages[currentIndex].alt}
-                  fill
-                  className="object-cover transition-opacity duration-500"
-                  priority
-                  quality={100}
-                  sizes="(max-width: 640px) 100vw, 90vw"
-                />
-              )}
+      {/* Mobile Carousel - Only shown on mobile */}
+      <div className="md:hidden relative w-full">
+        {/* Main Image Container */}
+        <div className="relative w-full bg-muted rounded-2xl overflow-hidden shadow-2xl mb-6">
+          <div className="relative w-full aspect-[9/12]">
+            {galleryImages.length > 0 && (
+              <Image
+                key={`mobile-${currentIndex}`}
+                src={galleryImages[currentIndex].src}
+                alt={galleryImages[currentIndex].alt}
+                fill
+                className="object-cover transition-opacity duration-500"
+                priority
+                quality={100}
+                sizes="(max-width: 640px) 100vw, 90vw"
+              />
+            )}
 
-              {/* Image Counter */}
-              <div className="absolute top-4 right-4 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
-                {currentIndex + 1} / {galleryImages.length}
-              </div>
+            {/* Image Counter */}
+            <div className="absolute top-4 right-4 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
+              {currentIndex + 1} / {galleryImages.length}
             </div>
           </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={prevSlide}
-              className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-
-            {/* Pagination Dots */}
-            <div className="flex gap-2 justify-center flex-1">
-              {galleryImages.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    index === currentIndex
-                      ? 'bg-foreground w-8'
-                      : 'bg-muted-foreground/40 w-2.5 hover:bg-muted-foreground/60'
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={nextSlide}
-              className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
-              aria-label="Next image"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Image Title */}
-          {galleryImages[currentIndex]?.title && (
-            <div className="text-center">
-              <h3 className="font-serif text-lg text-foreground mb-2">
-                {galleryImages[currentIndex].title}
-              </h3>
-            </div>
-          )}
         </div>
-      ) : (
-        /* Desktop Horizontal Scrolling Gallery */
-        <div className="relative group">
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory"
-            style={{
-              scrollBehavior: 'smooth',
-              paddingLeft: 'calc(50vw - 192px)',
-              paddingRight: 'calc(50vw - 192px)',
-            }}
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={prevSlide}
+            className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
+            aria-label="Previous image"
           >
-            {galleryImages.map((image) => (
-              <div
-                key={image.id}
-                className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group/image cursor-grab active:cursor-grabbing snap-center"
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover"
-                  priority={false}
-                  quality={95}
-                />
-              </div>
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+
+          {/* Pagination Dots */}
+          <div className="flex gap-2 justify-center flex-1">
+            {galleryImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? 'bg-foreground w-8'
+                    : 'bg-muted-foreground/40 w-2.5 hover:bg-muted-foreground/60'
+                }`}
+                aria-label={`Go to image ${index + 1}`}
+              />
             ))}
           </div>
 
-          {/* Desktop Navigation Buttons */}
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => scrollDesktop('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
-            aria-label="Scroll left"
+            variant="outline"
+            size="lg"
+            onClick={nextSlide}
+            className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
+            aria-label="Next image"
           >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => scrollDesktop('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-      )}
+
+        {/* Image Title */}
+        {galleryImages[currentIndex]?.title && (
+          <div className="text-center">
+            <h3 className="font-serif text-lg text-foreground mb-2">
+              {galleryImages[currentIndex].title}
+            </h3>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Horizontal Scrolling Gallery */}
+      <div className="hidden md:block relative group">
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-4 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory"
+          style={{
+            scrollBehavior: 'smooth',
+            paddingLeft: 'calc(50vw - 192px)',
+            paddingRight: 'calc(50vw - 192px)',
+          }}
+        >
+          {galleryImages.map((image) => (
+            <div
+              key={image.id}
+              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group/image cursor-grab active:cursor-grabbing snap-center"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={400}
+                height={400}
+                className="w-full h-full object-cover"
+                priority={false}
+                quality={95}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Navigation Buttons */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => scrollDesktop('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => scrollDesktop('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </Button>
+      </div>
     </section>
   )
 }
