@@ -18,6 +18,7 @@ export function GallerySection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -36,6 +37,35 @@ export function GallerySection() {
     }
 
     fetchImages()
+  }, [])
+
+  // Auto-scroll effect
+  useEffect(() => {
+    const autoScroll = () => {
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current
+        const scrollAmount = 400
+        
+        // If scrolled to near the end, reset to beginning
+        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 50) {
+          container.scrollLeft = 0
+        } else {
+          container.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth',
+          })
+        }
+      }
+    }
+
+    // Auto-scroll every 5 seconds
+    autoScrollIntervalRef.current = setInterval(autoScroll, 5000)
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current)
+      }
+    }
   }, [])
 
   const scroll = (direction: 'left' | 'right') => {
