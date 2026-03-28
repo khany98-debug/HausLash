@@ -103,18 +103,26 @@ export function GallerySection() {
 
       {/* Horizontal Scrolling Gallery */}
       <div className="relative group">
-        {/* Scroll Container */}
+        {/* Scroll Container - with snap scroll on mobile */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth pb-4"
-          style={{ scrollBehavior: 'smooth' }}
+          className="flex gap-4 overflow-x-auto scroll-smooth pb-4 md:overflow-hidden md:no-scrollbar"
+          style={{
+            scrollBehavior: 'smooth',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
           {galleryImages.map((image) => (
             <div
               key={image.id}
-              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing"
+              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing md:hidden"
+              style={{
+                scrollSnapAlign: 'center',
+                scrollSnapStop: 'always',
+              }}
             >
               <Image
                 src={image.src}
@@ -123,17 +131,38 @@ export function GallerySection() {
                 height={400}
                 className="w-full h-full object-cover"
                 priority={false}
+                quality={95}
               />
             </div>
           ))}
         </div>
 
-        {/* Navigation Buttons */}
+        {/* Desktop Static Display */}
+        <div className="hidden md:flex gap-4 overflow-hidden">
+          {galleryImages.slice(0, 4).map((image) => (
+            <div
+              key={image.id}
+              className="flex-1 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={400}
+                height={400}
+                className="w-full h-full object-cover"
+                priority={false}
+                quality={95}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Buttons - Mobile Only */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 hidden sm:flex"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 md:hidden"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -143,7 +172,7 @@ export function GallerySection() {
           variant="ghost"
           size="icon"
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 hidden sm:flex"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 md:hidden"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-6 w-6" />
