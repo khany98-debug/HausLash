@@ -46,9 +46,14 @@ export function GallerySection() {
         const container = scrollContainerRef.current
         const scrollAmount = 400
         
-        // If scrolled to near the end, reset to beginning
-        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 50) {
-          container.scrollLeft = 0
+        // Check if we're at or near the end
+        const isNearEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 100
+        
+        if (isNearEnd) {
+          // Reset to beginning with smooth animation
+          setTimeout(() => {
+            container.scrollLeft = 0
+          }, 600) // Wait for current scroll to finish
         } else {
           container.scrollBy({
             left: scrollAmount,
