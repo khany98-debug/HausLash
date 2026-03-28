@@ -14,10 +14,10 @@ interface GalleryImage {
 
 export function GallerySection() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const touchStartX = useRef(0)
-  const touchEndX = useRef(0)
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -39,21 +39,47 @@ export function GallerySection() {
     fetchImages()
   }, [])
 
-  // Auto-scroll effect
+  // Detect mobile
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Auto-scroll for mobile carousel
+  useEffect(() => {
+    if (!isMobile || galleryImages.length === 0) return
+
+    const autoScroll = () => {
+      setCurrentIndex((prev) => (prev + 1) % galleryImages.length)
+    }
+
+    autoScrollIntervalRef.current = setInterval(autoScroll, 5000)
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current)
+      }
+    }
+  }, [isMobile, galleryImages.length])
+
+  // Desktop auto-scroll
+  useEffect(() => {
+    if (isMobile || galleryImages.length === 0) return
+
     const autoScroll = () => {
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current
         const scrollAmount = 400
-        
-        // Check if we're at or near the end
         const isNearEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 100
         
         if (isNearEnd) {
-          // Reset to beginning with smooth animation
           setTimeout(() => {
             container.scrollLeft = 0
-          }, 600) // Wait for current scroll to finish
+          }, 600)
         } else {
           container.scrollBy({
             left: scrollAmount,
@@ -63,7 +89,6 @@ export function GallerySection() {
       }
     }
 
-    // Auto-scroll every 5 seconds
     autoScrollIntervalRef.current = setInterval(autoScroll, 5000)
 
     return () => {
@@ -71,27 +96,27 @@ export function GallerySection() {
         clearInterval(autoScrollIntervalRef.current)
       }
     }
-  }, [])
+  }, [isMobile, galleryImages.length])
 
-  const scroll = (direction: 'left' | 'right') => {
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index % galleryImages.length)
+  }
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % galleryImages.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
+  }
+
+  const scrollDesktop = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
       const scrollAmount = 400
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       })
-    }
-  }
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].clientX
-    const diff = touchStartX.current - touchEndX.current
-    if (Math.abs(diff) > 50) {
-      scroll(diff > 0 ? 'right' : 'left')
     }
   }
 
@@ -106,59 +131,131 @@ export function GallerySection() {
         </h2>
       </div>
 
-      {/* Horizontal Scrolling Gallery */}
-      <div className="relative group">
-        {/* Scroll Container - scrolling on all devices with snap centering on mobile */}
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory"
-          style={{
-            scrollBehavior: 'smooth',
-            paddingLeft: 'calc(50vw - 192px)',
-            paddingRight: 'calc(50vw - 192px)',
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          {galleryImages.map((image) => (
-            <div
-              key={image.id}
-              className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group/image cursor-grab active:cursor-grabbing snap-center"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
-                priority={false}
-                quality={95}
-              />
+      {/* Mobile Carousel */}
+      {isMobile ? (
+        <div className="relative w-full">
+          {/* Main Image Container */}
+          <div className="relative w-full bg-muted rounded-2xl overflow-hidden shadow-2xl mb-6">
+            <div className="relative w-full aspect-[9/12] md:aspect-[3/4]">
+              {galleryImages.length > 0 && (
+                <Image
+                  src={galleryImages[currentIndex].src}
+                  alt={galleryImages[currentIndex].alt}
+                  fill
+                  className="object-cover transition-opacity duration-500"
+                  priority
+                  quality={100}
+                  sizes="(max-width: 640px) 100vw, 90vw"
+                />
+              )}
+
+              {/* Image Counter */}
+              <div className="absolute top-4 right-4 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
+                {currentIndex + 1} / {galleryImages.length}
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center justify-between mb-6 gap-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={prevSlide}
+              className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+
+            {/* Pagination Dots */}
+            <div className="flex gap-2 justify-center flex-1">
+              {galleryImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    index === currentIndex
+                      ? 'bg-foreground w-8'
+                      : 'bg-muted-foreground/40 w-2.5 hover:bg-muted-foreground/60'
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={nextSlide}
+              className="flex-shrink-0 rounded-full w-12 h-12 p-0 border-2"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Image Title */}
+          {galleryImages[currentIndex]?.title && (
+            <div className="text-center">
+              <h3 className="font-serif text-lg text-foreground mb-2">
+                {galleryImages[currentIndex].title}
+              </h3>
+            </div>
+          )}
         </div>
+      ) : (
+        /* Desktop Horizontal Scrolling Gallery */
+        <div className="relative group">
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory"
+            style={{
+              scrollBehavior: 'smooth',
+              paddingLeft: 'calc(50vw - 192px)',
+              paddingRight: 'calc(50vw - 192px)',
+            }}
+          >
+            {galleryImages.map((image) => (
+              <div
+                key={image.id}
+                className="flex-shrink-0 w-80 sm:w-96 h-96 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group/image cursor-grab active:cursor-grabbing snap-center"
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  width={400}
+                  height={400}
+                  className="w-full h-full object-cover"
+                  priority={false}
+                  quality={95}
+                />
+              </div>
+            ))}
+          </div>
 
-        {/* Navigation Buttons - Mobile Only */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 md:hidden"
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
+          {/* Desktop Navigation Buttons */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => scrollDesktop('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10 md:hidden"
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
-      </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => scrollDesktop('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white/90 hover:bg-white text-black shadow-lg z-10"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
     </section>
   )
 }
