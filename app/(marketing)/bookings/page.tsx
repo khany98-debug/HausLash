@@ -61,9 +61,11 @@ export default function CustomerPortalPage() {
   async function onSubmit(values: EmailFormValues) {
     setIsLoading(true)
     try {
-      const response = await fetch(
-        `/api/customer/bookings?email=${encodeURIComponent(values.email)}`
-      )
+      const response = await fetch('/api/customer/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+      })
 
       if (!response.ok) {
         const error = await response.json()

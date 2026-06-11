@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
+import { isAdminRequest } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')

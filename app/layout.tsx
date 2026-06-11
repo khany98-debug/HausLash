@@ -4,8 +4,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-const _inter = Inter({ subsets: ['latin'] })
-const _playfair = Playfair_Display({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
 
 export const metadata: Metadata = {
   title: {
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   },
   description:
     'Elevate your natural beauty with expert Korean lash lifts and lash tinting. Book your appointment online today.',
+  metadataBase: new URL('https://hauslash.co.uk'),
   keywords: [
     'lash lift',
     'Korean lash lift',
@@ -39,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {children}
         <Toaster position="top-center" richColors />
         <Analytics />

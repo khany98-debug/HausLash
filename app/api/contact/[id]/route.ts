@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
+import { isAdminRequest } from '@/lib/admin-auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { id } = await params
     const sql = getDb()
@@ -74,6 +79,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { id } = await params
     const body = await request.json()
@@ -107,6 +116,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { id } = await params
     const sql = getDb()

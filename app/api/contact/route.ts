@@ -8,11 +8,24 @@ export const dynamic = 'force-dynamic'
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
-  phone: z.string().min(10),
+  phone: z.string().max(30).optional().default(''),
   message: z.string().min(10).max(5000),
 })
 
 type ContactFormData = z.infer<typeof contactSchema>
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }
+    return entities[character]
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, phone, message } = parsed.data as ContactFormData
+    const safeName = escapeHtml(name)
+    const safeEmail = escapeHtml(email)
+    const safePhone = escapeHtml(phone)
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>')
     const sql = getDb()
 
     // Store contact inquiry in database
@@ -58,11 +75,11 @@ export async function POST(request: NextRequest) {
         subject: 'Thank you for contacting HausLash',
         html: `
           <h2>We've received your message</h2>
-          <p>Hi ${name},</p>
+          <p>Hi ${safeName},</p>
           <p>Thank you for reaching out to HausLash! We've received your inquiry and will get back to you as soon as possible.</p>
           <p><strong>Your message:</strong></p>
           <p style="padding: 10px; background-color: #f5f5f5; border-left: 3px solid #333;">
-            ${message.replace(/\n/g, '<br>')}
+            ${safeMessage}
           </p>
           <p>Best regards,<br/>The HausLash Team</p>
         `,
@@ -80,17 +97,17 @@ export async function POST(request: NextRequest) {
         subject: `New Contact Inquiry from ${name}`,
         html: `
           <h2>New Contact Inquiry</h2>
-          <p><strong>From:</strong> ${name}</p>
-          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-          <p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>
+          <p><strong>From:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+          <p><strong>Phone:</strong> ${safePhone || 'Not provided'}</p>
           <p><strong>Inquiry ID:</strong> ${inquiryId}</p>
           <hr style="margin: 20px 0;">
           <p><strong>Message:</strong></p>
           <p style="padding: 10px; background-color: #f5f5f5; border-left: 3px solid #333;">
-            ${message.replace(/\n/g, '<br>')}
+            ${safeMessage}
           </p>
           <p>
-            <a href="https://yourdomain.com/admin/contact/${inquiryId}" style="background-color: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://hauslash.co.uk'}/admin/contact" style="background-color: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
               View in Admin Panel
             </a>
           </p>
@@ -115,39 +132,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const limit = parseInt(searchParams.get('limit') || '50')
-
-    const sql = getDb()
-
-    let inquiries
-    if (status && status !== 'all') {
-      inquiries = await sql`
-        SELECT id, name, email, phone, message, status, created_at
-        FROM contact_inquiries
-        WHERE status = ${status}
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-      `
-    } else {
-      // Fetch all inquiries regardless of status
-      inquiries = await sql`
-        SELECT id, name, email, phone, message, status, created_at
-        FROM contact_inquiries
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-      `
-    }
-
-    return NextResponse.json({ inquiries })
-  } catch (error) {
-    console.error('Error fetching contact inquiries:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch inquiries' },
-      { status: 500 }
-    )
-  }
+export async function GET() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }

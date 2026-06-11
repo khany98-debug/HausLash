@@ -28,16 +28,19 @@ export default async function BookPage({
     <>
       <SiteHeader />
       <main className="min-h-[80vh]">
-        <div className="mx-auto max-w-2xl px-6 py-10 md:py-16">
-          <div className="mb-8 text-center">
-            <h1 className="font-serif text-3xl tracking-tight text-foreground md:text-4xl">
-              Book Your Appointment
+        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 md:py-20">
+          <div className="mb-10 text-center">
+            <p className="eyebrow">Online booking</p>
+            <h1 className="mt-4 font-serif text-4xl leading-tight tracking-tight text-foreground md:text-5xl">
+              Reserve your appointment
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Secure your spot with a small deposit. The remaining balance is paid at the appointment.
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-muted-foreground">
+              Choose your treatment and preferred time, then secure it with a small deposit. The remaining balance is paid at your appointment.
             </p>
           </div>
-          <BookingWizard services={services} preselectedSlug={params.service} />
+          <div className="luxury-card p-5 sm:p-8">
+            <BookingWizard services={services} preselectedSlug={params.service} />
+          </div>
         </div>
       </main>
     </>

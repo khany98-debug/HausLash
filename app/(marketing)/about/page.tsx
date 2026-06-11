@@ -1,216 +1,118 @@
-'use client'
-
 import Image from 'next/image'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
+import { ArrowUpRight, Eye, Heart, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Award, Heart, Sparkles } from 'lucide-react'
+
+const VALUES = [
+  {
+    icon: Eye,
+    title: 'Every eye is different',
+    copy: 'Your lift is mapped around your natural lashes, eye shape, and the finish you want.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Refinement over excess',
+    copy: 'The goal is a beautifully open eye and a polished result that still feels like you.',
+  },
+  {
+    icon: Heart,
+    title: 'Care in every detail',
+    copy: 'From consultation to aftercare, your comfort and lash health stay at the centre.',
+  },
+]
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen">
-      {/* Hero */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-transparent border-b border-primary/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-            About HausLash
+    <main>
+      <section className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
+        <div>
+          <p className="eyebrow">About Hauslash</p>
+          <h1 className="mt-5 display-title">
+            A considered approach to
+            <span className="block italic">natural beauty.</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Bringing premium lash services directly to you with professionalism, passion, and perfection.
+          <p className="mt-7 max-w-lg text-base leading-8 text-muted-foreground">
+            Hauslash is a Stoke-on-Trent lash studio devoted to precise, personalised treatments. We specialise in Korean lash lifts that enhance what is already yours: no extensions, no heavy upkeep, just beautifully elevated lashes.
           </p>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-16 px-4 md:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="mb-4">Our Story</Badge>
-              <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-6">
-                Lash Service With a Personal Touch
-              </h2>
-              <div className="space-y-4 text-muted-foreground leading-relaxed">
-                <p>
-                  HausLash was born from a passion for beauty and a commitment to bringing premium lash services to the people of Stoke-on-Trent. What started as a dream has become a trusted beauty service that clients love.
-                </p>
-                <p>
-                  We specialize in professional lash lifts using premium Korean techniques and quality products. Every appointment is tailored to your unique eye shape and beauty goals, ensuring stunning results that last.
-                </p>
-                <p>
-                  Our mission is simple: provide salon-quality lash services in the comfort of your home (or our studio), with the professionalism and attention to detail you deserve.
-                </p>
-              </div>
-            </div>
-            <div className="relative h-96 lg:h-full rounded-xl overflow-hidden bg-muted">
-              {/* Placeholder - will be replaced with actual image */}
-              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <div className="text-center">
-                  <Sparkles className="h-16 w-16 text-primary/40 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Your image here</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Meet the Team */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-sm font-semibold text-primary mb-2 uppercase tracking-wider">
-              Our Team
-            </p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground">
-              Meet the Artist Behind HausLash
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Team Member */}
-            <Card className="overflow-hidden border-primary/10">
-              <div className="relative h-64 bg-muted">
-                {/* Placeholder - will be replaced with actual photo */}
-                <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <div className="text-center">
-                    <Heart className="h-12 w-12 text-primary/40 mx-auto mb-2" />
-                    <p className="text-muted-foreground">Your photo here</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="font-serif text-2xl text-foreground mb-2">
-                  [Your Name]
-                </h3>
-                <p className="text-primary font-semibold mb-4">
-                  Founder & Lash Artist
-                </p>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  With [X] years of professional excellence in lash and beauty services, I'm dedicated to delivering flawless results. Certified in Korean lash techniques with a passion for perfecting the art of lash lifting.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">Korean Lash Lift</Badge>
-
-                  <Badge variant="secondary">Trained Professional</Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Services Highlight */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-serif text-2xl text-foreground mb-6">
-                  Why Choose HausLash?
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <Award className="h-6 w-6 text-primary mt-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1">
-                      Professional Training
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Certified in premium Korean lash lift techniques with ongoing professional development
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <Sparkles className="h-6 w-6 text-primary mt-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1">
-                      Premium Products
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Using only high-quality, professional-grade products for lasting results
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <Heart className="h-6 w-6 text-primary mt-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1">
-                      Client-Focused
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Every appointment is tailored to your comfort and beauty goals
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-16 px-4 md:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
-              Our Values
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Everything we do is guided by these core principles
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'Quality',
-                description: 'Premium products and professional techniques for flawless results every time',
-              },
-              {
-                title: 'Professionalism',
-                description: 'Punctual, reliable, and maintaining the highest hygiene and safety standards',
-              },
-              {
-                title: 'Passion',
-                description: 'Genuine love for beauty and commitment to making our clients feel confident',
-              },
-            ].map((value) => (
-              <Card
-                key={value.title}
-                className="p-6 text-center border-primary/10 hover:border-primary/30 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-serif text-xl text-foreground mb-2">
-                  {value.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {value.description}
-                </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-primary/5 border-t border-primary/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
-            Ready to Experience HausLash?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Book your personalized lash appointment and see why our clients love HausLash.
-          </p>
-          <Button asChild size="lg" className="rounded-full">
-            <a href="/book">Book Your Appointment</a>
+          <Button asChild size="lg" className="mt-8 h-12 rounded-full px-7">
+            <Link href="/book">
+              Reserve your appointment
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </Button>
+        </div>
+
+        <div className="relative min-h-[540px]">
+          <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden rounded-[2rem]">
+            <Image
+              src="/images/work/Model3.jpeg"
+              alt="Hauslash Korean lash lift result"
+              fill
+              priority
+              sizes="(max-width: 1024px) 82vw, 45vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute bottom-8 left-0 w-[43%] overflow-hidden rounded-[1.5rem] border-[6px] border-background shadow-xl">
+            <div className="relative aspect-[3/4]">
+              <Image
+                src="/images/work/Model2.jpeg"
+                alt="Natural lifted lashes"
+                fill
+                sizes="(max-width: 1024px) 43vw, 23vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-foreground/10 bg-card/55">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 md:py-28">
+          <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
+            <div>
+              <p className="eyebrow">Our philosophy</p>
+              <h2 className="mt-4 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+                Small details make the
+                <span className="block italic">biggest difference.</span>
+              </h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {VALUES.map((value) => (
+                <article key={value.title} className="luxury-card p-6">
+                  <value.icon className="h-5 w-5 text-muted-foreground" />
+                  <h3 className="mt-8 font-serif text-xl">{value.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{value.copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-2 lg:items-center lg:gap-20">
+        <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem]">
+          <Image
+            src="/images/work/Model1.jpg"
+            alt="Finished Hauslash treatment"
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
+        </div>
+        <div>
+          <p className="eyebrow">What to expect</p>
+          <h2 className="mt-5 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+            Calm, personal,
+            <span className="block italic">never rushed.</span>
+          </h2>
+          <p className="mt-6 text-base leading-8 text-muted-foreground">
+            Your appointment starts with a consultation and ends with tailored aftercare. Between those moments, every step is performed with patience and precision so you can relax and leave feeling polished, confident, and completely yourself.
+          </p>
+          <Link href="/aftercare" className="mt-8 inline-flex items-center gap-2 text-sm font-medium">
+            Read the aftercare guide
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
     </main>

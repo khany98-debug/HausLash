@@ -6,7 +6,7 @@ export function getOrganizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'HausLash',
-    image: 'https://hauslash.co/images/logo.png',
+    image: 'https://hauslash.co.uk/images/IMG_3451.jpeg',
     description: 'Premium Korean lash lift and lash tinting studio in Stoke-on-Trent',
     address: {
       '@type': 'PostalAddress',
@@ -15,12 +15,10 @@ export function getOrganizationSchema() {
       postalCode: 'ST3',
       addressCountry: 'UK',
     },
-    telephone: '+44 (0) 7700 900000',
-    email: 'hello@hauslash.co',
-    url: 'https://hauslash.co',
+    email: 'info@hauslash.co',
+    url: 'https://hauslash.co.uk',
     sameAs: [
-      'https://www.instagram.com/hauslash',
-      'https://www.facebook.com/hauslash',
+      'https://www.instagram.com/hauslash_co/',
     ],
     priceRange: '$$',
     openingHoursSpecification: [
@@ -48,7 +46,7 @@ export function getServiceSchema() {
     provider: {
       '@type': 'LocalBusiness',
       name: 'HausLash',
-      url: 'https://hauslash.co',
+      url: 'https://hauslash.co.uk',
     },
     description: 'Expert Korean lash lifts and lash tinting treatments',
     areaServed: {

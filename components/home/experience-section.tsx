@@ -1,0 +1,63 @@
+import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowUpRight, Check } from 'lucide-react'
+
+const DETAILS = [
+  'A consultation shaped around your desired finish',
+  'A considered technique for lift without harshness',
+  'Clear aftercare guidance for beautiful longevity',
+]
+
+export function ExperienceSection() {
+  return (
+    <section className="bg-[#1b1917] text-[#f5f1eb]">
+      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-2 lg:items-center lg:gap-20">
+        <div className="relative min-h-[500px]">
+          <div className="absolute inset-y-0 left-0 w-[78%] overflow-hidden rounded-[1.75rem]">
+            <Image
+              src="/images/work/Model4.jpeg"
+              alt="Detailed lash lift result"
+              fill
+              sizes="(max-width: 1024px) 78vw, 39vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute bottom-6 right-0 w-[48%] overflow-hidden rounded-[1.35rem] border-[5px] border-[#1b1917]">
+            <div className="relative aspect-[3/4]">
+              <Image
+                src="/images/work/Model5.JPG"
+                alt="Natural Hauslash result"
+                fill
+                sizes="(max-width: 1024px) 48vw, 24vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="eyebrow text-[#91887e]">The Hauslash approach</p>
+          <h2 className="mt-5 font-serif text-4xl leading-[1.08] tracking-[-0.035em] sm:text-5xl">
+            Precision you can see.
+            <span className="block italic text-[#c9b9a7]">Care you can feel.</span>
+          </h2>
+          <p className="mt-6 max-w-lg text-base leading-8 text-[#bdb5aa]">
+            No two sets of eyes are the same. Every appointment begins with a thoughtful consultation, then every detail is tailored for a refined result that still feels unmistakably you.
+          </p>
+          <div className="mt-8 space-y-4 border-y border-white/10 py-7">
+            {DETAILS.map((detail) => (
+              <div key={detail} className="flex items-start gap-3 text-sm leading-6 text-[#d8d1c8]">
+                <Check className="mt-1 h-4 w-4 shrink-0 text-[#c9b9a7]" />
+                {detail}
+              </div>
+            ))}
+          </div>
+          <Link href="/about" className="mt-8 inline-flex items-center gap-2 text-sm font-medium">
+            Discover the Hauslash story
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}

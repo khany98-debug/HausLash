@@ -3,7 +3,7 @@ import { getDb } from '@/lib/db'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hauslash.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hauslash.co.uk'
 
   const staticPages = [
     { url: '', priority: 1.0, changefreq: 'daily' },

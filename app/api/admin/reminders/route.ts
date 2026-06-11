@@ -3,10 +3,15 @@ import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
 import AppointmentReminderEmail from '@/emails/appointment-reminder'
 import { format } from 'date-fns'
+import { isAdminRequest, isCronOrAdminRequest } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  if (!isCronOrAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const sql = getDb()
 
@@ -145,18 +150,11 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to check reminder status
 export async function GET(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const { searchParams } = new URL(request.url)
-    const adminToken = searchParams.get('token')
-
-    // Basic admin auth
-    if (adminToken !== process.env.ADMIN_PASSWORD) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     const sql = getDb()
 
     const pendingReminders = await sql`

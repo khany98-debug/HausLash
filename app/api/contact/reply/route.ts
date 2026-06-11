@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
 import { z } from 'zod'
+import { isAdminRequest } from '@/lib/admin-auth'
 
 const replySchema = z.object({
   inquiryId: z.string().min(1, 'Inquiry ID is required'),
@@ -10,11 +11,26 @@ const replySchema = z.object({
   replyMessage: z.string().min(1, 'Reply message cannot be empty').max(5000, 'Message too long'),
 })
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }
+    return entities[character]
+  })
+}
+
 export async function POST(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const body = await request.json()
-    console.log('Reply request body:', body)
-
     const parsed = replySchema.safeParse(body)
 
     if (!parsed.success) {
@@ -34,16 +50,12 @@ export async function POST(request: NextRequest) {
     const { inquiryId, email, customerName, replyMessage } = parsed.data
     const sql = getDb()
 
-    console.log('Updating inquiry status for ID:', inquiryId)
-
     // Update inquiry status to 'replied'
     await sql`
       UPDATE contact_inquiries
       SET status = 'replied'
       WHERE id = ${inquiryId}
     `
-
-    console.log('Inquiry status updated, storing message')
 
     // Store the reply message in contact_messages table
     try {
@@ -73,29 +85,27 @@ export async function POST(request: NextRequest) {
         INSERT INTO contact_messages (inquiry_id, message, sender, sender_name)
         VALUES (${inquiryId}, ${replyMessage}, 'admin', 'Admin')
       `
-      console.log('Message stored successfully')
     } catch (tableError) {
       console.error('Error storing message:', tableError)
       // Continue even if message storage fails - email was sent
     }
 
-    console.log('Sending email to:', email)
-
     // Send reply email to customer
-    let emailMessageId: string | null = null
     try {
-      const emailResponse = await resend.emails.send({
+      const safeCustomerName = escapeHtml(customerName)
+      const safeReplyMessage = escapeHtml(replyMessage).replace(/\n/g, '<br>')
+      await resend.emails.send({
         from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co.uk',
         to: email,
         subject: `Re: Your HausLash Inquiry`,
         replyTo: `inquiry-${inquiryId}@replies.hauslash.co.uk`,
         html: `
           <h2>We've responded to your inquiry</h2>
-          <p>Hi ${customerName},</p>
+          <p>Hi ${safeCustomerName},</p>
           <p>Thank you for reaching out to HausLash. We've reviewed your inquiry and have the following response:</p>
           <div style="padding: 15px; background-color: #f5f5f5; border-left: 4px solid #333; margin: 20px 0; border-radius: 4px;">
             <p style="margin: 0; white-space: pre-wrap; color: #333;">
-              ${replyMessage.replace(/\n/g, '<br>')}
+              ${safeReplyMessage}
             </p>
           </div>
           <p><strong>To reply to this message, simply reply to this email.</strong></p>
@@ -108,13 +118,10 @@ export async function POST(request: NextRequest) {
           </p>
         `,
       })
-      console.log('Email sent successfully')
     } catch (emailError) {
       console.error('Error sending reply email:', emailError)
       // Don't fail the request if email fails
     }
-
-    console.log('Reply processed successfully')
 
     return NextResponse.json({
       success: true,
