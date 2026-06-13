@@ -1,177 +1,75 @@
-'use client'
-
 import Link from 'next/link'
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowUpRight, Instagram, Mail, MapPin } from 'lucide-react'
+import { BrandMark } from '@/components/brand-mark'
 
-interface Testimonial {
-  id: string
-  customer_name: string
-  rating: number
-  review_text: string
-}
+const LINKS = [
+  { label: 'Treatments', href: '/services' },
+  { label: 'About', href: '/about' },
+  { label: 'Aftercare', href: '/aftercare' },
+  { label: 'Policies', href: '/policies' },
+  { label: 'My bookings', href: '/bookings' },
+]
 
 export function SiteFooter() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/testimonials?limit=3')
-      .then((res) => res.json())
-      .then((data) => {
-        setTestimonials(data.testimonials || [])
-      })
-      .catch((error) => {
-        console.error('Error fetching testimonials:', error)
-      })
-      .finally(() => setLoading(false))
-  }, [])
-
-  const currentTestimonial = testimonials[currentIndex]
-
-  const goToPrevious = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? testimonials.length - 1 : prev - 1
-    )
-  }
-
-  const goToNext = () => {
-    setCurrentIndex((prev) =>
-      prev === testimonials.length - 1 ? 0 : prev + 1
-    )
-  }
-
   return (
-    <footer className="border-t border-border/40 bg-[#EEEDE9]">
-      {/* Testimonials Carousel */}
-      {!loading && testimonials.length > 0 && (
-        <div className="border-b border-border/40 px-6 py-8">
-          <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-4">
-              Customer Love
+    <footer className="border-t border-white/10 bg-[#1b1917] text-[#f4f0e9]">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-20">
+        <div className="grid gap-14 lg:grid-cols-[1.35fr_0.65fr_0.8fr]">
+          <div>
+            <BrandMark className="text-4xl text-[#f4f0e9]" />
+            <h2 className="mt-8 max-w-xl font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+              Quiet luxury for your natural lashes.
+            </h2>
+            <p className="mt-5 max-w-md text-sm leading-7 text-[#bdb5aa]">
+              Bespoke Korean lash lifts and tinting in Stoke-on-Trent, shaped around your eyes and your style.
             </p>
-            <div className="space-y-4">
-              {/* Stars */}
-              <div className="flex gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < currentTestimonial.rating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-muted-foreground/30'
-                    }`}
-                  />
-                ))}
-              </div>
+            <Link
+              href="/book"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#f4f0e9] px-6 py-3 text-sm font-medium text-[#1b1917] transition-transform hover:-translate-y-0.5"
+            >
+              Reserve your appointment
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
 
-              {/* Review Text */}
-              <p className="text-sm leading-relaxed text-foreground italic">
-                "{currentTestimonial.review_text}"
-              </p>
+          <div>
+            <p className="eyebrow text-[#8f877d]">Explore</p>
+            <div className="mt-6 flex flex-col gap-3">
+              {LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="text-sm text-[#d8d1c8] transition-colors hover:text-white">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-              {/* Customer Name */}
-              <p className="text-xs font-medium text-muted-foreground">
-                — {currentTestimonial.customer_name}
-              </p>
-
-              {/* Navigation */}
-              <div className="flex gap-2 pt-2 items-center">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={goToPrevious}
-                  className="h-8 w-8 p-0"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                {/* Dots Indicator */}
-                <div className="flex gap-1 items-center flex-1">
-                  {testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentIndex(index)}
-                      className={`h-1.5 rounded-full transition-all ${
-                        index === currentIndex
-                          ? 'bg-primary w-4'
-                          : 'bg-primary/30 w-1.5'
-                      }`}
-                      aria-label={`Go to testimonial ${index + 1}`}
-                    />
-                  ))}
-                </div>
-
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={goToNext}
-                  className="h-8 w-8 p-0"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+          <div>
+            <p className="eyebrow text-[#8f877d]">Visit & connect</p>
+            <div className="mt-6 flex flex-col gap-4 text-sm text-[#d8d1c8]">
+              <span className="flex items-center gap-3">
+                <MapPin className="h-4 w-4 text-[#8f877d]" />
+                Stoke-on-Trent, England
+              </span>
+              <a href="mailto:info@hauslash.co" className="flex items-center gap-3 transition-colors hover:text-white">
+                <Mail className="h-4 w-4 text-[#8f877d]" />
+                info@hauslash.co
+              </a>
+              <a
+                href="https://www.instagram.com/hauslash_co/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
+                <Instagram className="h-4 w-4 text-[#8f877d]" />
+                @hauslash_co
+              </a>
             </div>
           </div>
         </div>
-      )}
-      <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between">
-          {/* Brand */}
-          <div className="flex flex-col gap-4 md:max-w-xs">
-            <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-80">
-              <Image
-                src="/images/IMG_3451.jpeg"
-                alt="Hauslash"
-                width={959}
-                height={1084}
-                priority
-                className="h-14 w-auto"
-              />
-            </Link>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Premium lash lift treatments that enhance your natural beauty.
-            </p>
-          </div>
 
-          {/* Quick links */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-sm font-semibold text-foreground">Quick Links</h4>
-            <Link href="/services" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Services
-            </Link>
-            <Link href="/book" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Book Appointment
-            </Link>
-            <Link href="/policies" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Policies
-            </Link>
-          </div>
-
-          {/* Policies */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-sm font-semibold text-foreground">Policies</h4>
-            <Link href="/policies#cancellation" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Cancellation Policy
-            </Link>
-            <Link href="/policies#aftercare" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Aftercare
-            </Link>
-            <Link href="/policies#patch-test" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Patch Test Info
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-12 border-t border-border/60 pt-8">
-          <p className="text-center text-xs text-muted-foreground">
-            {new Date().getFullYear()} Hauslash. All rights reserved.
-          </p>
+        <div className="mt-16 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-[#8f877d] sm:flex-row sm:items-center sm:justify-between">
+          <p>{new Date().getFullYear()} Hauslash. All rights reserved.</p>
+          <p>Precision treatments. Naturally elevated results.</p>
         </div>
       </div>
     </footer>

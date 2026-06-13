@@ -55,7 +55,7 @@ const formatDate = (dateString: string | null | undefined, formatStr: string = '
 }
 
 export default function ContactInquiriesAdmin() {
-  useAdminAuth()
+  const { token } = useAdminAuth()
   const { toast } = useToast()
 
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([])
@@ -70,7 +70,7 @@ export default function ContactInquiriesAdmin() {
 
   useEffect(() => {
     fetchInquiries()
-  }, [filter])
+  }, [filter, token])
 
   useEffect(() => {
     scrollToBottom()
@@ -86,7 +86,9 @@ export default function ContactInquiriesAdmin() {
       const params = new URLSearchParams()
       if (filter !== 'all') params.append('status', filter)
 
-      const response = await fetch(`/api/contact?${params}`)
+      const response = await fetch(`/api/admin/contact?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (response.ok) {
         const data = await response.json()
         setInquiries(data.inquiries.sort((a: ContactInquiry, b: ContactInquiry) => 
@@ -102,7 +104,9 @@ export default function ContactInquiriesAdmin() {
 
   async function fetchConversation(id: string) {
     try {
-      const response = await fetch(`/api/contact/${id}`)
+      const response = await fetch(`/api/contact/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (response.ok) {
         const data = await response.json()
         console.log('Conversation loaded:', data)
@@ -133,7 +137,10 @@ export default function ContactInquiriesAdmin() {
 
       const response = await fetch('/api/contact/reply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           inquiryId,
           email: selectedInquiry.inquiry.email,
@@ -188,7 +195,10 @@ export default function ContactInquiriesAdmin() {
       setActionLoading(id)
       const response = await fetch(`/api/contact/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ status }),
       })
 
@@ -212,6 +222,7 @@ export default function ContactInquiriesAdmin() {
       setActionLoading(id)
       const response = await fetch(`/api/contact/${id}`, {
         method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (response.ok) {

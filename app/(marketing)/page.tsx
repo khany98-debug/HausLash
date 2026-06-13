@@ -9,41 +9,24 @@ export const metadata = {
   },
 }
 
-import { getDb } from '@/lib/db'
-import { Service } from '@/lib/types'
 import { HeroSection } from '@/components/home/hero-section'
+import { VideoHero } from '@/components/home/video-hero'
 import { TrustSection } from '@/components/home/trust-section'
+import { ExperienceSection } from '@/components/home/experience-section'
 import { GallerySection } from '@/components/home/gallery-section'
-import VideoShowcase from '@/components/home/video-showcase'
 import TestimonialsSection from '@/components/home/testimonials-section'
-import TestimonialForm from '@/components/home/testimonial-form'
 import { FaqSection } from '@/components/home/faq-section'
 import { CtaSection } from '@/components/home/cta-section'
 
-export const dynamic = 'force-dynamic'
-
-async function getServices(): Promise<Service[]> {
-  const sql = getDb()
-  const rows = await sql`SELECT * FROM services WHERE active = true ORDER BY sort_order ASC`
-  return rows as Service[]
-}
-
-export default async function HomePage() {
-  const services = await getServices()
-
+export default function HomePage() {
   return (
     <>
+      <VideoHero />
       <HeroSection />
       <TrustSection />
-      <VideoShowcase
-        videoId={process.env.NEXT_PUBLIC_YOUTUBE_VIDEO_ID || ''}
-        title="The HausLash Experience"
-        description="Discover professional lash lift services delivered with expertise and elegance. Watch our brand story and see why clients choose HausLash."
-        provider="youtube"
-      />
+      <ExperienceSection />
       <GallerySection />
       <TestimonialsSection />
-      <TestimonialForm />
       <FaqSection />
       <CtaSection />
     </>

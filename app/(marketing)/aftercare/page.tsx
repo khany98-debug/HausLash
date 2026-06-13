@@ -262,16 +262,18 @@ export default function AftercareInstructionsPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="tel:+441782123456"
-                className="inline-flex items-center justify-center px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
-              >
-                Call Us
-              </a>
-              <a
-                href="mailto:hello@hauslash.co"
+                href="mailto:info@hauslash.co"
                 className="inline-flex items-center justify-center px-6 py-2 border border-primary text-primary rounded-full hover:bg-primary/5 transition-colors"
               >
-                Email Us
+                Email Hauslash
+              </a>
+              <a
+                href="https://www.instagram.com/hauslash_co/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+              >
+                Message on Instagram
               </a>
             </div>
           </Card>

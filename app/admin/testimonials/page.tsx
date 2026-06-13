@@ -31,7 +31,7 @@ interface Testimonial {
 }
 
 export default function TestimonialsAdmin() {
-  useAdminAuth()
+  const { token } = useAdminAuth()
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,7 +41,7 @@ export default function TestimonialsAdmin() {
 
   useEffect(() => {
     fetchTestimonials()
-  }, [filter])
+  }, [filter, token])
 
   async function fetchTestimonials() {
     try {
@@ -49,7 +49,9 @@ export default function TestimonialsAdmin() {
       const params = new URLSearchParams()
       if (filter !== 'all') params.append('status', filter)
 
-      const response = await fetch(`/api/admin/testimonials?${params}`)
+      const response = await fetch(`/api/admin/testimonials?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (response.ok) {
         const data = await response.json()
         setTestimonials(data.testimonials)
@@ -66,7 +68,10 @@ export default function TestimonialsAdmin() {
       setActionLoading(id)
       const response = await fetch(`/api/admin/testimonials/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ status }),
       })
 
@@ -87,6 +92,7 @@ export default function TestimonialsAdmin() {
       setActionLoading(id)
       const response = await fetch(`/api/admin/testimonials/${id}`, {
         method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (response.ok) {

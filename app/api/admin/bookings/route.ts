@@ -5,18 +5,12 @@ import BookingCancellationEmail from '@/emails/booking-cancellation'
 import BookingRescheduleEmail from '@/emails/booking-reschedule'
 import { formatPence } from '@/lib/types'
 import { format } from 'date-fns'
+import { isAdminRequest } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
-function checkAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) return false
-  const token = authHeader.replace('Bearer ', '')
-  return token === (process.env.ADMIN_PASSWORD || 'admin123')
-}
-
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -52,7 +46,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

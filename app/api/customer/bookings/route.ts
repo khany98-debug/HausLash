@@ -5,7 +5,7 @@ import { z } from 'zod'
 export const dynamic = 'force-dynamic'
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().max(254),
 })
 
 // POST: Login with email to get booking history
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { email } = parsed.data
+    const email = parsed.data.email.toLowerCase()
     const sql = getDb()
 
     // Find bookings for this email
@@ -37,33 +37,14 @@ export async function POST(request: NextRequest) {
         b.created_at
       FROM bookings b
       JOIN services s ON b.service_id = s.id
-      WHERE b.customer_email = ${email}
+      WHERE lower(b.customer_email) = ${email}
       ORDER BY b.start_at DESC
     `
 
-    // Get or create customer profile
-    const profileRows = await sql`
-      SELECT * FROM customer_profiles WHERE email = ${email}
-    `
-
-    let profile
-    if (profileRows.length > 0) {
-      profile = profileRows[0]
-    } else {
-      // Create profile on first login
-      const newProfileRows = await sql`
-        INSERT INTO customer_profiles (email, name)
-        VALUES (${email}, 'Customer')
-        RETURNING id, email, name, created_at
-      `
-      profile = newProfileRows[0]
-    }
-
-    return NextResponse.json({
-      success: true,
-      profile,
-      bookings,
-    })
+    return NextResponse.json(
+      { success: true, bookings },
+      { headers: { 'Cache-Control': 'private, no-store' } },
+    )
   } catch (error) {
     console.error('Error in customer login:', error)
     return NextResponse.json(
@@ -74,44 +55,6 @@ export async function POST(request: NextRequest) {
 }
 
 // GET: Get customer bookings if email is provided
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const email = searchParams.get('email')
-
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      )
-    }
-
-    const sql = getDb()
-
-    const bookings = await sql`
-      SELECT 
-        b.id,
-        b.service_id,
-        s.name as service_name,
-        s.duration_minutes,
-        b.start_at,
-        b.end_at,
-        b.status,
-        b.deposit_amount_pence,
-        b.notes,
-        b.created_at
-      FROM bookings b
-      JOIN services s ON b.service_id = s.id
-      WHERE b.customer_email = ${email}
-      ORDER BY b.start_at DESC
-    `
-
-    return NextResponse.json({ bookings })
-  } catch (error) {
-    console.error('Error fetching bookings:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch bookings' },
-      { status: 500 }
-    )
-  }
+export async function GET() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }

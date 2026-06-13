@@ -1,95 +1,96 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { ArrowUpRight, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BrandMark } from '@/components/brand-mark'
+import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { label: 'Home', href: '/' },
-  { label: 'Services', href: '/services' },
+  { label: 'Treatments', href: '/services' },
+  { label: 'Results', href: '/#results' },
   { label: 'About', href: '/about' },
   { label: 'Aftercare', href: '/aftercare' },
   { label: 'Contact', href: '/contact' },
-  { label: 'My Bookings', href: '/bookings' },
-  { label: 'Policies', href: '/policies' },
 ]
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/40 bg-[#EEEDE9]">
-      
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/images/IMG_3451.jpeg"
-            alt="Hauslash"
-            width={959}
-            height={1084}
-            priority
-            className="h-16 w-auto"
-          />
+    <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+        <Link href="/" className="flex items-center" onClick={() => setOpen(false)}>
+          <BrandMark />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+              className={cn(
+                'text-[13px] tracking-wide text-muted-foreground transition-colors hover:text-foreground',
+                pathname === item.href && 'text-foreground',
+              )}
             >
               {item.label}
             </Link>
           ))}
-
-          <Button asChild size="sm" className="rounded-full px-6">
+          <Link
+            href="/bookings"
+            className="text-[13px] tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+          >
+            My bookings
+          </Link>
+          <Button asChild size="sm" className="rounded-full px-5">
             <Link href="/book">Book Now</Link>
           </Button>
         </nav>
 
-        {/* Mobile Menu */}
         <button
           onClick={() => setOpen(!open)}
-          className="text-foreground md:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-foreground/15 text-foreground lg:hidden"
           aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
-
       </div>
 
-      {/* Mobile Navigation */}
       {open && (
-        <nav className="border-t border-border/60 bg-background px-6 py-6 md:hidden">
-          <div className="flex flex-col gap-4">
-
+        <nav className="border-t border-foreground/10 bg-background px-5 py-8 lg:hidden" aria-label="Mobile navigation">
+          <div className="mx-auto flex max-w-7xl flex-col">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="text-base text-muted-foreground transition-colors hover:text-foreground"
+                className="flex items-center justify-between border-b border-foreground/10 py-4 font-serif text-2xl text-foreground"
               >
                 {item.label}
+                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             ))}
-
-            <Button asChild className="mt-2 rounded-full">
+            <Link
+              href="/bookings"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-between border-b border-foreground/10 py-4 font-serif text-2xl text-foreground"
+            >
+              My bookings
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
+            <Button asChild size="lg" className="mt-8 rounded-full">
               <Link href="/book" onClick={() => setOpen(false)}>
-                Book Now
+                Book an appointment
               </Link>
             </Button>
-
           </div>
         </nav>
       )}
-
     </header>
   )
 }

@@ -36,7 +36,7 @@ export function FaqSection() {
 
   return (
     <section id="faq" className="border-t border-border/60 bg-card">
-      <div className="mx-auto max-w-3xl px-2 sm:px-6 py-12 md:py-20">
+      <div className="mx-auto max-w-3xl px-5 sm:px-8 py-16 md:py-24">
         <div className="mb-8 md:mb-12 text-center">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
             FAQ
