@@ -1,13 +1,12 @@
 import { getDb } from '@/lib/db'
-import { resend } from '@/lib/email'
 import { formatPence, formatDuration } from '@/lib/types'
+import { confirmPaidBooking } from '@/lib/confirm-booking'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Calendar, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { AddToCalendarButton } from '@/components/booking/add-to-calendar'
-import BookingConfirmationEmail from '@/emails/booking-confirmation'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,13 +42,22 @@ export default async function BookingSuccessPage({
     )
   }
 
-  const sql = getDb()
+  let confirmationEmailSent = false
 
+  try {
+    const result = await confirmPaidBooking(sessionId)
+    confirmationEmailSent = result.customerEmailSent
+  } catch (error) {
+    console.error('Could not complete booking confirmation email:', error)
+  }
+
+  const sql = getDb()
   const bookings = await sql`
     SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
     FROM bookings b
     JOIN services s ON b.service_id = s.id
     WHERE b.stripe_checkout_session_id = ${sessionId}
+    AND b.status = 'confirmed'
   `
 
   if (bookings.length === 0) {
@@ -81,55 +89,6 @@ export default async function BookingSuccessPage({
   const pricePence = booking.price_pence as number | null
   const remainingPence = pricePence ? pricePence - depositPence : null
 
-  console.log("Booking success page loaded")
-  console.log("Booking ID:", booking.id)
-
-  try {
-
-    // Send customer confirmation email
-    const customerEmail = await resend.emails.send({
-      from: process.env.RESEND_FROM_ADDRESS || "noreply@hauslash.co",
-      to: booking.customer_email,
-      subject: "Your Hauslash appointment is confirmed",
-      react: BookingConfirmationEmail({
-        name: booking.customer_name,
-        service: booking.service_name,
-        date: formattedDate,
-        time: formattedTime,
-        deposit: formatPence(depositPence),
-        remaining: remainingPence ? formatPence(remainingPence) : null,
-      }),
-    })
-
-    console.log("Customer email response:", customerEmail)
-
-    // Send admin notification email
-    const adminEmail = await resend.emails.send({
-      from: process.env.RESEND_FROM_ADDRESS || "noreply@hauslash.co",
-      to: process.env.ADMIN_EMAIL || "admin@hauslash.co",
-      subject: "New Hauslash booking",
-      html: `
-        <h2>New Booking - ${booking.customer_name}</h2>
-
-        <p><strong>Name:</strong> ${booking.customer_name}</p>
-        <p><strong>Email:</strong> ${booking.customer_email}</p>
-        <p><strong>Phone:</strong> ${booking.customer_phone}</p>
-
-        <p><strong>Service:</strong> ${booking.service_name}</p>
-        <p><strong>Date:</strong> ${formattedDate}</p>
-        <p><strong>Time:</strong> ${formattedTime}</p>
-        <p><strong>Deposit Paid:</strong> ${formatPence(depositPence)}</p>
-        
-        ${booking.notes ? `<p><strong>Notes:</strong> ${booking.notes}</p>` : ''}
-      `,
-    })
-
-    console.log("Admin email response:", adminEmail)
-
-  } catch (error) {
-    console.error("Email sending failed:", error)
-  }
-
   return (
     <>
       <SiteHeader />
@@ -149,7 +108,9 @@ export default async function BookingSuccessPage({
 
             <p className="text-sm text-muted-foreground">
               Thank you, {booking.customer_name}! Your appointment is secured.
-              A confirmation email has been sent.
+              {confirmationEmailSent
+                ? ' A confirmation email is on its way.'
+                : ' Please keep the appointment details below. If your email does not arrive shortly, contact us and we will resend it.'}
             </p>
 
           </div>
