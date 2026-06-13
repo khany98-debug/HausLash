@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden">
+    <section id="signature" className="relative scroll-mt-20 overflow-hidden">
       <div className="mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:py-16">
         <div className="relative z-10 order-2 lg:order-1">
           <p className="eyebrow">Korean lash lift specialist · Stoke-on-Trent</p>

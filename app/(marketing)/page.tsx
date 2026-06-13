@@ -10,6 +10,7 @@ export const metadata = {
 }
 
 import { HeroSection } from '@/components/home/hero-section'
+import { VideoHero } from '@/components/home/video-hero'
 import { TrustSection } from '@/components/home/trust-section'
 import { ExperienceSection } from '@/components/home/experience-section'
 import { GallerySection } from '@/components/home/gallery-section'
@@ -20,6 +21,7 @@ import { CtaSection } from '@/components/home/cta-section'
 export default function HomePage() {
   return (
     <>
+      <VideoHero />
       <HeroSection />
       <TrustSection />
       <ExperienceSection />
