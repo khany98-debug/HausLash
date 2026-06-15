@@ -15,6 +15,7 @@ import { TrustSection } from '@/components/home/trust-section'
 import { ExperienceSection } from '@/components/home/experience-section'
 import { GallerySection } from '@/components/home/gallery-section'
 import TestimonialsSection from '@/components/home/testimonials-section'
+import { ReviewInvite } from '@/components/home/review-invite'
 import { FaqSection } from '@/components/home/faq-section'
 import { CtaSection } from '@/components/home/cta-section'
 
@@ -27,6 +28,7 @@ export default function HomePage() {
       <ExperienceSection />
       <GallerySection />
       <TestimonialsSection />
+      <ReviewInvite />
       <FaqSection />
       <CtaSection />
     </>

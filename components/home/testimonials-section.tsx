@@ -33,7 +33,8 @@ export default function TestimonialsSection() {
           ))}
         </div>
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {testimonial.customer_name} · Verified client
+          {testimonial.customer_name}
+          {testimonial.verified_booking ? ' · Verified client' : ''}
         </p>
         {testimonials.length > 1 && (
           <div className="mt-8 flex justify-center gap-2">

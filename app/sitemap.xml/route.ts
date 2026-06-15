@@ -11,6 +11,7 @@ export async function GET() {
     { url: '/about', priority: 0.8, changefreq: 'monthly' },
     { url: '/contact', priority: 0.8, changefreq: 'monthly' },
     { url: '/aftercare', priority: 0.8, changefreq: 'monthly' },
+    { url: '/reviews', priority: 0.8, changefreq: 'weekly' },
     { url: '/book', priority: 0.95, changefreq: 'daily' },
     { url: '/policies', priority: 0.7, changefreq: 'yearly' },
   ]

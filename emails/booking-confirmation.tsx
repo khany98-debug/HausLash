@@ -7,6 +7,7 @@ import {
   Text,
   Heading,
   Hr,
+  Link,
 } from "@react-email/components"
 
 export default function BookingConfirmationEmail({
@@ -116,6 +117,13 @@ export default function BookingConfirmationEmail({
           <Text style={{ fontSize: "13px", color: "#777" }}>
             Your technician will be in touch shortly to confirm the
             appointment location and any final details.
+          </Text>
+
+          <Text style={{ fontSize: "13px", color: "#777" }}>
+            After your appointment, we would love to hear about your experience.{" "}
+            <Link href="https://hauslash.co.uk/reviews#leave-a-review">
+              Leave a Hauslash review
+            </Link>
           </Text>
 
           <Hr />

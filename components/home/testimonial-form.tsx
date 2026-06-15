@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Star } from 'lucide-react'
+import { Check, Loader2, ShieldCheck, Star } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -17,7 +17,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -25,28 +24,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 
 const testimonialFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  serviceId: z.string().optional(),
-  rating: z.string().refine((val) => ['1', '2', '3', '4', '5'].includes(val), {
+  name: z.string().trim().min(2, 'Please enter your name').max(100),
+  email: z.string().trim().email('Please enter a valid email address'),
+  serviceId: z.string().uuid().optional(),
+  rating: z.string().refine((value) => ['1', '2', '3', '4', '5'].includes(value), {
     message: 'Please select a rating',
   }),
-  review: z.string().min(10, 'Review must be at least 10 characters').max(1000),
+  review: z
+    .string()
+    .trim()
+    .min(20, 'Please share at least 20 characters')
+    .max(1000, 'Please keep your review under 1,000 characters'),
+  website: z.string().max(0).optional(),
 })
 
 type TestimonialFormValues = z.infer<typeof testimonialFormSchema>
 
-const SERVICES = [
-  { id: 'classic-lash-lift', name: 'Classic Lash Lift' },
-  { id: 'korean-lash-lift', name: 'Korean Lash Lift' },
-  { id: 'lash-lift', name: 'Lash Lift' },
+type ReviewService = {
+  id: string
+  name: string
+}
 
-  { id: 'lash-tint', name: 'Lash Tint' },
-]
-
-export default function TestimonialForm() {
+export default function TestimonialForm({
+  services,
+}: {
+  services: ReviewService[]
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [hoverRating, setHoverRating] = useState(0)
@@ -59,11 +65,13 @@ export default function TestimonialForm() {
       serviceId: undefined,
       rating: '5',
       review: '',
+      website: '',
     },
   })
 
   async function onSubmit(values: TestimonialFormValues) {
     setIsSubmitting(true)
+
     try {
       const response = await fetch('/api/testimonials', {
         method: 'POST',
@@ -72,199 +80,226 @@ export default function TestimonialForm() {
           name: values.name,
           email: values.email,
           serviceId: values.serviceId || null,
-          rating: parseInt(values.rating),
+          rating: Number(values.rating),
           review: values.review,
+          website: values.website,
         }),
       })
 
-      if (response.ok) {
-        setSubmitSuccess(true)
-        form.reset()
-        setTimeout(() => setSubmitSuccess(false), 5000)
-      } else {
-        const error = await response.json()
+      const result = await response.json()
+
+      if (!response.ok) {
         form.setError('review', {
-          message: error.error || 'Failed to submit review',
+          message: result.error || 'We could not submit your review. Please try again.',
         })
+        return
       }
-    } catch (error) {
+
+      setSubmitSuccess(true)
+      form.reset()
+    } catch {
       form.setError('review', {
-        message: 'An error occurred while submitting your review',
+        message: 'We could not submit your review. Please try again.',
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  if (submitSuccess) {
+    return (
+      <div
+        role="status"
+        className="flex min-h-[32rem] flex-col items-center justify-center rounded-[1.75rem] border border-emerald-900/10 bg-emerald-50/70 p-8 text-center"
+      >
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-900 text-white">
+          <Check className="h-6 w-6" />
+        </span>
+        <h2 className="mt-6 font-serif text-3xl tracking-tight">Thank you for sharing.</h2>
+        <p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
+          Your review has been received and will appear after a quick moderation check.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-7 rounded-full border-foreground/15 bg-transparent"
+          onClick={() => setSubmitSuccess(false)}
+        >
+          Leave another review
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <section id="review-form" className="py-16 px-4 md:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
-            Share Your Experience
-          </h2>
-          <p className="text-muted-foreground">
-            We'd love to hear about your HausLash experience. Your feedback helps us improve and helps others discover our services.
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs uppercase tracking-[0.12em]">Name</FormLabel>
+                <FormControl>
+                  <Input
+                    autoComplete="name"
+                    placeholder="Your name"
+                    disabled={isSubmitting}
+                    className="h-12 rounded-xl bg-background/60"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs uppercase tracking-[0.12em]">Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    disabled={isSubmitting}
+                    className="h-12 rounded-xl bg-background/60"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="serviceId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs uppercase tracking-[0.12em]">
+                Treatment <span className="normal-case tracking-normal text-muted-foreground">(optional)</span>
+              </FormLabel>
+              <Select
+                value={field.value || 'none'}
+                onValueChange={(value) => field.onChange(value === 'none' ? undefined : value)}
+                disabled={isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger className="h-12 w-full rounded-xl bg-background/60">
+                    <SelectValue placeholder="Select your treatment" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Prefer not to say</SelectItem>
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={service.id}>
+                      {service.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="rating"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs uppercase tracking-[0.12em]">Your rating</FormLabel>
+              <FormControl>
+                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Review rating">
+                  {[1, 2, 3, 4, 5].map((rating) => {
+                    const selectedRating = Number(field.value)
+                    const active = rating <= (hoverRating || selectedRating)
+
+                    return (
+                      <button
+                        key={rating}
+                        type="button"
+                        role="radio"
+                        aria-checked={rating === selectedRating}
+                        aria-label={`${rating} out of 5 stars`}
+                        onClick={() => field.onChange(String(rating))}
+                        onMouseEnter={() => setHoverRating(rating)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onFocus={() => setHoverRating(rating)}
+                        onBlur={() => setHoverRating(0)}
+                        disabled={isSubmitting}
+                        className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/10 bg-background/55 transition hover:-translate-y-0.5 hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50"
+                      >
+                        <Star
+                          className={`h-5 w-5 ${
+                            active ? 'fill-foreground text-foreground' : 'text-muted-foreground/35'
+                          }`}
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="review"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs uppercase tracking-[0.12em]">Your experience</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="What did you love about your treatment or result?"
+                  rows={7}
+                  disabled={isSubmitting}
+                  className="min-h-40 rounded-xl bg-background/60"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className="flex justify-between gap-4 text-xs">
+                <span>Reviews are checked before appearing publicly.</span>
+                <span>{field.value.length}/1000</span>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem className="hidden" aria-hidden="true">
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input tabIndex={-1} autoComplete="off" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <div className="rounded-xl border border-foreground/10 bg-background/45 p-4 text-xs leading-6 text-muted-foreground">
+          <p className="flex gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+            Your email is never displayed. It is used only to identify verified Hauslash bookings and moderate submissions.
           </p>
         </div>
 
-        {submitSuccess ? (
-          <Card className="p-8 text-center border-green-200 bg-green-50">
-            <Star className="h-12 w-12 mx-auto mb-4 text-green-600" />
-            <h3 className="font-serif text-xl text-foreground mb-2">
-              Thank You!
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Your review has been submitted and is pending approval. We'll display it shortly!
-            </p>
-          </Card>
-        ) : (
-          <Card className="p-8 border-primary/10">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Your name"
-                            {...field}
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="your@email.com"
-                            {...field}
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="serviceId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Service (Optional)</FormLabel>
-                      <Select 
-                        value={field.value ?? ''} 
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a service" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="__none__">All Services</SelectItem>
-                          {SERVICES.map((service) => (
-                            <SelectItem key={service.id} value={service.id}>
-                              {service.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Which service would you like to review?
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="rating"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rating</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-3">
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <button
-                              key={rating}
-                              type="button"
-                              onClick={() => field.onChange(rating.toString())}
-                              onMouseEnter={() => setHoverRating(rating)}
-                              onMouseLeave={() => setHoverRating(0)}
-                              disabled={isSubmitting}
-                              className="transition-transform hover:scale-110"
-                            >
-                              <Star
-                                className={`h-8 w-8 ${
-                                  rating <= (hoverRating || parseInt(field.value))
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-muted'
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="review"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Review</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Share your experience with HausLash..."
-                          rows={5}
-                          {...field}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {1000 - field.value.length} characters remaining
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full rounded-full"
-                  size="lg"
-                >
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Submit Review
-                </Button>
-              </form>
-            </Form>
-          </Card>
-        )}
-      </div>
-    </section>
+        <Button type="submit" disabled={isSubmitting} size="lg" className="h-12 w-full rounded-full">
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Star className="h-4 w-4" />}
+          {isSubmitting ? 'Submitting review...' : 'Submit review'}
+        </Button>
+      </form>
+    </Form>
   )
 }
