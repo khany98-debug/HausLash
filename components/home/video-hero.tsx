@@ -50,15 +50,15 @@ export function VideoHero() {
   return (
     <section
       aria-label="Welcome to Hauslash"
-      className="relative isolate flex min-h-[calc(100svh-72px)] items-center overflow-hidden border-b border-foreground/10"
+      className="relative isolate flex items-center overflow-hidden border-b border-foreground/10 sm:min-h-[calc(100svh-68px)] xl:min-h-[calc(100svh-82px)]"
     >
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.85),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.18),transparent)]"
       />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 py-12 sm:px-8 sm:py-16 lg:py-20">
-        <p className="eyebrow mb-7 text-center">Welcome to Hauslash</p>
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-5 py-10 sm:px-8 sm:py-16 lg:py-20">
+        <p className="eyebrow mb-5 text-center sm:mb-7">Welcome to Hauslash</p>
 
         <div className="relative w-full max-w-5xl">
           <div className="absolute -inset-5 -z-10 rounded-[2.75rem] bg-white/35 blur-2xl sm:-inset-8" />
@@ -126,7 +126,7 @@ export function VideoHero() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center gap-5 text-center sm:mt-10">
+        <div className="mt-7 flex flex-col items-center gap-4 text-center sm:mt-10 sm:gap-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-foreground">
             Premium Korean lash studio
           </p>
