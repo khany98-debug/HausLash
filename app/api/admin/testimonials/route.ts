@@ -19,17 +19,35 @@ export async function GET(request: NextRequest) {
     let testimonials
     if (status) {
       testimonials = await sql`
-        SELECT id, customer_id, customer_name, service_id, rating, review_text, status, featured, created_at, updated_at
-        FROM testimonials
-        WHERE status = ${status}
-        ORDER BY created_at DESC
+        SELECT
+          t.id, t.customer_id, t.customer_name, t.service_id, t.rating, t.review_text,
+          t.status, t.featured, t.created_at, t.updated_at,
+          EXISTS (
+            SELECT 1
+            FROM bookings b
+            JOIN customer_profiles cp ON cp.id = t.customer_id
+            WHERE lower(b.customer_email) = lower(cp.email)
+            AND b.status IN ('confirmed', 'completed')
+          ) AS verified_booking
+        FROM testimonials t
+        WHERE t.status = ${status}
+        ORDER BY t.created_at DESC
         LIMIT ${limit}
       `
     } else {
       testimonials = await sql`
-        SELECT id, customer_id, customer_name, service_id, rating, review_text, status, featured, created_at, updated_at
-        FROM testimonials
-        ORDER BY created_at DESC
+        SELECT
+          t.id, t.customer_id, t.customer_name, t.service_id, t.rating, t.review_text,
+          t.status, t.featured, t.created_at, t.updated_at,
+          EXISTS (
+            SELECT 1
+            FROM bookings b
+            JOIN customer_profiles cp ON cp.id = t.customer_id
+            WHERE lower(b.customer_email) = lower(cp.email)
+            AND b.status IN ('confirmed', 'completed')
+          ) AS verified_booking
+        FROM testimonials t
+        ORDER BY t.created_at DESC
         LIMIT ${limit}
       `
     }

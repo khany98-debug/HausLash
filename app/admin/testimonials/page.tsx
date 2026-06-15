@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Star, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { Star, Loader2, CheckCircle, XCircle, Trash2, ShieldCheck } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +26,7 @@ interface Testimonial {
   review_text: string
   status: 'pending' | 'approved' | 'rejected'
   featured: boolean
+  verified_booking: boolean
   created_at: string
   updated_at: string
 }
@@ -197,6 +198,13 @@ export default function TestimonialsAdmin() {
                     {testimonial.rating}/5
                   </span>
                 </div>
+
+                {testimonial.verified_booking && (
+                  <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Verified booking
+                  </p>
+                )}
 
                 {/* Review Text */}
                 <p className="text-foreground leading-relaxed">

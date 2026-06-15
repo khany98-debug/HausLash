@@ -6,6 +6,7 @@ const LINKS = [
   { label: 'Treatments', href: '/services' },
   { label: 'About', href: '/about' },
   { label: 'Aftercare', href: '/aftercare' },
+  { label: 'Client reviews', href: '/reviews' },
   { label: 'Policies', href: '/policies' },
   { label: 'My bookings', href: '/bookings' },
 ]
