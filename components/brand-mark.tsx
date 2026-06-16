@@ -4,13 +4,13 @@ export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-baseline text-2xl leading-none tracking-[-0.08em] text-foreground',
+        'inline-flex items-baseline whitespace-nowrap text-2xl leading-none text-foreground',
         className,
       )}
       aria-label="Hauslash"
     >
-      <span className="font-serif italic font-normal">haus</span>
-      <span className="font-sans font-bold not-italic">lash</span>
+      <span className="font-serif italic font-normal tracking-[-0.045em]">haus</span>
+      <span className="ml-[0.08em] font-sans font-bold not-italic tracking-[-0.04em]">lash</span>
     </span>
   )
 }
