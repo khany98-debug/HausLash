@@ -1,16 +1,25 @@
 import { cn } from '@/lib/utils'
 
+const LOGO_MASK = '/images/brand/hauslash-logo-mask.png'
+
 export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-baseline whitespace-nowrap text-2xl leading-none text-foreground',
+        'inline-flex h-[1em] w-[3.86em] shrink-0 items-center text-2xl leading-none text-foreground',
         className,
       )}
+      role="img"
       aria-label="Hauslash"
     >
-      <span className="font-serif italic font-normal tracking-[-0.035em]">haus</span>
-      <span className="ml-[0.24em] font-sans font-black not-italic tracking-[-0.055em]">lash</span>
+      <span
+        aria-hidden="true"
+        className="block h-full w-full bg-current"
+        style={{
+          WebkitMask: `url(${LOGO_MASK}) center / contain no-repeat`,
+          mask: `url(${LOGO_MASK}) center / contain no-repeat`,
+        }}
+      />
     </span>
   )
 }
