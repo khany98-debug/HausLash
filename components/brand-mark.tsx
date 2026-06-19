@@ -28,15 +28,16 @@ export function BrandMark({ className }: { className?: string }) {
         >
           haus
         </text>
+        <rect x="176" y="2" width="23.5" height="74" rx="1.5" />
         <text
-          x="176"
+          x="200"
           y="76"
           fontFamily="var(--font-inter), Inter, Arial, sans-serif"
           fontSize="78"
           fontWeight="900"
           letterSpacing="-6"
         >
-          lash
+          ash
         </text>
       </svg>
     </span>
