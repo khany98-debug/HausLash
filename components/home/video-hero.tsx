@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowDown, Pause, Play } from 'lucide-react'
@@ -12,7 +11,7 @@ export function VideoHero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
@@ -64,21 +63,9 @@ export function VideoHero() {
           <div className="absolute -inset-5 -z-10 rounded-[2.75rem] bg-white/35 blur-2xl sm:-inset-8" />
 
           <div className="group relative aspect-[16/9] overflow-hidden rounded-[1.5rem] border border-foreground/15 bg-[#d7c4b8] shadow-[0_36px_100px_-42px_rgba(42,34,28,0.72)] sm:rounded-[2rem]">
-            <Image
-              src="/images/work/Model2.jpeg"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1200px) 100vw, 1024px"
-              className="object-cover object-center"
-            />
-            <div
-              aria-hidden="true"
-              className={cn(
-                'absolute inset-0 bg-background/25 backdrop-blur-[1px] transition-opacity duration-700',
-                isReady && !hasError ? 'opacity-0' : 'opacity-100',
-              )}
-            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <BrandMark className="text-4xl text-white drop-shadow-lg sm:text-6xl" />
+            </div>
 
             {!hasError && (
               <video
@@ -88,13 +75,17 @@ export function VideoHero() {
                 muted
                 playsInline
                 preload="auto"
-                onCanPlay={() => setIsReady(true)}
+                onPlaying={() => {
+                  setIsReady(true)
+                  setIsPlaying(true)
+                }}
+                onPause={() => setIsPlaying(false)}
                 onError={() => {
                   setHasError(true)
                   setIsPlaying(false)
                 }}
                 className={cn(
-                  'absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700',
+                  'absolute inset-0 z-10 h-full w-full object-cover object-center transition-opacity duration-700',
                   isReady ? 'opacity-100' : 'opacity-0',
                 )}
                 aria-label="Hauslash eye-opening brand film"
@@ -103,17 +94,11 @@ export function VideoHero() {
               </video>
             )}
 
-            {(!isReady || hasError) && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <BrandMark className="text-4xl text-white drop-shadow-lg sm:text-6xl" />
-              </div>
-            )}
-
             {isReady && !hasError && (
               <button
                 type="button"
                 onClick={togglePlayback}
-                className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/25 text-white opacity-100 shadow-lg backdrop-blur-md transition hover:bg-black/40 focus-visible:opacity-100 sm:bottom-5 sm:right-5 sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute bottom-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/25 text-white opacity-100 shadow-lg backdrop-blur-md transition hover:bg-black/40 focus-visible:opacity-100 sm:bottom-5 sm:right-5 sm:opacity-0 sm:group-hover:opacity-100"
                 aria-label={isPlaying ? 'Pause welcome film' : 'Play welcome film'}
               >
                 {isPlaying ? (
