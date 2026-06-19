@@ -29,7 +29,7 @@ export function BrandMark({ className }: { className?: string }) {
           haus
         </text>
         <text
-          x="214"
+          x="176"
           y="76"
           fontFamily="var(--font-inter), Inter, Arial, sans-serif"
           fontSize="78"
