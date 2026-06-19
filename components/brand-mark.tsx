@@ -9,8 +9,8 @@ export function BrandMark({ className }: { className?: string }) {
       )}
       aria-label="Hauslash"
     >
-      <span className="font-serif italic font-normal tracking-[-0.025em]">haus</span>
-      <span className="ml-[0.16em] font-sans font-bold not-italic tracking-[-0.025em]">lash</span>
+      <span className="font-serif italic font-normal tracking-[-0.035em]">haus</span>
+      <span className="ml-[0.24em] font-sans font-black not-italic tracking-[-0.055em]">lash</span>
     </span>
   )
 }
