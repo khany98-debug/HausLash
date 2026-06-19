@@ -1,44 +1,25 @@
 import { cn } from '@/lib/utils'
 
+const LOGO_MASK = '/images/brand/hauslash-original-wordmark.png'
+
 export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex h-[1em] w-[4.25em] shrink-0 items-center text-2xl leading-none text-foreground',
+        'inline-flex h-[1em] w-[4.26em] shrink-0 items-center text-2xl leading-none text-foreground',
         className,
       )}
       role="img"
       aria-label="Hauslash"
     >
-      <svg
+      <span
         aria-hidden="true"
-        className="block h-full w-full overflow-visible"
-        fill="currentColor"
-        viewBox="0 0 425 100"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <text
-          x="0"
-          y="76"
-          fontFamily="var(--font-playfair), 'Playfair Display', serif"
-          fontSize="92"
-          fontStyle="italic"
-          fontWeight="400"
-          letterSpacing="-4"
-        >
-          haus
-        </text>
-        <text
-          x="176"
-          y="76"
-          fontFamily="var(--font-inter), Inter, Arial, sans-serif"
-          fontSize="78"
-          fontWeight="900"
-          letterSpacing="-6"
-        >
-          Lash
-        </text>
-      </svg>
+        className="block h-full w-full bg-current"
+        style={{
+          WebkitMask: `url(${LOGO_MASK}) center / contain no-repeat`,
+          mask: `url(${LOGO_MASK}) center / contain no-repeat`,
+        }}
+      />
     </span>
   )
 }
