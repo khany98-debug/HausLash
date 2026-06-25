@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/db'
+import { FALLBACK_SERVICES, isMissingDatabaseConfig } from '@/lib/service-fallbacks'
 import { Service } from '@/lib/types'
 import { BookingWizard } from '@/components/booking/booking-wizard'
 import { SiteHeader } from '@/components/site-header'
@@ -11,9 +12,17 @@ export const metadata = {
 }
 
 async function getServices(): Promise<Service[]> {
-  const sql = getDb()
-  const rows = await sql`SELECT * FROM services WHERE active = true ORDER BY sort_order ASC`
-  return rows as Service[]
+  try {
+    const sql = getDb()
+    const rows = await sql`SELECT * FROM services WHERE active = true ORDER BY sort_order ASC`
+    return rows as Service[]
+  } catch (error) {
+    if (isMissingDatabaseConfig(error)) {
+      return FALLBACK_SERVICES
+    }
+
+    throw error
+  }
 }
 
 export default async function BookPage({

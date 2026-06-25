@@ -3,11 +3,48 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 
 const IMAGES = [
-  { src: '/images/work/Model3.jpeg', alt: 'Korean lash lift close-up', className: 'md:col-span-7 md:row-span-2' },
-  { src: '/images/work/Model2.jpeg', alt: 'Natural lifted lash result', className: 'md:col-span-5' },
-  { src: '/images/work/Model5.JPG', alt: 'Soft lash lift result', className: 'md:col-span-5' },
-  { src: '/images/work/Model1.jpg', alt: 'Hauslash client result', className: 'md:col-span-5' },
-  { src: '/images/work/Model6.JPG', alt: 'Detailed lash treatment result', className: 'md:col-span-7' },
+  {
+    src: '/images/work/hauslash-editorial-mirror.jpg',
+    alt: 'Hauslash mirror reveal with lifted lashes',
+    className: 'md:col-span-7 md:row-span-2',
+    imageClassName: 'object-[48%_48%]',
+  },
+  {
+    src: '/images/work/hauslash-blue-eye-detail.jpg',
+    alt: 'Blue eye Korean lash lift detail',
+    className: 'md:col-span-5',
+    imageClassName: 'object-[50%_48%]',
+  },
+  {
+    src: '/images/work/hauslash-green-eye-detail.jpg',
+    alt: 'Refined green eye lash lift detail',
+    className: 'md:col-span-5',
+    imageClassName: 'object-[44%_50%]',
+  },
+  {
+    src: '/images/work/hauslash-blue-eye-lift.jpg',
+    alt: 'Full blue eye lifted lash result',
+    className: 'md:col-span-4',
+    imageClassName: 'object-[50%_58%]',
+  },
+  {
+    src: '/images/work/hauslash-amber-eye-closeup.jpg',
+    alt: 'Amber eye close-up lash lift result',
+    className: 'md:col-span-4',
+    imageClassName: 'object-[48%_48%]',
+  },
+  {
+    src: '/images/work/hauslash-soft-brown-detail.jpg',
+    alt: 'Soft brown eye lash lift close-up',
+    className: 'md:col-span-4',
+    imageClassName: 'object-[50%_48%]',
+  },
+  {
+    src: '/images/work/hauslash-mirror-brown-lift.jpg',
+    alt: 'Mirror view of glossy lifted lashes',
+    className: 'md:col-span-12',
+    imageClassName: 'object-[50%_44%]',
+  },
 ]
 
 export function GallerySection() {
@@ -29,7 +66,7 @@ export function GallerySection() {
       <div className="grid auto-rows-[260px] gap-4 md:grid-cols-12 md:auto-rows-[280px]">
         {IMAGES.map((image, index) => (
           <div
-            key={image.src}
+            key={`${image.src}-${index}`}
             className={`group relative overflow-hidden rounded-[1.5rem] bg-muted ${image.className}`}
           >
             <Image
@@ -37,7 +74,7 @@ export function GallerySection() {
               alt={image.alt}
               fill
               sizes="(max-width: 768px) 100vw, 60vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+              className={`object-cover transition-transform duration-700 group-hover:scale-[1.025] ${image.imageClassName}`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-70" />
             <span className="absolute bottom-4 left-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white">

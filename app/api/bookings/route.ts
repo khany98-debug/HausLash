@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
+import { isMissingDatabaseConfig } from "@/lib/service-fallbacks"
 import { stripe } from "@/lib/stripe"
 import { z } from "zod"
 
@@ -151,6 +152,16 @@ export async function POST(request: NextRequest) {
       checkoutUrl: session.url,
     })
   } catch (error: any) {
+    if (isMissingDatabaseConfig(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Booking payments are not available in this local preview because the booking database is not configured.",
+        },
+        { status: 503 }
+      )
+    }
+
     console.error("Booking creation error:", error)
 
     return NextResponse.json(

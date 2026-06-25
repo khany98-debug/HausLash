@@ -136,6 +136,11 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground;
@@ -143,6 +148,8 @@
       radial-gradient(circle at 12% 8%, rgb(255 255 255 / 0.65), transparent 28rem),
       radial-gradient(circle at 88% 32%, rgb(210 190 167 / 0.15), transparent 30rem);
     min-width: 320px;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
   }
   ::selection {
     background: rgb(42 37 32 / 0.85);

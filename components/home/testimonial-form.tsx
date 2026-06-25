@@ -117,7 +117,7 @@ export default function TestimonialForm({
         </span>
         <h2 className="mt-6 font-serif text-3xl tracking-tight">Thank you for sharing.</h2>
         <p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
-          Your review has been received and will appear after a quick moderation check.
+          Your review has been received and will appear on the reviews page shortly.
         </p>
         <Button
           type="button"
@@ -267,7 +267,7 @@ export default function TestimonialForm({
                 />
               </FormControl>
               <FormDescription className="flex justify-between gap-4 text-xs">
-                <span>Reviews are checked before appearing publicly.</span>
+                <span>Reviews appear publicly after submission.</span>
                 <span>{field.value.length}/1000</span>
               </FormDescription>
               <FormMessage />

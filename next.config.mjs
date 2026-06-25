@@ -1,5 +1,6 @@
 /** @type {import('next).NextConfig} */
 const nextConfig = {
+  devIndicators: false,
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000,

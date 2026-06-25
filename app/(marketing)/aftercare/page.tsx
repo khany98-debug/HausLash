@@ -1,282 +1,244 @@
-'use client'
+import Link from 'next/link'
+import {
+  AlertCircle,
+  ArrowUpRight,
+  Check,
+  Clock3,
+  Droplet,
+  ShieldCheck,
+  Sparkles,
+  Wind,
+  X,
+} from 'lucide-react'
 
-import { AlertCircle, Clock, Droplet, Wind, Zap, Coffee } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+
+const TIMELINE = [
+  {
+    icon: Clock3,
+    period: 'First 24 hours',
+    title: 'Let the lift set',
+    note: 'This is the most important window for keeping the lift clean, dry, and undisturbed.',
+    items: [
+      'Avoid water, steam, heavy moisture, saunas, and swimming.',
+      'Do not apply eye makeup, mascara, liner, or oil-based products.',
+      'Sleep on your back where possible and avoid pressing lashes into the pillow.',
+      'Keep hands away from the eye area. No rubbing, pulling, or brushing yet.',
+    ],
+  },
+  {
+    icon: Droplet,
+    period: 'Days 2-7',
+    title: 'Cleanse with care',
+    note: 'Your lift is set, but gentle habits help preserve the shape and finish.',
+    items: [
+      'Use lukewarm water and keep cleansing soft around the eyes.',
+      'Choose oil-free skincare and makeup around the lash line.',
+      'Brush lashes lightly with a clean spoolie when needed.',
+      'Avoid hot showers directly on the face and skip waterproof mascara.',
+    ],
+  },
+  {
+    icon: Sparkles,
+    period: 'Week 2 onward',
+    title: 'Maintain the polish',
+    note: 'A simple routine keeps lashes soft, separated, and beautifully lifted.',
+    items: [
+      'Cleanse gently and remove makeup without tugging.',
+      'Use a nourishing lash serum if recommended for your lashes.',
+      'Brush through only when lashes are dry and settled.',
+      'Book your next lift around the 6-8 week mark when the natural cycle softens.',
+    ],
+  },
+]
+
+const DOS = [
+  'Keep lashes dry during the first setting window.',
+  'Use lukewarm water when cleansing near the eyes.',
+  'Choose oil-free products around the lash line.',
+  'Brush gently with a clean spoolie after the first day.',
+  'Contact Hauslash if anything feels uncomfortable.',
+]
+
+const DONTS = [
+  'Rub, pull, pick, or sleep with pressure on lashes.',
+  'Use steam rooms, saunas, or swimming pools in the first week.',
+  'Apply waterproof mascara or harsh makeup removers.',
+  'Use oil-based serums or balms around the eyes.',
+  'Re-lift lashes before the natural growth cycle is ready.',
+]
+
+const FAQS = [
+  {
+    q: 'How long will my lift last?',
+    a: 'Most lash lifts last around 6-8 weeks. Your natural growth cycle, skincare, and aftercare routine can all affect longevity.',
+  },
+  {
+    q: 'What if I accidentally get my lashes wet?',
+    a: 'Gently pat them dry with a clean towel and avoid rubbing. One small splash is not usually a disaster, but repeated moisture in the first 24 hours can soften the result.',
+  },
+  {
+    q: 'Can I wear mascara?',
+    a: 'Yes, after the first 24-48 hours. A regular, non-waterproof mascara is best because it removes more gently.',
+  },
+  {
+    q: 'Can I use lash serum?',
+    a: 'Yes, once the lift has settled. Keep the product light, clean, and away from the lash line if it contains oils.',
+  },
+]
 
 export default function AftercareInstructionsPage() {
   return (
-    <main className="min-h-screen">
-      {/* Hero */}
-      <section className="py-12 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-transparent border-b border-primary/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-            Aftercare Instructions
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Follow these simple steps to maximize your lash lift results and ensure beautiful lashes for up to 8 weeks.
-          </p>
+    <main>
+      <section className="relative isolate overflow-hidden border-b border-foreground/10">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.86),transparent_34%),radial-gradient(circle_at_88%_20%,rgba(201,185,167,0.25),transparent_28%)]"
+        />
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 md:py-24 lg:grid-cols-[1fr_0.72fr] lg:items-end">
+          <div>
+            <p className="eyebrow">Aftercare ritual</p>
+            <h1 className="mt-5 display-title max-w-3xl">
+              Protect the lift,
+              <span className="block italic">preserve the softness.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground">
+              Your treatment continues after you leave the studio. These simple, calm steps help your lashes stay lifted, glossy, and comfortable for as long as possible.
+            </p>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-foreground/10 bg-foreground p-7 text-primary-foreground shadow-[0_32px_90px_-55px_rgba(42,34,28,0.75)]">
+            <div className="flex items-start gap-4">
+              <AlertCircle className="mt-1 h-5 w-5 shrink-0 text-[#c9b9a7]" />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-foreground/45">
+                  Most important
+                </p>
+                <h2 className="mt-3 font-serif text-3xl leading-tight">The first 24 hours matter most.</h2>
+                <p className="mt-4 text-sm leading-7 text-primary-foreground/68">
+                  Keep lashes dry, clean, and untouched while the lift settles. This one window has the biggest impact on the final result.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="py-16 px-4 md:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Important Alert */}
-          <Alert className="mb-8 border-amber-200 bg-amber-50">
-            <AlertCircle className="h-4 w-4 text-amber-700" />
-            <AlertDescription className="text-amber-700">
-              <strong>First 24-48 Hours:</strong> Your lashes are setting during this critical period. Following these instructions is essential for optimal results.
-            </AlertDescription>
-          </Alert>
-
-          {/* Timeline Section */}
-          <div className="mb-16">
-            <h2 className="font-serif text-3xl text-foreground mb-8">
-              Timeline for Care
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 md:py-28">
+        <div className="mb-12 grid gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+          <div>
+            <p className="eyebrow">The setting timeline</p>
+            <h2 className="mt-4 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+              Three phases,
+              <span className="block italic">one beautiful finish.</span>
             </h2>
-
-            <div className="space-y-6">
-              {/* First 24 Hours */}
-              <Card className="p-6 border-primary/10">
-                <div className="flex gap-4 mb-4">
-                  <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-serif text-xl text-foreground mb-2">
-                      First 24 Hours - Critical Setting Period
-                    </h3>
-                    <Badge className="mb-4">Most Important</Badge>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 text-foreground">
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>No water, steam, or moisture</strong> - Avoid washing your face, showering, or exposing lashes to steam
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>No makeup</strong> - Skip eye makeup, mascara, and liner during this period
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>No touching or rubbing</strong> - Avoid touching, rubbing, or manipulating your lashes
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Sleep on your back</strong> - Prevent pressure on your lashes by sleeping on your back
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>No saunas or swimming</strong> - Avoid hot environments and chlorinated pools
-                    </span>
-                  </li>
-                </ul>
-              </Card>
-
-              {/* Days 2-7 */}
-              <Card className="p-6 border-primary/10">
-                <div className="flex gap-4 mb-4">
-                  <Droplet className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                  <h3 className="font-serif text-xl text-foreground">
-                    Days 2-7 - Careful Management
-                  </h3>
-                </div>
-
-                <ul className="space-y-3 text-foreground">
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Gentle cleansing</strong> - When washing, keep eyes closed and use only gentle, lukewarm water
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Oil-free products</strong> - Use oil-free makeup and skincare products around the eyes
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Minimal makeup</strong> - When wearing makeup, apply lighter amounts and remove gently
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Avoid hot showers</strong> - Keep water temperature lukewarm when near your face
-                    </span>
-                  </li>
-                </ul>
-              </Card>
-
-              {/* Week 2 Onwards */}
-              <Card className="p-6 border-primary/10">
-                <div className="flex gap-4 mb-4">
-                  <Zap className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                  <h3 className="font-serif text-xl text-foreground">
-                    Week 2 & Beyond - Maintenance
-                  </h3>
-                </div>
-
-                <ul className="space-y-3 text-foreground">
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Regular gentle cleansing</strong> - Use makeup remover or gentle cleanser as usual
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Avoid waterproof mascara</strong> - It's harder to remove and can strain delicate lashes
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Use lash serum</strong> - Consider using a nourishing lash serum to maintain health
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-primary font-bold">✓</span>
-                    <span>
-                      <strong>Brush gently</strong> - Use a clean spoolie brush to comb lashes gently
-                    </span>
-                  </li>
-                </ul>
-              </Card>
-            </div>
           </div>
+          <p className="max-w-2xl text-sm leading-7 text-muted-foreground lg:justify-self-end">
+            Follow the timeline below, then return to your normal routine with a gentler touch around the eye area.
+          </p>
+        </div>
 
-          {/* Do's and Don'ts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {/* Do's */}
-            <div>
-              <h3 className="font-serif text-2xl text-foreground mb-6 flex items-center gap-2">
-                <span className="text-green-600">✓</span> Do's
-              </h3>
-              <ul className="space-y-3 text-foreground">
-                {[
-                  'Sleep on your back',
-                  'Use lukewarm water for washing',
-                  'Keep eyes closed in showers',
-                  'Use oil-free makeup and skincare',
-                  'Be gentle when cleansing',
-                  'Use mascara (after 2-3 days)',
-                  'Apply makeup remover gently',
-                  'Use lash serum for maintenance',
-                ].map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="text-green-600 font-bold flex-shrink-0">✓</span>
-                    <span>{item}</span>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {TIMELINE.map((step, index) => (
+            <article key={step.period} className="luxury-card relative overflow-hidden p-6 sm:p-7">
+              <span className="absolute right-5 top-4 font-serif text-6xl italic text-foreground/[0.045]">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <step.icon className="h-5 w-5 text-muted-foreground" />
+              <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                {step.period}
+              </p>
+              <h3 className="mt-3 font-serif text-3xl tracking-tight">{step.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">{step.note}</p>
+              <ul className="mt-6 space-y-3 border-t border-foreground/10 pt-6">
+                {step.items.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-foreground/80">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-foreground" />
+                    {item}
                   </li>
                 ))}
               </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-foreground/10 bg-card/55">
+        <div className="mx-auto grid max-w-7xl gap-6 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-2">
+          <article className="rounded-[1.75rem] border border-foreground/10 bg-background/70 p-7 sm:p-9">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-foreground" />
+              <h2 className="font-serif text-3xl tracking-tight">Do</h2>
             </div>
-
-            {/* Don'ts */}
-            <div>
-              <h3 className="font-serif text-2xl text-foreground mb-6 flex items-center gap-2">
-                <span className="text-red-600">✗</span> Don'ts
-              </h3>
-              <ul className="space-y-3 text-foreground">
-                {[
-                  'Get lashes wet in first 24-48 hours',
-                  'Use hot water or steam on face',
-                  'Rub or pull your lashes',
-                  'Sleep on your side or stomach',
-                  'Use waterproof mascara',
-                  'Use oil-based treatments or makeup',
-                  'Visit saunas or steam rooms',
-                  'Go swimming for 1 week',
-                ].map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="text-red-600 font-bold flex-shrink-0">✗</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* FAQ Section */}
-          <div className="mb-16">
-            <h2 className="font-serif text-3xl text-foreground mb-8">
-              Common Questions
-            </h2>
-
-            <div className="space-y-6">
-              {[
-                {
-                  q: 'How long do results last?',
-                  a: 'Your lash lift results typically last 6-8 weeks. After this period, your natural lash growth cycle will cause the curl to gradually return to normal.',
-                },
-                {
-                  q: 'Can I wear makeup after my appointment?',
-                  a: 'We recommend avoiding eye makeup for the first 24-48 hours. After that, you can wear makeup, but use oil-free products and avoid waterproof formulas for the best results.',
-                },
-                {
-                  q: 'What if I accidentally get my lashes wet?',
-                  a: 'If you get your lashes wet within the first 48 hours, gently pat them dry with a clean cloth. Avoid rubbing. It may slightly affect the longevity of your lift, so try to reschedule if you know water exposure is unavoidable.',
-                },
-                {
-                  q: 'Can I use mascara?',
-                  a: 'Yes, you can use regular mascara after 2-3 days. Avoid waterproof formulas as they require more aggressive removal that can damage your lifted lashes.',
-                },
-                {
-                  q: 'What should I do if my lashes feel uncomfortable?',
-                  a: 'Some slight sensitivity is normal for the first few hours. If discomfort persists or worsens, contact us immediately. Avoid touching or rubbing your eyes.',
-                },
-                {
-                  q: 'Can I combine a lash lift with other treatments?',
-                  a: 'Lash lifts pair beautifully with tinting. However, space them out if possible. Never combine with eyelash extensions.',
-                },
-              ].map((item, idx) => (
-                <Card key={idx} className="p-6 border-primary/10">
-                  <h4 className="font-semibold text-foreground mb-2">{item.q}</h4>
-                  <p className="text-muted-foreground">{item.a}</p>
-                </Card>
+            <ul className="mt-7 space-y-4">
+              {DOS.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+                  <Check className="mt-1 h-4 w-4 shrink-0 text-foreground" />
+                  {item}
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </article>
 
-          {/* Contact CTA */}
-          <Card className="p-8 border-primary/20 bg-primary/5 text-center">
-            <h3 className="font-serif text-2xl text-foreground mb-4">
-              Questions About Your Aftercare?
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              If you have any concerns or complications, please don't hesitate to contact us. We're here to ensure your lashes look and feel perfect.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="mailto:info@hauslash.co"
-                className="inline-flex items-center justify-center px-6 py-2 border border-primary text-primary rounded-full hover:bg-primary/5 transition-colors"
-              >
-                Email Hauslash
-              </a>
-              <a
-                href="https://www.instagram.com/hauslash_co/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
-              >
-                Message on Instagram
-              </a>
+          <article className="rounded-[1.75rem] border border-foreground/10 bg-[#1b1917] p-7 text-[#f5f1eb] sm:p-9">
+            <div className="flex items-center gap-3">
+              <Wind className="h-5 w-5 text-[#c9b9a7]" />
+              <h2 className="font-serif text-3xl tracking-tight">Avoid</h2>
             </div>
-          </Card>
+            <ul className="mt-7 space-y-4">
+              {DONTS.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-6 text-[#d8d1c8]">
+                  <X className="mt-1 h-4 w-4 shrink-0 text-[#c9b9a7]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[0.72fr_1.28fr]">
+        <div>
+          <p className="eyebrow">Questions after treatment</p>
+          <h2 className="mt-4 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+            Clear answers,
+            <span className="block italic">calm guidance.</span>
+          </h2>
+          <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
+            If something feels unusual, contact Hauslash directly. Aftercare should feel simple, never stressful.
+          </p>
+        </div>
+
+        <div className="grid gap-4">
+          {FAQS.map((item) => (
+            <article key={item.q} className="luxury-card p-6 sm:p-7">
+              <h3 className="font-serif text-2xl tracking-tight">{item.q}</h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.a}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-5 pb-20 sm:px-8 md:pb-28">
+        <div className="mx-auto max-w-5xl rounded-[2rem] border border-foreground/10 bg-[#d9cbbc] p-8 text-center sm:p-12">
+          <Sparkles className="mx-auto h-5 w-5 text-foreground/55" />
+          <h2 className="mx-auto mt-5 max-w-2xl font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+            Need a second look at your aftercare?
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-foreground/65">
+            Send a message with your question and Hauslash will help you protect the result.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 rounded-full px-7">
+              <Link href="/contact">
+                Contact Hauslash
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 rounded-full border-foreground/15 bg-transparent px-7">
+              <Link href="/book">Book your next lift</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </main>

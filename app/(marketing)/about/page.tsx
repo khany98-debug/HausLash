@@ -43,24 +43,25 @@ export default function AboutPage() {
         </div>
 
         <div className="relative min-h-[540px]">
-          <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden rounded-[2rem]">
+          <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden rounded-[2rem] border border-foreground/10 bg-muted shadow-[0_40px_110px_-60px_rgba(42,34,28,0.75)]">
             <Image
-              src="/images/work/Model3.jpeg"
+              src="/images/work/hauslash-editorial-mirror.jpg"
               alt="Hauslash Korean lash lift result"
               fill
               priority
               sizes="(max-width: 1024px) 82vw, 45vw"
-              className="object-cover"
+              className="object-cover object-[50%_47%]"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
           </div>
           <div className="absolute bottom-8 left-0 w-[43%] overflow-hidden rounded-[1.5rem] border-[6px] border-background shadow-xl">
             <div className="relative aspect-[3/4]">
               <Image
-                src="/images/work/Model2.jpeg"
+                src="/images/work/hauslash-blue-eye-detail.jpg"
                 alt="Natural lifted lashes"
                 fill
                 sizes="(max-width: 1024px) 43vw, 23vw"
-                className="object-cover"
+                className="object-cover object-[50%_45%]"
               />
             </div>
           </div>
@@ -93,11 +94,11 @@ export default function AboutPage() {
       <section className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-2 lg:items-center lg:gap-20">
         <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem]">
           <Image
-            src="/images/work/Model1.jpg"
+            src="/images/work/hauslash-green-eye-detail.jpg"
             alt="Finished Hauslash treatment"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
+            className="object-cover object-[45%_50%]"
           />
         </div>
         <div>

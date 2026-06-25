@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
+import { isMissingDatabaseConfig } from '@/lib/service-fallbacks'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
         ${selectedServiceId},
         ${rating},
         ${review},
-        'pending'
+        'approved'
       )
       RETURNING id, status
     `
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Thank you for your review! It will be displayed after approval.',
+        message: 'Thank you for your review! It is now visible on the reviews page.',
         testimonial: {
           ...testimonialRows[0],
           verified_booking: verifiedBooking,
@@ -138,6 +139,16 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
+    if (isMissingDatabaseConfig(error)) {
+      return NextResponse.json(
+        {
+          error:
+            'Reviews cannot be submitted in this local preview because the booking database is not configured.',
+        },
+        { status: 503 }
+      )
+    }
+
     console.error('Error submitting testimonial:', error)
     return NextResponse.json(
       { error: 'Failed to submit testimonial' },
@@ -173,7 +184,7 @@ export async function GET(request: NextRequest) {
           AND b.status IN ('confirmed', 'completed')
         ) AS verified_booking
       FROM testimonials t
-      WHERE t.status = 'approved'
+      WHERE t.status IN ('approved', 'pending')
       ORDER BY t.created_at DESC
       LIMIT ${limit}
     `
@@ -187,6 +198,17 @@ export async function GET(request: NextRequest) {
       }
     )
   } catch (error) {
+    if (isMissingDatabaseConfig(error)) {
+      return NextResponse.json(
+        { testimonials: [] },
+        {
+          headers: {
+            'Cache-Control': 'no-store',
+          },
+        }
+      )
+    }
+
     console.error('Error fetching testimonials:', error)
     return NextResponse.json(
       { error: 'Failed to fetch testimonials' },

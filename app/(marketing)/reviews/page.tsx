@@ -5,6 +5,7 @@ import { ArrowUpRight, Quote, ShieldCheck, Star } from 'lucide-react'
 import TestimonialForm from '@/components/home/testimonial-form'
 import { Button } from '@/components/ui/button'
 import { getDb } from '@/lib/db'
+import { FALLBACK_SERVICES, isMissingDatabaseConfig } from '@/lib/service-fallbacks'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ async function getReviewPageData() {
         LEFT JOIN services s
           ON s.id::text = t.service_id
           OR s.slug = t.service_id
-        WHERE t.status = 'approved'
+        WHERE t.status IN ('approved', 'pending')
         ORDER BY t.featured DESC, t.created_at DESC
         LIMIT 12
       `,
@@ -64,6 +65,13 @@ async function getReviewPageData() {
       reviews: reviews as Review[],
     }
   } catch (error) {
+    if (isMissingDatabaseConfig(error)) {
+      return {
+        services: FALLBACK_SERVICES.map(({ id, name }) => ({ id, name })),
+        reviews: [],
+      }
+    }
+
     console.error('Could not load review page data:', error)
     return {
       services: [],
@@ -88,8 +96,8 @@ export default async function ReviewsPage() {
         </p>
       </section>
 
-      {reviews.length > 0 && (
-        <section className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 md:pb-28">
+      <section className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 md:pb-28">
+        {reviews.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {reviews.map((review) => (
               <article key={review.id} className="luxury-card flex min-h-72 flex-col p-6 sm:p-7">
@@ -128,8 +136,21 @@ export default async function ReviewsPage() {
               </article>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="luxury-card mx-auto max-w-3xl p-8 text-center sm:p-12">
+            <Quote className="mx-auto h-7 w-7 text-muted-foreground/40" />
+            <h2 className="mt-6 font-serif text-3xl tracking-tight">
+              Client reviews will appear here.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">
+              Once a customer shares their experience, it will be displayed in this section so future clients can read real Hauslash stories before booking.
+            </p>
+            <Button asChild variant="outline" className="mt-7 rounded-full border-foreground/15 bg-transparent">
+              <Link href="#leave-a-review">Leave the first review</Link>
+            </Button>
+          </div>
+        )}
+      </section>
 
       <section id="leave-a-review" className="scroll-mt-24 border-y border-foreground/10 bg-card/55">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
@@ -140,7 +161,7 @@ export default async function ReviewsPage() {
               <span className="block italic">feel confident booking.</span>
             </h2>
             <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
-              Tell us about your treatment, your result, or how the experience made you feel. Every submission is reviewed before it appears publicly.
+              Tell us about your treatment, your result, or how the experience made you feel. Reviews appear publicly after submission so future clients can read real experiences.
             </p>
             <div className="mt-8 space-y-4 border-t border-foreground/10 pt-7 text-sm text-muted-foreground">
               <p className="flex gap-3">
