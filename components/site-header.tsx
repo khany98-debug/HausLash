@@ -28,7 +28,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 xl:px-8">
-        <div className="relative flex h-[68px] items-center justify-between xl:hidden">
+        <div className="relative flex h-[68px] items-center justify-between min-[1400px]:hidden">
           <button
             onClick={() => setOpen(!open)}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/15 text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/[0.04]"
@@ -54,14 +54,14 @@ export function SiteHeader() {
           </Button>
         </div>
 
-        <div className="hidden h-[82px] grid-cols-[1fr_auto_1fr] items-center gap-8 xl:grid">
-          <nav className="flex items-center gap-6 justify-self-start" aria-label="Primary navigation">
+        <div className="hidden h-[82px] grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)] items-center gap-3 min-[1400px]:grid">
+          <nav className="flex min-w-0 items-center gap-5 justify-self-start" aria-label="Primary navigation">
             {LEFT_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
+                  'whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
                   pathname === item.href && 'text-foreground',
                 )}
               >
@@ -70,17 +70,17 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <Link href="/" aria-label="Hauslash home" className="flex items-center px-3 py-2">
+          <Link href="/" aria-label="Hauslash home" className="flex items-center justify-self-center px-3 py-2">
             <BrandMark className="text-[2rem]" />
           </Link>
 
-          <nav className="flex items-center gap-6 justify-self-end" aria-label="Booking and information navigation">
+          <nav className="flex min-w-0 items-center justify-end gap-4 justify-self-end" aria-label="Booking and information navigation">
             {RIGHT_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
+                  'whitespace-nowrap text-[11px] uppercase tracking-[0.11em] text-muted-foreground transition-colors hover:text-foreground 2xl:text-[12px] 2xl:tracking-[0.12em]',
                   pathname === item.href && 'text-foreground',
                 )}
               >
@@ -90,18 +90,18 @@ export function SiteHeader() {
             <Link
               href="/bookings"
               className={cn(
-                'text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
+                'whitespace-nowrap text-[11px] uppercase tracking-[0.11em] text-muted-foreground transition-colors hover:text-foreground 2xl:text-[12px] 2xl:tracking-[0.12em]',
                 pathname === '/bookings' && 'text-foreground',
               )}
             >
               My bookings
             </Link>
-            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-5">
+            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-4 2xl:px-5">
               <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
                 Enquire Now
               </a>
             </Button>
-            <Button asChild size="sm" className="rounded-full px-5">
+            <Button asChild size="sm" className="rounded-full px-4 2xl:px-5">
               <Link href="/book">Book Now</Link>
             </Button>
           </nav>
@@ -109,7 +109,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-foreground/10 bg-background px-5 py-8 xl:hidden" aria-label="Mobile navigation">
+        <nav className="border-t border-foreground/10 bg-background px-5 py-8 min-[1400px]:hidden" aria-label="Mobile navigation">
           <div className="mx-auto flex max-w-7xl flex-col">
             {NAV_ITEMS.map((item) => (
               <Link
