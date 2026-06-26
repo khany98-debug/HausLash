@@ -140,13 +140,6 @@ export function VideoHero() {
           </Link>
         </div>
 
-        <div className="mt-8 grid w-full max-w-5xl gap-3 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground sm:grid-cols-3">
-          {['Tailored eye mapping', 'Low-maintenance lift', 'Calm studio ritual'].map((item) => (
-            <div key={item} className="rounded-full border border-foreground/10 bg-white/35 px-4 py-3 backdrop-blur-sm">
-              {item}
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   )

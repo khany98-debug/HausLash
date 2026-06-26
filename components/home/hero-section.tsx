@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+
 export function HeroSection() {
   return (
     <section id="signature" className="relative isolate scroll-mt-20 overflow-hidden">
@@ -14,7 +16,7 @@ export function HeroSection() {
           <h1 className="mt-6 max-w-xl font-serif text-5xl leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-[5.25rem]">
             Your lashes,
             <span className="block italic">
-              <span className="block sm:inline">beautifully</span>
+              <span className="block sm:inline">beautifully&nbsp;</span>
               <span className="block sm:inline">considered.</span>
             </span>
           </h1>
@@ -32,10 +34,16 @@ export function HeroSection() {
             <Button asChild variant="outline" size="lg" className="h-12 w-full justify-center rounded-full border-foreground/15 bg-transparent px-7 sm:w-auto">
               <Link href="/services">Explore treatments</Link>
             </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 w-full justify-center rounded-full border-foreground/15 bg-transparent px-7 sm:w-auto">
+              <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
+                Enquire via Instagram
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </Button>
           </div>
 
           <div className="mt-10 flex max-w-[22rem] flex-wrap gap-x-6 gap-y-3 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground sm:max-w-none">
-            {['Tailored mapping', 'Premium products', '6-8 week results'].map((item) => (
+            {['Premium products', '6-8 week results'].map((item) => (
               <span key={item} className="flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full border border-foreground/15">
                   <Check className="h-3 w-3 text-foreground" />
@@ -47,7 +55,7 @@ export function HeroSection() {
 
           <div className="mt-10 grid gap-3 border-y border-foreground/10 py-5 text-sm text-muted-foreground sm:grid-cols-3">
             {[
-              ['01', 'Consultation and lash mapping'],
+              ['01', 'Consultation and lash lift plan'],
               ['02', 'Lift, tint, and refined setting'],
               ['03', 'Aftercare plan before you leave'],
             ].map(([step, label]) => (
@@ -89,7 +97,7 @@ export function HeroSection() {
           </div>
 
           <div className="absolute bottom-[8%] left-[-0.5rem] max-w-[13rem] rounded-2xl border border-white/55 bg-background/88 p-4 shadow-xl backdrop-blur-md sm:left-[-1.5rem] sm:p-5">
-            <p className="font-serif text-3xl tracking-tight">6-8</p>
+            <p className="font-serif text-3xl tracking-tight">6-8 weeks</p>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               weeks of lifted, low-maintenance lashes
             </p>

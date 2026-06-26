@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+
 export function CtaSection() {
   return (
     <section className="px-5 py-20 sm:px-8 md:py-28">
@@ -18,19 +20,20 @@ export function CtaSection() {
           <p className="mx-auto mt-6 max-w-lg text-sm leading-7 text-foreground/65 sm:text-base">
             Choose your treatment, find a time that suits you, and secure your appointment online in minutes.
           </p>
-          <div className="mx-auto mt-8 grid max-w-2xl gap-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/55 sm:grid-cols-3">
-            {['Choose treatment', 'Pick your time', 'Secure deposit'].map((item) => (
-              <div key={item} className="rounded-full border border-foreground/10 bg-white/25 px-4 py-3">
-                {item}
-              </div>
-            ))}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 rounded-full px-7">
+              <Link href="/book">
+                Book your lash lift
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 rounded-full border-foreground/15 bg-transparent px-7">
+              <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
+                Enquire via Instagram
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </Button>
           </div>
-          <Button asChild size="lg" className="mt-8 h-12 rounded-full px-7">
-            <Link href="/book">
-              Book your lash lift
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </div>
     </section>

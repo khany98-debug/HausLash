@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
 
+const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+
 const DETAILS = [
   'A consultation shaped around your desired finish',
   'A considered technique for lift without harshness',
@@ -49,14 +51,6 @@ export function ExperienceSection() {
           <p className="mt-6 max-w-lg text-base leading-8 text-[#bdb5aa]">
             No two sets of eyes are the same. Every appointment begins with a thoughtful consultation, then every detail is tailored for a refined result that still feels unmistakably you.
           </p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {['Consult', 'Map', 'Lift'].map((item, index) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                <p className="font-serif text-2xl italic text-[#c9b9a7]">{String(index + 1).padStart(2, '0')}</p>
-                <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#91887e]">{item}</p>
-              </div>
-            ))}
-          </div>
           <div className="mt-8 space-y-4 border-y border-white/10 py-7">
             {DETAILS.map((detail) => (
               <div key={detail} className="flex items-start gap-3 text-sm leading-6 text-[#d8d1c8]">
@@ -65,10 +59,21 @@ export function ExperienceSection() {
               </div>
             ))}
           </div>
-          <Link href="/about" className="mt-8 inline-flex items-center gap-2 text-sm font-medium">
-            Discover the Hauslash story
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/about" className="inline-flex items-center gap-2 text-sm font-medium">
+              Discover the Hauslash story
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-[#f5f1eb] transition hover:bg-white/10"
+            >
+              Enquire via Instagram
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
     </section>
