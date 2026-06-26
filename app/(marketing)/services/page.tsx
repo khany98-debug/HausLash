@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Clock3, Sparkles } from 'lucide-react'
 import { getDb } from '@/lib/db'
@@ -35,46 +34,24 @@ export default async function ServicesPage() {
           <span className="block italic">made personal.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-muted-foreground">
-          Every treatment includes a consultation and a bespoke approach to your natural lashes, eye shape, and preferred finish.
+          Clear treatment options, simple booking, and a consultation-led Korean lash lift experience from start to finish.
         </p>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-8 md:pb-28">
-        <div className="mb-10 grid gap-3 sm:grid-cols-3 md:mb-14">
-          {[
-            {
-              src: '/images/work/hauslash-blue-eye-detail.jpg',
-              alt: 'Detailed blue eye lash lift result',
-              className: 'object-[50%_48%]',
-            },
-            {
-              src: '/images/work/hauslash-editorial-mirror.jpg',
-              alt: 'Hauslash branded mirror with lifted lashes',
-              className: 'object-[50%_48%]',
-            },
-            {
-              src: '/images/work/hauslash-green-eye-detail.jpg',
-              alt: 'Detailed green eye lash lift result',
-              className: 'object-[46%_50%]',
-            },
-          ].map((image, index) => (
-            <div
-              key={image.src}
-              className="group relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-muted shadow-[0_28px_80px_-50px_rgba(42,34,28,0.65)] sm:aspect-[3/4]"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className={`object-cover transition-transform duration-700 group-hover:scale-[1.025] ${image.className}`}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
-              <span className="absolute bottom-4 left-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-white">
-                Finish {String(index + 1).padStart(2, '0')}
-              </span>
-            </div>
-          ))}
+        <div className="mb-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+          <div className="rounded-2xl border border-foreground/10 bg-card/65 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">Consultation</p>
+            <p className="mt-2 leading-6">We discuss your natural lashes, preferred finish, and any sensitivity concerns.</p>
+          </div>
+          <div className="rounded-2xl border border-foreground/10 bg-card/65 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">Patch test</p>
+            <p className="mt-2 leading-6">Available before treatment for peace of mind, especially for first-time clients.</p>
+          </div>
+          <div className="rounded-2xl border border-foreground/10 bg-card/65 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground">Easy booking</p>
+            <p className="mt-2 leading-6">Choose the treatment, pick your time, and secure your appointment online.</p>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -98,7 +75,7 @@ export default async function ServicesPage() {
                   </span>
                   <span className="flex items-center gap-2">
                     <Sparkles className="h-3.5 w-3.5" />
-                    Bespoke consultation included
+                    Consultation and patch test guidance
                   </span>
                 </div>
               </div>

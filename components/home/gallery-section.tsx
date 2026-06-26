@@ -4,10 +4,10 @@ import { ArrowUpRight } from 'lucide-react'
 
 const IMAGES = [
   {
-    src: '/images/work/hauslash-editorial-mirror.jpg',
+    src: '/images/work/hauslash-client-mirror-lift.jpg',
     alt: 'Hauslash mirror reveal with lifted lashes',
     className: 'md:col-span-7 md:row-span-2',
-    imageClassName: 'object-[48%_48%]',
+    imageClassName: 'object-[50%_50%]',
   },
   {
     src: '/images/work/hauslash-blue-eye-detail.jpg',

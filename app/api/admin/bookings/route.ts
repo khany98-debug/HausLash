@@ -95,7 +95,7 @@ export async function PATCH(request: NextRequest) {
       await resend.emails.send({
         from: 'noreply@hauslash.co',
         to: booking.customer_email,
-        subject: 'Appointment Cancellation Confirmation',
+        subject: 'Your Hauslash appointment update',
         react: BookingCancellationEmail({
           name: booking.customer_name,
           service: booking.service_name,
@@ -167,7 +167,7 @@ export async function PATCH(request: NextRequest) {
       await resend.emails.send({
         from: 'noreply@hauslash.co',
         to: booking.customer_email,
-        subject: 'Appointment Rescheduled Confirmation',
+        subject: 'Your Hauslash appointment has been rescheduled',
         react: BookingRescheduleEmail({
           name: booking.customer_name,
           service: booking.service_name,

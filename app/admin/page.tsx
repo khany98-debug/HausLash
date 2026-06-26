@@ -58,6 +58,7 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [statusFilter, setStatusFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
   
   // Cancel modal state
   const [showCancelDialog, setShowCancelDialog] = useState(false)
@@ -134,9 +135,10 @@ export default function AdminBookingsPage() {
       setShowCancelDialog(false)
       setSelectedBookingForCancel(null)
       setCancelReason('')
+      setActionMessage('Appointment cancelled and the customer cancellation email has been sent.')
     } catch (error) {
       console.error('Error cancelling booking:', error)
-      alert('Failed to cancel booking')
+      setActionMessage('The cancellation could not be completed. Please try again.')
     } finally {
       setCancelLoading(false)
     }
@@ -183,9 +185,10 @@ export default function AdminBookingsPage() {
       setRescheduleDate('')
       setRescheduleTime('')
       setRescheduleReason('')
+      setActionMessage('Appointment rescheduled and the customer update email has been sent.')
     } catch (error) {
       console.error('Error rescheduling booking:', error)
-      alert('Failed to reschedule booking')
+      setActionMessage('The reschedule could not be completed. Please try again.')
     } finally {
       setRescheduleLoading(false)
     }
@@ -208,6 +211,12 @@ export default function AdminBookingsPage() {
           </SelectContent>
         </Select>
       </div>
+
+      {actionMessage && (
+        <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm">
+          {actionMessage}
+        </div>
+      )}
 
       {loading ? (
         <p className="py-8 text-center text-sm text-muted-foreground">Loading...</p>

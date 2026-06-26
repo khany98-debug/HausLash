@@ -7,7 +7,116 @@ import {
   Text,
   Heading,
   Hr,
+  Link,
+  Img,
 } from "@react-email/components"
+
+const SITE_URL = "https://hauslash.co.uk"
+const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
+const STUDIO_ADDRESS = "5 Leawood Road, Stoke-On-Trent, ST4 6JZ"
+
+const styles = {
+  body: {
+    backgroundColor: "#f4f0e9",
+    fontFamily: "Arial, sans-serif",
+    padding: "32px 0",
+    color: "#1d1a17",
+  },
+  container: {
+    backgroundColor: "#fffdf9",
+    border: "1px solid #e3dbcf",
+    borderRadius: "18px",
+    maxWidth: "580px",
+    overflow: "hidden",
+  },
+  inner: {
+    padding: "34px",
+  },
+  logo: {
+    margin: "0 auto 22px",
+    width: "150px",
+    height: "auto",
+  },
+  eyebrow: {
+    color: "#8d8174",
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase" as const,
+    textAlign: "center" as const,
+  },
+  heading: {
+    margin: "12px 0 0",
+    color: "#1d1a17",
+    fontFamily: "Georgia, serif",
+    fontSize: "34px",
+    fontWeight: 400,
+    lineHeight: "1.1",
+    textAlign: "center" as const,
+  },
+  copy: {
+    color: "#5f5750",
+    fontSize: "15px",
+    lineHeight: "1.7",
+  },
+  card: {
+    backgroundColor: "#f7f3ed",
+    border: "1px solid #e7ded2",
+    borderRadius: "14px",
+    padding: "20px",
+    marginTop: "22px",
+  },
+  highlightCard: {
+    backgroundColor: "#1d1a17",
+    borderRadius: "14px",
+    padding: "20px",
+    marginTop: "22px",
+  },
+  label: {
+    color: "#8d8174",
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase" as const,
+    marginBottom: "4px",
+  },
+  value: {
+    color: "#1d1a17",
+    fontSize: "16px",
+    lineHeight: "1.45",
+    marginTop: 0,
+  },
+  lightLabel: {
+    color: "#cfc2b4",
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase" as const,
+    marginBottom: "4px",
+  },
+  lightValue: {
+    color: "#fffdf9",
+    fontSize: "16px",
+    lineHeight: "1.45",
+    marginTop: 0,
+  },
+  button: {
+    display: "inline-block",
+    backgroundColor: "#1d1a17",
+    borderRadius: "999px",
+    color: "#fffdf9",
+    fontSize: "14px",
+    fontWeight: 700,
+    padding: "13px 22px",
+    textDecoration: "none",
+  },
+  footer: {
+    color: "#8d8174",
+    fontSize: "12px",
+    lineHeight: "1.6",
+    textAlign: "center" as const,
+  },
+}
 
 export default function BookingRescheduleEmail({
   name,
@@ -29,130 +138,58 @@ export default function BookingRescheduleEmail({
   return (
     <Html>
       <Head />
+      <Body style={styles.body}>
+        <Container style={styles.container}>
+          <Section style={styles.inner}>
+            <Img src={LOGO_URL} alt="Hauslash" style={styles.logo} />
+            <Text style={styles.eyebrow}>Appointment updated</Text>
+            <Heading style={styles.heading}>Your new appointment is confirmed.</Heading>
 
-      <Body
-        style={{
-          backgroundColor: "#EEEDE9",
-          fontFamily: "Georgia, serif",
-          padding: "40px 0",
-        }}
-      >
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "40px",
-            borderRadius: "12px",
-            maxWidth: "520px",
-          }}
-        >
-          <Heading>Hauslash</Heading>
-
-          <Text style={{ color: "#666" }}>
-            Appointment Rescheduled
-          </Text>
-
-          <Hr />
-
-          <Section>
-            <Text>Hello {name},</Text>
-
-            <Text>
-              We are pleased to confirm that your appointment has been successfully rescheduled.
-            </Text>
-          </Section>
-
-          <Section
-            style={{
-              backgroundColor: "#fff3cd",
-              padding: "20px",
-              borderRadius: "10px",
-              marginTop: "20px",
-              border: "1px solid #ffc107",
-            }}
-          >
-            <Text style={{ fontWeight: "bold", marginTop: 0 }}>Previous Appointment</Text>
-
-            <Text style={{ marginBottom: "8px" }}>
-              <strong>Service</strong><br />
-              {service}
+            <Text style={{ ...styles.copy, marginTop: "24px" }}>
+              Hello {name}, your Hauslash appointment has been moved to the new date and time below. Your deposit carries over automatically.
             </Text>
 
-            <Text style={{ marginBottom: "8px" }}>
-              <strong>Date</strong><br />
-              {oldDate}
-            </Text>
-
-            <Text>
-              <strong>Time</strong><br />
-              {oldTime}
-            </Text>
-          </Section>
-
-          <Section
-            style={{
-              backgroundColor: "#d4edda",
-              padding: "20px",
-              borderRadius: "10px",
-              marginTop: "20px",
-              border: "1px solid #28a745",
-            }}
-          >
-            <Text style={{ fontWeight: "bold", color: "#155724", marginTop: 0 }}>
-              ✓ New Appointment Confirmed
-            </Text>
-
-            <Text style={{ marginBottom: "8px", color: "#155724" }}>
-              <strong>Service</strong><br />
-              {service}
-            </Text>
-
-            <Text style={{ marginBottom: "8px", color: "#155724" }}>
-              <strong>Date</strong><br />
-              {newDate}
-            </Text>
-
-            <Text style={{ color: "#155724" }}>
-              <strong>Time</strong><br />
-              {newTime}
-            </Text>
-          </Section>
-
-          {reason && (
-            <Section style={{ marginTop: "20px" }}>
-              <Text>
-                <strong>Reason for Reschedule:</strong><br />
-                {reason}
+            <Section style={styles.highlightCard}>
+              <Text style={styles.lightLabel}>New appointment</Text>
+              <Text style={styles.lightValue}>{service}</Text>
+              <Text style={styles.lightValue}>
+                {newDate} at {newTime}
               </Text>
+              <Text style={styles.lightValue}>{STUDIO_ADDRESS}</Text>
             </Section>
-          )}
 
-          <Section style={{ marginTop: "30px", backgroundColor: "#f0f8ff", padding: "20px", borderRadius: "10px" }}>
-            <Text style={{ marginTop: 0 }}>
-              <strong>Important Reminders</strong>
+            <Section style={styles.card}>
+              <Text style={styles.label}>Previous appointment</Text>
+              <Text style={styles.value}>
+                {oldDate} at {oldTime}
+              </Text>
+              {reason && (
+                <>
+                  <Text style={styles.label}>Note from Hauslash</Text>
+                  <Text style={styles.value}>{reason}</Text>
+                </>
+              )}
+            </Section>
+
+            <Text style={styles.copy}>
+              Please arrive with clean, makeup-free lashes. If you would like a patch test before the appointment, send us a message and we will arrange this with you.
             </Text>
 
-            <Text style={{ fontSize: "14px", marginBottom: "10px" }}>
-              • Please arrive 5-10 minutes early
-            </Text>
+            <Section style={{ textAlign: "center", marginTop: "26px" }}>
+              <Link href={`${SITE_URL}/bookings`} style={styles.button}>
+                View my booking
+              </Link>
+            </Section>
 
-            <Text style={{ fontSize: "14px", marginBottom: "10px" }}>
-              • If you need to reschedule again, please contact us as soon as possible
-            </Text>
+            <Hr style={{ borderColor: "#e7ded2", margin: "30px 0" }} />
 
-            <Text style={{ fontSize: "14px" }}>
-              • Your deposit will carry over to your new appointment
-            </Text>
-          </Section>
-
-          <Section style={{ marginTop: "30px", textAlign: "center" }}>
-            <Text style={{ fontSize: "12px", color: "#999" }}>
-              If you have any questions or need further assistance, please feel free to contact us.
-            </Text>
-
-            <Hr style={{ marginTop: "20px", marginBottom: "20px" }} />
-
-            <Text style={{ fontSize: "12px", color: "#999" }}>
-              © Hauslash. All rights reserved.
+            <Text style={styles.footer}>
+              Hauslash, {STUDIO_ADDRESS}
+              <br />
+              Need to ask something before your appointment? Visit{" "}
+              <Link href={`${SITE_URL}/contact`} style={{ color: "#1d1a17" }}>
+                hauslash.co.uk/contact
+              </Link>
             </Text>
           </Section>
         </Container>

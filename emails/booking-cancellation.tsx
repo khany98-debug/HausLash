@@ -8,7 +8,95 @@ import {
   Heading,
   Hr,
   Link,
+  Img,
 } from "@react-email/components"
+
+const SITE_URL = "https://hauslash.co.uk"
+const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
+const STUDIO_ADDRESS = "5 Leawood Road, Stoke-On-Trent, ST4 6JZ"
+
+const styles = {
+  body: {
+    backgroundColor: "#f4f0e9",
+    fontFamily: "Arial, sans-serif",
+    padding: "32px 0",
+    color: "#1d1a17",
+  },
+  container: {
+    backgroundColor: "#fffdf9",
+    border: "1px solid #e3dbcf",
+    borderRadius: "18px",
+    maxWidth: "580px",
+    overflow: "hidden",
+  },
+  inner: {
+    padding: "34px",
+  },
+  logo: {
+    margin: "0 auto 22px",
+    width: "150px",
+    height: "auto",
+  },
+  eyebrow: {
+    color: "#8d8174",
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase" as const,
+    textAlign: "center" as const,
+  },
+  heading: {
+    margin: "12px 0 0",
+    color: "#1d1a17",
+    fontFamily: "Georgia, serif",
+    fontSize: "34px",
+    fontWeight: 400,
+    lineHeight: "1.1",
+    textAlign: "center" as const,
+  },
+  copy: {
+    color: "#5f5750",
+    fontSize: "15px",
+    lineHeight: "1.7",
+  },
+  card: {
+    backgroundColor: "#f7f3ed",
+    border: "1px solid #e7ded2",
+    borderRadius: "14px",
+    padding: "20px",
+    marginTop: "22px",
+  },
+  label: {
+    color: "#8d8174",
+    fontSize: "11px",
+    fontWeight: 700,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase" as const,
+    marginBottom: "4px",
+  },
+  value: {
+    color: "#1d1a17",
+    fontSize: "16px",
+    lineHeight: "1.45",
+    marginTop: 0,
+  },
+  button: {
+    display: "inline-block",
+    backgroundColor: "#1d1a17",
+    borderRadius: "999px",
+    color: "#fffdf9",
+    fontSize: "14px",
+    fontWeight: 700,
+    padding: "13px 22px",
+    textDecoration: "none",
+  },
+  footer: {
+    color: "#8d8174",
+    fontSize: "12px",
+    lineHeight: "1.6",
+    textAlign: "center" as const,
+  },
+}
 
 export default function BookingCancellationEmail({
   name,
@@ -28,98 +116,59 @@ export default function BookingCancellationEmail({
   return (
     <Html>
       <Head />
+      <Body style={styles.body}>
+        <Container style={styles.container}>
+          <Section style={styles.inner}>
+            <Img src={LOGO_URL} alt="Hauslash" style={styles.logo} />
+            <Text style={styles.eyebrow}>Appointment cancelled</Text>
+            <Heading style={styles.heading}>Your appointment has been cancelled.</Heading>
 
-      <Body
-        style={{
-          backgroundColor: "#EEEDE9",
-          fontFamily: "Georgia, serif",
-          padding: "40px 0",
-        }}
-      >
-        <Container
-          style={{
-            backgroundColor: "#ffffff",
-            padding: "40px",
-            borderRadius: "12px",
-            maxWidth: "520px",
-          }}
-        >
-          <Heading>Hauslash</Heading>
-
-          <Text style={{ color: "#666" }}>
-            Appointment Cancellation
-          </Text>
-
-          <Hr />
-
-          <Section>
-            <Text>Hello {name},</Text>
-
-            <Text>
-              We are writing to confirm that your appointment has been successfully cancelled.
-            </Text>
-          </Section>
-
-          <Section
-            style={{
-              backgroundColor: "#f7f7f7",
-              padding: "20px",
-              borderRadius: "10px",
-              marginTop: "20px",
-            }}
-          >
-            <Text>
-              <strong>Service</strong><br />
-              {service}
+            <Text style={{ ...styles.copy, marginTop: "24px" }}>
+              Hello {name}, this confirms that your Hauslash appointment has been cancelled. We know plans can change, and we would be happy to welcome you another time.
             </Text>
 
-            <Text>
-              <strong>Date</strong><br />
-              {date}
-            </Text>
-
-            <Text>
-              <strong>Time</strong><br />
-              {time}
-            </Text>
-          </Section>
-
-          <Section style={{ marginTop: "20px" }}>
-            <Text style={{ color: "#27ae60", fontWeight: "bold" }}>
-              Refund Amount: {refundAmount}
-            </Text>
-
-            <Text style={{ fontSize: "14px", color: "#666" }}>
-              The refund will be processed to your original payment method within 3-5 business days.
-            </Text>
-
-            {reason && (
-              <Text>
-                <strong>Cancellation Reason:</strong><br />
-                {reason}
+            <Section style={styles.card}>
+              <Text style={styles.label}>Cancelled appointment</Text>
+              <Text style={styles.value}>{service}</Text>
+              <Text style={styles.value}>
+                {date} at {time}
               </Text>
-            )}
-          </Section>
+              <Text style={styles.value}>{STUDIO_ADDRESS}</Text>
+            </Section>
 
-          <Section style={{ marginTop: "30px", backgroundColor: "#f0f8ff", padding: "20px", borderRadius: "10px" }}>
-            <Text>
-              <strong>Would you like to reschedule?</strong>
+            <Section style={styles.card}>
+              <Text style={styles.label}>Refund information</Text>
+              <Text style={styles.value}>Refund amount: {refundAmount}</Text>
+              <Text style={styles.copy}>
+                If a refund is due, it will be processed to the original payment method. Depending on your bank, it can take 3-5 working days to appear.
+              </Text>
+              {reason && (
+                <>
+                  <Text style={styles.label}>Note from Hauslash</Text>
+                  <Text style={styles.value}>{reason}</Text>
+                </>
+              )}
+            </Section>
+
+            <Text style={styles.copy}>
+              Ready to choose a new time? You can rebook online or send us a message if you would like help finding the right appointment.
             </Text>
 
-            <Text style={{ fontSize: "14px" }}>
-              If you'd like to book another appointment, please visit our booking page or contact us directly.
-            </Text>
-          </Section>
+            <Section style={{ textAlign: "center", marginTop: "26px" }}>
+              <Link href={`${SITE_URL}/book`} style={styles.button}>
+                Book a new appointment
+              </Link>
+            </Section>
 
-          <Section style={{ marginTop: "30px", textAlign: "center" }}>
-            <Text style={{ fontSize: "12px", color: "#999" }}>
-              If you have any questions, please don't hesitate to contact us.
-            </Text>
+            <Hr style={{ borderColor: "#e7ded2", margin: "30px 0" }} />
 
-            <Hr style={{ marginTop: "20px", marginBottom: "20px" }} />
-
-            <Text style={{ fontSize: "12px", color: "#999" }}>
-              © Hauslash. All rights reserved.
+            <Text style={styles.footer}>
+              Hauslash, {STUDIO_ADDRESS}
+              <br />
+              Questions? Reply to this email or visit{" "}
+              <Link href={`${SITE_URL}/contact`} style={{ color: "#1d1a17" }}>
+                hauslash.co.uk/contact
+              </Link>
             </Text>
           </Section>
         </Container>

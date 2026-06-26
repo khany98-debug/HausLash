@@ -11,11 +11,11 @@ const FAQS = [
   },
   {
     q: 'How long does a treatment take?',
-    a: 'Most individual treatments take 30-75 minutes depending on the service. Our Korean Lash Lift treatment take approximately maximum 90 minutes.',
+    a: 'Most Korean lash lift appointments take around 75-90 minutes, including consultation time and aftercare guidance.',
   },
   {
     q: 'Do I need a patch test?',
-    a: 'If you require a patch test, please let us know when booking. We will arrange it for you before the appointment',
+    a: 'If you require a patch test, please let us know when booking. We will arrange it before your appointment.',
   },
   {
     q: 'How long do results last?',

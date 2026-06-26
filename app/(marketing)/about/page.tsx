@@ -7,7 +7,7 @@ const VALUES = [
   {
     icon: Eye,
     title: 'Every eye is different',
-    copy: 'Your lift is mapped around your natural lashes, eye shape, and the finish you want.',
+    copy: 'Your lift begins with a consultation and patch test conversation so the treatment feels considered from the start.',
   },
   {
     icon: Sparkles,
@@ -45,12 +45,12 @@ export default function AboutPage() {
         <div className="relative min-h-[540px]">
           <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden rounded-[2rem] border border-foreground/10 bg-muted shadow-[0_40px_110px_-60px_rgba(42,34,28,0.75)]">
             <Image
-              src="/images/work/hauslash-editorial-mirror.jpg"
+              src="/images/work/hauslash-client-mirror-lift.jpg"
               alt="Hauslash Korean lash lift result"
               fill
               priority
               sizes="(max-width: 1024px) 82vw, 45vw"
-              className="object-cover object-[50%_47%]"
+              className="object-cover object-[50%_50%]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
           </div>

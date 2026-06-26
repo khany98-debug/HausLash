@@ -10,14 +10,14 @@ export function HeroSection() {
     <section id="signature" className="relative isolate scroll-mt-20 overflow-hidden">
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(244,240,233,1)_0%,rgba(250,247,242,0.72)_42%,rgba(244,240,233,1)_100%)]" />
       <div aria-hidden="true" className="absolute left-[-12rem] top-24 -z-10 h-96 w-96 rounded-full bg-[#d9cbbc]/30 blur-3xl" />
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:py-24">
-        <div className="relative z-10 order-2 max-w-full lg:order-1">
+      <div className="mx-auto grid min-w-0 max-w-7xl items-center gap-12 px-4 py-14 sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:gap-20 lg:py-24">
+        <div className="relative z-10 order-2 min-w-0 max-w-full lg:order-1">
           <p className="eyebrow max-w-[20rem] leading-5 sm:max-w-none">Signature Korean lash lift · Stoke-on-Trent</p>
-          <h1 className="mt-6 max-w-xl font-serif text-5xl leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-[5.25rem]">
+          <h1 className="mt-6 max-w-xl font-serif text-4xl leading-[0.98] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-[4.65rem]">
             Your lashes,
             <span className="block italic">
-              <span className="block sm:inline">beautifully&nbsp;</span>
-              <span className="block sm:inline">considered.</span>
+              <span className="block">beautifully</span>
+              <span className="block">considered.</span>
             </span>
           </h1>
           <p className="mt-7 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
@@ -42,8 +42,8 @@ export function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-10 flex max-w-[22rem] flex-wrap gap-x-6 gap-y-3 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground sm:max-w-none">
-            {['Premium products', '6-8 week results'].map((item) => (
+          <div className="mt-10 flex max-w-[22rem] flex-wrap gap-x-5 gap-y-3 text-[0.68rem] font-medium uppercase tracking-[0.1em] text-muted-foreground sm:max-w-none sm:gap-x-6 sm:text-xs sm:tracking-[0.12em]">
+            {['Consultation and patch test', 'Premium products', '6-8 week results'].map((item) => (
               <span key={item} className="flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full border border-foreground/15">
                   <Check className="h-3 w-3 text-foreground" />
@@ -55,7 +55,7 @@ export function HeroSection() {
 
           <div className="mt-10 grid gap-3 border-y border-foreground/10 py-5 text-sm text-muted-foreground sm:grid-cols-3">
             {[
-              ['01', 'Consultation and lash lift plan'],
+              ['01', 'Consultation and patch test'],
               ['02', 'Lift, tint, and refined setting'],
               ['03', 'Aftercare plan before you leave'],
             ].map(([step, label]) => (
@@ -70,12 +70,12 @@ export function HeroSection() {
         <div className="relative order-1 min-h-[460px] w-full max-w-full lg:order-2 lg:min-h-[650px]">
           <div className="absolute inset-x-0 top-0 h-[88%] overflow-hidden rounded-[2rem] bg-[#d8cec0] shadow-[0_46px_110px_-55px_rgba(37,30,24,0.7)]">
             <Image
-              src="/images/work/hauslash-editorial-mirror.jpg"
+              src="/images/work/hauslash-client-mirror-lift.jpg"
               alt="Bespoke Hauslash lash lift result"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover object-[50%_46%]"
+              className="object-cover object-[50%_50%]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/5" />
             <div className="absolute inset-0 ring-1 ring-inset ring-white/20" />
@@ -99,7 +99,7 @@ export function HeroSection() {
           <div className="absolute bottom-[8%] left-[-0.5rem] max-w-[13rem] rounded-2xl border border-white/55 bg-background/88 p-4 shadow-xl backdrop-blur-md sm:left-[-1.5rem] sm:p-5">
             <p className="font-serif text-3xl tracking-tight">6-8 weeks</p>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              weeks of lifted, low-maintenance lashes
+              lifted, low-maintenance lashes
             </p>
           </div>
 

@@ -1,9 +1,9 @@
 import { Clock3, Eye, ShieldCheck, Sparkles } from 'lucide-react'
 
 const ITEMS = [
-  { icon: Eye, value: '01', label: 'Mapped to your eye shape', detail: 'A consultation-led lift plan before treatment begins.' },
+  { icon: Eye, value: '01', label: 'Consultation and patch test', detail: 'A calm check-in before treatment so your lift feels right for you.' },
   { icon: Sparkles, value: '02', label: 'Korean lift technique', detail: 'A modern finish for open, glossy, natural-looking lashes.' },
-  { icon: Clock3, value: '03', label: '6-8 week result', detail: 'Designed for low-maintenance definition between visits.' },
+  { icon: Clock3, value: '03', label: '6-8 week results', detail: 'Designed for low-maintenance definition between visits.' },
   { icon: ShieldCheck, value: '04', label: 'Aftercare led', detail: 'Clear guidance to protect the lift and your natural lashes.' },
 ]
 

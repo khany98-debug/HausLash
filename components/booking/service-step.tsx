@@ -14,7 +14,7 @@ export function ServiceStep({
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <h2 className="text-lg md:text-xl font-medium text-foreground mb-2 md:mb-3">Choose your treatment</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5">
         {services.map((service) => {
           const isSelected = service.id === selectedId
           return (
@@ -22,7 +22,7 @@ export function ServiceStep({
               key={service.id}
               onClick={() => onSelect(service.id)}
               className={cn(
-                'flex flex-col gap-2 rounded-xl border p-5 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'flex min-w-0 flex-col gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-5',
                 isSelected
                   ? 'border-primary bg-primary/5 shadow-sm'
                   : 'border-border/60 bg-card hover:border-primary/40 hover:shadow-sm'
@@ -30,9 +30,9 @@ export function ServiceStep({
               aria-pressed={isSelected}
               tabIndex={0}
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-medium text-foreground">{service.name}</h3>
-                <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <h3 className="min-w-0 text-base font-medium leading-snug text-foreground">{service.name}</h3>
+                <div className="flex shrink-0 items-center gap-2">
                   {service.price_pence && (
                     <span className="text-sm font-medium text-foreground">
                       {formatPence(service.price_pence)}
@@ -50,10 +50,10 @@ export function ServiceStep({
                   {service.description}
                 </p>
               )}
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatDuration(service.duration_minutes)}
-                <span className="ml-2">Deposit: {formatPence(service.deposit_pence)}</span>
+                <span>Deposit: {formatPence(service.deposit_pence)}</span>
               </div>
             </button>
           )
