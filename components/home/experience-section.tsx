@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
 
-const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 const DETAILS = [
   'Soft curl from the root for a more open-looking eye',
@@ -65,12 +65,12 @@ export function ExperienceSection() {
               <ArrowUpRight className="h-4 w-4" />
             </Link>
             <a
-              href={INSTAGRAM_URL}
+              href={INSTAGRAM_DM_URL}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-[#f5f1eb] transition hover:bg-white/10"
             >
-              Enquire via Instagram
+              Enquire Now
               <ArrowUpRight className="h-4 w-4" />
             </a>
           </div>

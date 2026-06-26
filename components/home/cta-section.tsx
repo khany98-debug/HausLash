@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 export function CtaSection() {
   return (
@@ -28,8 +28,8 @@ export function CtaSection() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 rounded-full border-foreground/15 bg-transparent px-7">
-              <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
-                Enquire via Instagram
+              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
+                Enquire Now
                 <ArrowUpRight className="h-4 w-4" />
               </a>
             </Button>

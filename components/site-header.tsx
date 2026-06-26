@@ -47,11 +47,19 @@ export function SiteHeader() {
             <BrandMark className="text-[1.7rem]" />
           </Link>
 
-          <Button asChild size="sm" className="h-10 rounded-full px-4 text-xs">
-            <Link href="/book" onClick={() => setOpen(false)}>
-              Book
-            </Link>
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button asChild variant="outline" size="sm" className="h-10 rounded-full border-foreground/15 bg-transparent px-3 text-xs">
+              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+                <span className="min-[430px]:hidden">DM</span>
+                <span className="hidden min-[430px]:inline">Enquire</span>
+              </a>
+            </Button>
+            <Button asChild size="sm" className="h-10 rounded-full px-4 text-xs">
+              <Link href="/book" onClick={() => setOpen(false)}>
+                Book
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="hidden h-[82px] grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)] items-center gap-3 min-[1400px]:grid">

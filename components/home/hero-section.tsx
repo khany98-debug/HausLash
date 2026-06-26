@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
+const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 export function HeroSection() {
   return (
@@ -24,7 +24,7 @@ export function HeroSection() {
             Bespoke lash lifts that open the eye, honour your natural features, and make every morning feel effortless.
           </p>
 
-          <div className="mt-8 flex w-full max-w-[22rem] flex-col gap-3 sm:max-w-none sm:flex-row">
+          <div className="mt-8 grid w-full max-w-[25rem] grid-cols-1 gap-3 sm:grid-cols-2">
             <Button asChild size="lg" className="h-12 w-full justify-center rounded-full px-7 sm:w-auto">
               <Link href="/book">
                 Reserve your appointment
@@ -32,19 +32,22 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 w-full justify-center rounded-full border-foreground/15 bg-transparent px-7 sm:w-auto">
-              <Link href="/services">Explore treatments</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 w-full justify-center rounded-full border-foreground/15 bg-transparent px-7 sm:w-auto">
-              <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer">
-                Enquire via Instagram
+              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
+                Enquire Now
                 <ArrowUpRight className="h-4 w-4" />
               </a>
             </Button>
           </div>
 
-          <p className="mt-9 max-w-md border-l border-foreground/15 pl-5 text-sm leading-7 text-muted-foreground">
-            A soft, polished lift with a glossy tint, designed for natural lashes and low-maintenance mornings.
-          </p>
+          <div className="mt-8 max-w-md border-l border-foreground/15 pl-5">
+            <p className="text-sm leading-7 text-muted-foreground">
+              A soft, polished lift with a glossy tint, designed for natural lashes and low-maintenance mornings.
+            </p>
+            <Link href="/services" className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-foreground">
+              Explore treatments
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="relative order-1 mx-auto min-h-[440px] w-full max-w-[38rem] lg:order-2 lg:min-h-[650px] lg:max-w-none">
