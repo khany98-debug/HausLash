@@ -18,7 +18,6 @@ const NAV_ITEMS = [
 ]
 
 const LEFT_NAV_ITEMS = NAV_ITEMS.slice(0, 3)
-const RIGHT_NAV_ITEMS = NAV_ITEMS.slice(3)
 const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 export function SiteHeader() {
@@ -62,8 +61,8 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="hidden h-[82px] grid-cols-[minmax(0,1fr)_180px_minmax(0,1fr)] items-center gap-3 min-[1400px]:grid">
-          <nav className="flex min-w-0 items-center gap-5 justify-self-start" aria-label="Primary navigation">
+        <div className="hidden h-[82px] grid-cols-[minmax(0,1fr)_220px_minmax(0,1fr)] items-center gap-8 min-[1400px]:grid">
+          <nav className="flex min-w-0 items-center gap-6 justify-self-start" aria-label="Primary navigation">
             {LEFT_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
@@ -82,34 +81,22 @@ export function SiteHeader() {
             <BrandMark className="text-[2rem]" />
           </Link>
 
-          <nav className="flex min-w-0 items-center justify-end gap-4 justify-self-end" aria-label="Booking and information navigation">
-            {RIGHT_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'whitespace-nowrap text-[11px] uppercase tracking-[0.11em] text-muted-foreground transition-colors hover:text-foreground 2xl:text-[12px] 2xl:tracking-[0.12em]',
-                  pathname === item.href && 'text-foreground',
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="flex min-w-0 items-center justify-end gap-5 justify-self-end" aria-label="Booking and information navigation">
             <Link
               href="/bookings"
               className={cn(
-                'whitespace-nowrap text-[11px] uppercase tracking-[0.11em] text-muted-foreground transition-colors hover:text-foreground 2xl:text-[12px] 2xl:tracking-[0.12em]',
+                'whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
                 pathname === '/bookings' && 'text-foreground',
               )}
             >
               My bookings
             </Link>
-            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-4 2xl:px-5">
+            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-5">
               <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
                 Enquire Now
               </a>
             </Button>
-            <Button asChild size="sm" className="rounded-full px-4 2xl:px-5">
+            <Button asChild size="sm" className="rounded-full px-5">
               <Link href="/book">Book Now</Link>
             </Button>
           </nav>
