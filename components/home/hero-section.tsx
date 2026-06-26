@@ -10,8 +10,8 @@ export function HeroSection() {
     <section id="signature" className="relative isolate scroll-mt-20 overflow-hidden">
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(244,240,233,1)_0%,rgba(250,247,242,0.72)_42%,rgba(244,240,233,1)_100%)]" />
       <div aria-hidden="true" className="absolute left-[-12rem] top-24 -z-10 h-96 w-96 rounded-full bg-[#d9cbbc]/30 blur-3xl" />
-      <div className="mx-auto grid min-w-0 max-w-7xl items-center gap-12 px-4 py-14 sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:gap-20 lg:py-24">
-        <div className="relative z-10 order-2 min-w-0 max-w-full lg:order-1">
+      <div className="mx-auto grid min-w-0 max-w-7xl items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:gap-20 lg:py-24">
+        <div className="relative z-10 order-2 mx-auto w-full max-w-[38rem] min-w-0 lg:order-1 lg:max-w-none">
           <p className="eyebrow max-w-[20rem] leading-5 sm:max-w-none">Signature Korean lash lift · Stoke-on-Trent</p>
           <h1 className="mt-6 max-w-xl font-serif text-4xl leading-[0.98] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-[4.65rem]">
             Your lashes,
@@ -47,7 +47,7 @@ export function HeroSection() {
           </p>
         </div>
 
-        <div className="relative order-1 min-h-[460px] w-full max-w-full lg:order-2 lg:min-h-[650px]">
+        <div className="relative order-1 mx-auto min-h-[440px] w-full max-w-[38rem] lg:order-2 lg:min-h-[650px] lg:max-w-none">
           <div className="absolute inset-x-0 top-0 h-[88%] overflow-hidden rounded-[2rem] bg-[#d8cec0] shadow-[0_46px_110px_-55px_rgba(37,30,24,0.7)]">
             <Image
               src="/images/work/hauslash-client-mirror-lift.jpg"
@@ -64,7 +64,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="absolute bottom-0 right-10 w-[34%] overflow-hidden rounded-[1.5rem] border-[6px] border-background bg-muted shadow-[0_30px_80px_-42px_rgba(31,25,20,0.85)] sm:right-7 sm:w-[43%]">
+          <div className="absolute bottom-0 right-4 w-[34%] max-w-[9rem] overflow-hidden rounded-[1.5rem] border-[5px] border-background bg-muted shadow-[0_30px_80px_-42px_rgba(31,25,20,0.85)] sm:right-7 sm:w-[43%] sm:max-w-none sm:border-[6px]">
             <div className="relative aspect-[3/4]">
               <Image
                 src="/images/work/hauslash-amber-eye-closeup.jpg"
@@ -76,7 +76,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="absolute bottom-[8%] left-[-0.5rem] max-w-[13rem] rounded-2xl border border-white/55 bg-background/88 p-4 shadow-xl backdrop-blur-md sm:left-[-1.5rem] sm:p-5">
+          <div className="absolute bottom-[8%] left-0 max-w-[12.5rem] rounded-2xl border border-white/55 bg-background/88 p-4 shadow-xl backdrop-blur-md sm:left-[-1.5rem] sm:max-w-[13rem] sm:p-5">
             <p className="font-serif text-3xl tracking-tight">6-8 weeks</p>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               lifted, low-maintenance lashes
