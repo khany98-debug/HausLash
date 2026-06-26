@@ -42,8 +42,8 @@ const IMAGES = [
   {
     src: '/images/work/hauslash-mirror-brown-lift.jpg',
     alt: 'Mirror view of glossy lifted lashes',
-    className: 'md:col-span-12',
-    imageClassName: 'object-[50%_44%]',
+    className: 'min-h-[430px] md:col-span-4 md:col-start-5 md:row-span-2',
+    imageClassName: 'object-[50%_50%]',
   },
 ]
 
