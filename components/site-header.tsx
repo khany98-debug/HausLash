@@ -19,6 +19,7 @@ const NAV_ITEMS = [
 
 const LEFT_NAV_ITEMS = NAV_ITEMS.slice(0, 3)
 const RIGHT_NAV_ITEMS = NAV_ITEMS.slice(3)
+const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
@@ -95,6 +96,11 @@ export function SiteHeader() {
             >
               My bookings
             </Link>
+            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-5">
+              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
+                Enquire Now
+              </a>
+            </Button>
             <Button asChild size="sm" className="rounded-full px-5">
               <Link href="/book">Book Now</Link>
             </Button>
@@ -128,6 +134,11 @@ export function SiteHeader() {
               <Link href="/book" onClick={() => setOpen(false)}>
                 Book an appointment
               </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="mt-3 rounded-full border-foreground/15 bg-transparent">
+              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+                Enquire Now on Instagram
+              </a>
             </Button>
           </div>
         </nav>
