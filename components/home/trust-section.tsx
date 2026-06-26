@@ -1,10 +1,10 @@
-import { Clock3, Eye, ShieldCheck, Sparkles } from 'lucide-react'
+import { CalendarCheck, Clock3, CreditCard, MapPin } from 'lucide-react'
 
 const ITEMS = [
-  { icon: Eye, value: '01', label: 'Consultation and patch test', detail: 'A calm check-in before treatment so your lift feels right for you.' },
-  { icon: Sparkles, value: '02', label: 'Korean lift technique', detail: 'A modern finish for open, glossy, natural-looking lashes.' },
-  { icon: Clock3, value: '03', label: '6-8 week results', detail: 'Designed for low-maintenance definition between visits.' },
-  { icon: ShieldCheck, value: '04', label: 'Aftercare led', detail: 'Clear guidance to protect the lift and your natural lashes.' },
+  { icon: CalendarCheck, value: '01', label: 'Patch test', detail: 'Available before treatment, especially for first-time clients or sensitive eyes.' },
+  { icon: Clock3, value: '02', label: '75-90 minutes', detail: 'Most appointments include lifting, tinting, setting time, and a calm finish.' },
+  { icon: CreditCard, value: '03', label: '£15 deposit', detail: 'Your booking is secured online and the deposit comes off your final balance.' },
+  { icon: MapPin, value: '04', label: 'Studio or mobile', detail: 'Visit the Stoke-on-Trent studio or choose selected mobile outcall appointments.' },
 ]
 
 export function TrustSection() {

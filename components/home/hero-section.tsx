@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowUpRight, Check } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
@@ -42,29 +42,9 @@ export function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-10 flex max-w-[22rem] flex-wrap gap-x-5 gap-y-3 text-[0.68rem] font-medium uppercase tracking-[0.1em] text-muted-foreground sm:max-w-none sm:gap-x-6 sm:text-xs sm:tracking-[0.12em]">
-            {['Consultation and patch test', 'Premium products', '6-8 week results'].map((item) => (
-              <span key={item} className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-foreground/15">
-                  <Check className="h-3 w-3 text-foreground" />
-                </span>
-                {item}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-10 grid gap-3 border-y border-foreground/10 py-5 text-sm text-muted-foreground sm:grid-cols-3">
-            {[
-              ['01', 'Consultation and patch test'],
-              ['02', 'Lift, tint, and refined setting'],
-              ['03', 'Aftercare plan before you leave'],
-            ].map(([step, label]) => (
-              <div key={step} className="flex gap-3">
-                <span className="font-serif text-xl italic text-foreground/45">{step}</span>
-                <span className="leading-6">{label}</span>
-              </div>
-            ))}
-          </div>
+          <p className="mt-9 max-w-md border-l border-foreground/15 pl-5 text-sm leading-7 text-muted-foreground">
+            A soft, polished lift with a glossy tint, designed for natural lashes and low-maintenance mornings.
+          </p>
         </div>
 
         <div className="relative order-1 min-h-[460px] w-full max-w-full lg:order-2 lg:min-h-[650px]">

@@ -5,9 +5,9 @@ import { ArrowUpRight, Check } from 'lucide-react'
 const INSTAGRAM_URL = 'https://www.instagram.com/hauslash_co/'
 
 const DETAILS = [
-  'A consultation shaped around your desired finish',
-  'A considered technique for lift without harshness',
-  'Clear aftercare guidance for beautiful longevity',
+  'Soft curl from the root for a more open-looking eye',
+  'Tinted lashes for a darker, glossier finish without extensions',
+  'A calm appointment pace with time for setting and finishing',
 ]
 
 export function ExperienceSection() {
@@ -49,7 +49,7 @@ export function ExperienceSection() {
             <span className="block italic text-[#c9b9a7]">Care you can feel.</span>
           </h2>
           <p className="mt-6 max-w-lg text-base leading-8 text-[#bdb5aa]">
-            No two sets of eyes are the same. Every appointment begins with a thoughtful consultation, then every detail is tailored for a refined result that still feels unmistakably you.
+            Korean lash lifts are about refinement, not heaviness. The finish is clean, lifted, and easy to live with, so your lashes still feel like yours.
           </p>
           <div className="mt-8 space-y-4 border-y border-white/10 py-7">
             {DETAILS.map((detail) => (
