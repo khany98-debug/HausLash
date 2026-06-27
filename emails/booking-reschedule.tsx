@@ -110,6 +110,18 @@ const styles = {
     padding: "13px 22px",
     textDecoration: "none",
   },
+  secondaryButton: {
+    display: "inline-block",
+    backgroundColor: "#fffdf9",
+    border: "1px solid #d8cec2",
+    borderRadius: "999px",
+    color: "#1d1a17",
+    fontSize: "14px",
+    fontWeight: 700,
+    padding: "12px 22px",
+    textDecoration: "none",
+    marginLeft: "8px",
+  },
   footer: {
     color: "#8d8174",
     fontSize: "12px",
@@ -126,6 +138,7 @@ export default function BookingRescheduleEmail({
   newDate,
   newTime,
   reason,
+  calendarUrl,
 }: {
   name: string
   service: string
@@ -134,6 +147,7 @@ export default function BookingRescheduleEmail({
   newDate: string
   newTime: string
   reason?: string | null
+  calendarUrl?: string
 }) {
   return (
     <Html>
@@ -179,7 +193,17 @@ export default function BookingRescheduleEmail({
               <Link href={`${SITE_URL}/bookings`} style={styles.button}>
                 View my booking
               </Link>
+              {calendarUrl && (
+                <Link href={calendarUrl} style={styles.secondaryButton}>
+                  Add updated time
+                </Link>
+              )}
             </Section>
+
+            <Text style={{ ...styles.copy, fontSize: "13px", textAlign: "center" }}>
+              We have attached an updated calendar file for your phone, Apple Calendar,
+              Outlook, or Gmail.
+            </Text>
 
             <Hr style={{ borderColor: "#e7ded2", margin: "30px 0" }} />
 

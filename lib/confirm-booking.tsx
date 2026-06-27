@@ -2,7 +2,13 @@ import 'server-only'
 
 import { format } from 'date-fns'
 
+import AdminBookingNotificationEmail from '@/emails/admin-booking-notification'
 import BookingConfirmationEmail from '@/emails/booking-confirmation'
+import {
+  createBookingCalendarAttachment,
+  createBookingCalendarEvent,
+  createGoogleCalendarUrl,
+} from '@/lib/calendar'
 import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
 import { stripe } from '@/lib/stripe'
@@ -15,7 +21,9 @@ type BookingDetails = {
   customer_phone: string
   notes: string | null
   start_at: string
+  end_at: string | null
   service_name: string
+  duration_minutes: number | null
   price_pence: number | null
   deposit_amount_pence: number
 }
@@ -24,15 +32,6 @@ type ConfirmationResult = {
   booking: BookingDetails | null
   confirmed: boolean
   customerEmailSent: boolean
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;')
 }
 
 async function hasSuccessfulEmailLog(
@@ -107,11 +106,20 @@ async function sendCustomerEmail(booking: BookingDetails) {
   const remainingPence = booking.price_pence
     ? booking.price_pence - depositPence
     : null
+  const calendarEvent = createBookingCalendarEvent({
+    bookingId: booking.id,
+    service: booking.service_name,
+    customerName: booking.customer_name,
+    startAt: booking.start_at,
+    endAt: booking.end_at,
+    durationMinutes: booking.duration_minutes,
+  })
 
   const response = await resend.emails.send({
     from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
     to: booking.customer_email,
     subject,
+    attachments: [createBookingCalendarAttachment(calendarEvent)],
     react: BookingConfirmationEmail({
       name: booking.customer_name,
       service: booking.service_name,
@@ -119,6 +127,7 @@ async function sendCustomerEmail(booking: BookingDetails) {
       time: format(startDate, 'HH:mm'),
       deposit: formatPence(depositPence),
       remaining: remainingPence ? formatPence(remainingPence) : null,
+      calendarUrl: createGoogleCalendarUrl(calendarEvent),
     }),
   })
 
@@ -159,21 +168,36 @@ async function sendAdminEmail(booking: BookingDetails) {
   }
 
   const startDate = new Date(booking.start_at)
+  const depositPence = booking.deposit_amount_pence
+  const remainingPence = booking.price_pence
+    ? booking.price_pence - depositPence
+    : null
+  const calendarEvent = createBookingCalendarEvent({
+    bookingId: booking.id,
+    service: booking.service_name,
+    customerName: booking.customer_name,
+    startAt: booking.start_at,
+    endAt: booking.end_at,
+    durationMinutes: booking.duration_minutes,
+  })
+
   const response = await resend.emails.send({
     from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
     to: recipient,
     subject,
-    html: `
-      <h2>New Booking - ${escapeHtml(booking.customer_name)}</h2>
-      <p><strong>Name:</strong> ${escapeHtml(booking.customer_name)}</p>
-      <p><strong>Email:</strong> ${escapeHtml(booking.customer_email)}</p>
-      <p><strong>Phone:</strong> ${escapeHtml(booking.customer_phone)}</p>
-      <p><strong>Service:</strong> ${escapeHtml(booking.service_name)}</p>
-      <p><strong>Date:</strong> ${format(startDate, 'EEEE d MMMM yyyy')}</p>
-      <p><strong>Time:</strong> ${format(startDate, 'HH:mm')}</p>
-      <p><strong>Deposit Paid:</strong> ${formatPence(booking.deposit_amount_pence)}</p>
-      ${booking.notes ? `<p><strong>Notes:</strong> ${escapeHtml(booking.notes)}</p>` : ''}
-    `,
+    attachments: [createBookingCalendarAttachment(calendarEvent)],
+    react: AdminBookingNotificationEmail({
+      customerName: booking.customer_name,
+      customerEmail: booking.customer_email,
+      customerPhone: booking.customer_phone,
+      service: booking.service_name,
+      date: format(startDate, 'EEEE d MMMM yyyy'),
+      time: format(startDate, 'HH:mm'),
+      deposit: formatPence(depositPence),
+      remaining: remainingPence ? formatPence(remainingPence) : null,
+      notes: booking.notes,
+      calendarUrl: createGoogleCalendarUrl(calendarEvent),
+    }),
   })
 
   if (response.error) {
@@ -251,8 +275,10 @@ export async function confirmPaidBooking(
       b.customer_phone,
       b.notes,
       b.start_at,
+      b.end_at,
       b.deposit_amount_pence,
       s.name AS service_name,
+      s.duration_minutes,
       s.price_pence
     FROM bookings b
     JOIN services s ON s.id = b.service_id

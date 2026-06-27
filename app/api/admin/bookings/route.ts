@@ -6,8 +6,70 @@ import BookingRescheduleEmail from '@/emails/booking-reschedule'
 import { formatPence } from '@/lib/types'
 import { format } from 'date-fns'
 import { isAdminRequest } from '@/lib/admin-auth'
+import {
+  createBookingCalendarAttachment,
+  createBookingCalendarEvent,
+  createGoogleCalendarUrl,
+} from '@/lib/calendar'
 
 export const dynamic = 'force-dynamic'
+
+async function recordEmailResult(
+  bookingId: string,
+  emailType: string,
+  recipient: string,
+  subject: string,
+  status: 'sent' | 'failed',
+  errorMessage?: string
+) {
+  try {
+    const sql = getDb()
+    await sql`
+      INSERT INTO email_logs (
+        booking_id,
+        email_type,
+        recipient_email,
+        subject,
+        status,
+        error_message
+      )
+      VALUES (
+        ${bookingId},
+        ${emailType},
+        ${recipient},
+        ${subject},
+        ${status},
+        ${errorMessage || null}
+      )
+    `
+  } catch (error) {
+    console.error(`Could not record ${emailType} email result:`, error)
+  }
+}
+
+async function assertEmailSent(
+  bookingId: string,
+  emailType: string,
+  recipient: string,
+  subject: string,
+  sendEmail: () => Promise<{ error: { message: string } | null }>
+) {
+  const response = await sendEmail()
+
+  if (response.error) {
+    await recordEmailResult(
+      bookingId,
+      emailType,
+      recipient,
+      subject,
+      'failed',
+      response.error.message
+    )
+    throw new Error(`Resend rejected ${emailType}: ${response.error.message}`)
+  }
+
+  await recordEmailResult(bookingId, emailType, recipient, subject, 'sent')
+}
 
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
@@ -91,20 +153,28 @@ export async function PATCH(request: NextRequest) {
       const formattedDate = format(startDate, 'EEEE, d MMMM yyyy')
       const formattedTime = format(startDate, 'HH:mm')
       const refundAmount = formatPence(booking.deposit_pence)
+      const subject = 'Your Hauslash appointment has been cancelled'
 
-      await resend.emails.send({
-        from: 'noreply@hauslash.co',
-        to: booking.customer_email,
-        subject: 'Your Hauslash appointment update',
-        react: BookingCancellationEmail({
-          name: booking.customer_name,
-          service: booking.service_name,
-          date: formattedDate,
-          time: formattedTime,
-          refundAmount,
-          reason: reason || null,
-        }),
-      })
+      await assertEmailSent(
+        bookingId,
+        'booking_cancellation_customer',
+        booking.customer_email,
+        subject,
+        () =>
+          resend.emails.send({
+            from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
+            to: booking.customer_email,
+            subject,
+            react: BookingCancellationEmail({
+              name: booking.customer_name,
+              service: booking.service_name,
+              date: formattedDate,
+              time: formattedTime,
+              refundAmount,
+              reason: reason || null,
+            }),
+          })
+      )
 
       return NextResponse.json({
         success: true,
@@ -163,30 +233,61 @@ export async function PATCH(request: NextRequest) {
       const newStartDate = new Date(newStartAt)
       const newFormattedDate = format(newStartDate, 'EEEE, d MMMM yyyy')
       const newFormattedTime = format(newStartDate, 'HH:mm')
-
-      await resend.emails.send({
-        from: 'noreply@hauslash.co',
-        to: booking.customer_email,
-        subject: 'Your Hauslash appointment has been rescheduled',
-        react: BookingRescheduleEmail({
-          name: booking.customer_name,
-          service: booking.service_name,
-          oldDate: oldFormattedDate,
-          oldTime: oldFormattedTime,
-          newDate: newFormattedDate,
-          newTime: newFormattedTime,
-          reason: reason || null,
-        }),
+      const calendarEvent = createBookingCalendarEvent({
+        bookingId,
+        service: booking.service_name,
+        customerName: booking.customer_name,
+        startAt: newStartAt,
+        endAt: newEndAt,
+        durationMinutes: booking.duration_minutes,
       })
+      const subject = 'Your Hauslash appointment has been rescheduled'
+
+      await assertEmailSent(
+        bookingId,
+        'booking_reschedule_customer',
+        booking.customer_email,
+        subject,
+        () =>
+          resend.emails.send({
+            from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
+            to: booking.customer_email,
+            subject,
+            attachments: [createBookingCalendarAttachment(calendarEvent)],
+            react: BookingRescheduleEmail({
+              name: booking.customer_name,
+              service: booking.service_name,
+              oldDate: oldFormattedDate,
+              oldTime: oldFormattedTime,
+              newDate: newFormattedDate,
+              newTime: newFormattedTime,
+              reason: reason || null,
+              calendarUrl: createGoogleCalendarUrl(calendarEvent),
+            }),
+          })
+      )
 
       return NextResponse.json({
         success: true,
         message: 'Booking rescheduled and email sent',
         booking: updatedRows[0],
       })
+    } else if (action === 'mark_complete') {
+      const updatedRows = await sql`
+        UPDATE bookings
+        SET status = 'completed', updated_at = now()
+        WHERE id = ${bookingId}
+        RETURNING *
+      `
+
+      return NextResponse.json({
+        success: true,
+        message: 'Booking marked as complete',
+        booking: updatedRows[0],
+      })
     } else {
       return NextResponse.json(
-        { error: 'Invalid action. Must be "cancel" or "reschedule"' },
+        { error: 'Invalid action. Must be "cancel", "reschedule", or "mark_complete"' },
         { status: 400 }
       )
     }
