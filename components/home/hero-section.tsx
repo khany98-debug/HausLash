@@ -12,7 +12,9 @@ export function HeroSection() {
       <div aria-hidden="true" className="absolute left-[-12rem] top-24 -z-10 h-96 w-96 rounded-full bg-[#d9cbbc]/30 blur-3xl" />
       <div className="mx-auto grid min-w-0 max-w-7xl items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:gap-20 lg:py-24">
         <div className="relative z-10 order-2 mx-auto w-full max-w-[38rem] min-w-0 lg:order-1 lg:max-w-none">
-          <p className="eyebrow max-w-[20rem] leading-5 sm:max-w-none">Signature Korean lash lift · Stoke-on-Trent</p>
+          <p className="eyebrow max-w-[20rem] leading-5 sm:max-w-none">
+            Signature Korean lash lift · <span className="whitespace-nowrap">Stoke-on-Trent</span>
+          </p>
           <h1 className="mt-6 max-w-xl font-serif text-4xl leading-[0.98] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-[4.65rem]">
             Your lashes,
             <span className="block italic">
@@ -67,7 +69,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="absolute bottom-0 right-4 w-[34%] max-w-[9rem] overflow-hidden rounded-[1.5rem] border-[5px] border-background bg-muted shadow-[0_30px_80px_-42px_rgba(31,25,20,0.85)] sm:right-7 sm:w-[43%] sm:max-w-none sm:border-[6px]">
+          <div className="absolute bottom-0 right-4 w-[34%] max-w-[9rem] overflow-hidden rounded-[1.5rem] border-[5px] border-background bg-muted shadow-[0_30px_80px_-42px_rgba(31,25,20,0.85)] sm:right-7 sm:w-[36%] sm:max-w-none sm:border-[6px] lg:w-[32%]">
             <div className="relative aspect-[3/4]">
               <Image
                 src="/images/work/hauslash-amber-eye-closeup.jpg"
@@ -84,11 +86,6 @@ export function HeroSection() {
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               lifted, low-maintenance lashes
             </p>
-          </div>
-
-          <div className="absolute right-8 top-8 hidden max-w-[10rem] rounded-2xl border border-white/45 bg-white/20 p-4 text-white shadow-xl backdrop-blur-md sm:block">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75">Finish</p>
-            <p className="mt-2 font-serif text-2xl leading-none">Open, glossy, natural</p>
           </div>
         </div>
       </div>

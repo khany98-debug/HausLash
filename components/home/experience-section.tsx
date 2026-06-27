@@ -5,9 +5,9 @@ import { ArrowUpRight, Check } from 'lucide-react'
 const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
 
 const DETAILS = [
-  'Soft curl from the root for a more open-looking eye',
-  'Tinted lashes for a darker, glossier finish without extensions',
-  'A calm appointment pace with time for setting and finishing',
+  'Premium product use for a polished, healthy-looking finish',
+  'A considerate technique designed to lift without harshness',
+  'Clear aftercare guidance for beautiful longevity',
 ]
 
 export function ExperienceSection() {

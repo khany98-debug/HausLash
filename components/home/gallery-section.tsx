@@ -77,9 +77,6 @@ export function GallerySection() {
               className={`object-cover transition-transform duration-700 group-hover:scale-[1.025] ${image.imageClassName}`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-70" />
-            <span className="absolute bottom-4 left-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
-              Result {String(index + 1).padStart(2, '0')}
-            </span>
           </div>
         ))}
       </div>
