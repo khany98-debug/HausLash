@@ -230,7 +230,7 @@ export default function CustomerPortalPage() {
                             <div className="flex items-center gap-3 text-foreground">
                               <DollarSign className="h-4 w-4 text-primary" />
                               <span>
-                                Deposit: {formatPence(booking.deposit_amount_pence)}
+                                Non-refundable deposit: {formatPence(booking.deposit_amount_pence)}
                               </span>
                             </div>
                           </div>

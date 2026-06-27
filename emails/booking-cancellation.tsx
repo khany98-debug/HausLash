@@ -103,14 +103,14 @@ export default function BookingCancellationEmail({
   service,
   date,
   time,
-  refundAmount,
+  depositAmount,
   reason,
 }: {
   name: string
   service: string
   date: string
   time: string
-  refundAmount: string
+  depositAmount: string
   reason?: string | null
 }) {
   return (
@@ -137,10 +137,10 @@ export default function BookingCancellationEmail({
             </Section>
 
             <Section style={styles.card}>
-              <Text style={styles.label}>Refund information</Text>
-              <Text style={styles.value}>Refund amount: {refundAmount}</Text>
+              <Text style={styles.label}>Deposit policy</Text>
+              <Text style={styles.value}>Deposit paid: {depositAmount}</Text>
               <Text style={styles.copy}>
-                If a refund is due, it will be processed to the original payment method. Depending on your bank, it can take 3-5 working days to appear.
+                Deposits are non-refundable once the booking has been made. A new deposit will be required to secure another appointment.
               </Text>
               {reason && (
                 <>

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Book an Appointment',
-  description: 'Choose your treatment, pick a date and time, and secure your booking with a small deposit.',
+  description: 'Choose your treatment, pick a date and time, and secure your booking with a non-refundable deposit.',
 }
 
 async function getServices(): Promise<Service[]> {
@@ -44,7 +44,7 @@ export default async function BookPage({
               Reserve your appointment
             </h1>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-muted-foreground">
-              Choose your treatment and preferred time, then secure it with a small deposit. The remaining balance is paid at your appointment.
+              Choose your treatment and preferred time, then secure it with a non-refundable deposit. The remaining balance is paid at your appointment.
             </p>
           </div>
           <div className="luxury-card p-5 sm:p-8">

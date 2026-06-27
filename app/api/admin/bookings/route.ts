@@ -152,7 +152,7 @@ export async function PATCH(request: NextRequest) {
       const startDate = new Date(booking.start_at)
       const formattedDate = format(startDate, 'EEEE, d MMMM yyyy')
       const formattedTime = format(startDate, 'HH:mm')
-      const refundAmount = formatPence(booking.deposit_pence)
+      const depositAmount = formatPence(booking.deposit_pence)
       const subject = 'Your Hauslash appointment has been cancelled'
 
       await assertEmailSent(
@@ -170,7 +170,7 @@ export async function PATCH(request: NextRequest) {
               service: booking.service_name,
               date: formattedDate,
               time: formattedTime,
-              refundAmount,
+              depositAmount,
               reason: reason || null,
             }),
           })

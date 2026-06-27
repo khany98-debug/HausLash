@@ -108,6 +108,9 @@ export function ReviewStep({
               {formatPence(service.deposit_pence)}
             </span>
           </div>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            Deposits are non-refundable once the booking has been made.
+          </p>
           {service.price_pence && (
             <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
               <span>Remaining balance (pay at appointment)</span>
@@ -135,7 +138,7 @@ export function ReviewStep({
 
       <p className="text-center text-xs text-muted-foreground">
         You will be redirected to our secure payment provider to complete your deposit.
-        Your appointment will be held for 30 minutes while you complete payment.
+        Your appointment will be held for 30 minutes while you complete payment. Deposits are non-refundable once the booking has been made.
       </p>
     </div>
   )

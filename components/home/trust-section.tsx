@@ -3,7 +3,7 @@ import { CalendarCheck, Clock3, CreditCard, MapPin } from 'lucide-react'
 const ITEMS = [
   { icon: CalendarCheck, value: '01', label: 'Patch test', detail: 'Required if this is your first lash lift with Hauslash. Please enquire about your patch test before booking.' },
   { icon: Clock3, value: '02', label: '60-90 minutes', detail: 'Most appointments include lifting, tinting, setting time, and a calm finish.' },
-  { icon: CreditCard, value: '03', label: '£15 deposit', detail: 'Your booking is secured online and the deposit comes off your final balance.' },
+  { icon: CreditCard, value: '03', label: '£15 deposit', detail: 'Your booking is secured online. Deposits are non-refundable once the booking has been made.' },
   { icon: MapPin, value: '04', label: 'Studio or mobile', detail: 'Visit the Stoke-on-Trent studio or choose selected mobile outcall appointments.' },
 ]
 

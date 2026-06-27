@@ -157,6 +157,9 @@ export default function BookingConfirmationEmail({
             <Section style={styles.card}>
               <Text style={styles.label}>Payment</Text>
               <Text style={styles.value}>Deposit paid: {deposit}</Text>
+              <Text style={styles.copy}>
+                Deposits are non-refundable once the booking has been made.
+              </Text>
               {remaining && (
                 <Text style={styles.value}>Remaining balance due at appointment: {remaining}</Text>
               )}

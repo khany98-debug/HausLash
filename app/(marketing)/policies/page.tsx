@@ -34,7 +34,7 @@ export default function PoliciesPage() {
               <li>
                 <strong className="text-foreground">Deposits are non-refundable:</strong>{' '}
                 All appointments require a deposit to secure the booking and this
-                deposit is non-refundable.
+                deposit is non-refundable once the booking has been made.
               </li>
 
               <li>

@@ -53,7 +53,7 @@ export function ServiceStep({
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatDuration(service.duration_minutes)}
-                <span>Deposit: {formatPence(service.deposit_pence)}</span>
+                <span>Non-refundable deposit: {formatPence(service.deposit_pence)}</span>
               </div>
             </button>
           )

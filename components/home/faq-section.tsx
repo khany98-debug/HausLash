@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: 'Is a deposit required to book?',
-    a: 'Yes, we take a small deposit when you book online. This secures your appointment and is deducted from the total treatment cost on the day.',
+    a: 'Yes, we take a non-refundable deposit when you book online. This secures your appointment and is deducted from the total treatment cost on the day.',
   },
   {
     q: 'What is your cancellation policy?',

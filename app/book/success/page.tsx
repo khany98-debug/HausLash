@@ -141,6 +141,9 @@ export default async function BookingSuccessPage({
                 <span className="text-muted-foreground">Deposit paid</span>
                 <span className="font-medium">{formatPence(depositPence)}</span>
               </div>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                Deposits are non-refundable once the booking has been made.
+              </p>
 
               {remainingPence !== null && remainingPence > 0 && (
                 <div className="flex justify-between text-sm mt-1">
