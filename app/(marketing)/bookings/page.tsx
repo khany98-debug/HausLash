@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
-import { Loader2, Calendar, Clock, DollarSign } from 'lucide-react'
+import { Loader2, Calendar, Clock, DollarSign, Mail, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -25,7 +25,13 @@ const emailSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
 
+const codeSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, 'Enter the 6 digit code from your email'),
+})
+
 type EmailFormValues = z.infer<typeof emailSchema>
+type CodeFormValues = z.infer<typeof codeSchema>
+type Step = 'email' | 'code' | 'bookings'
 
 interface Booking {
   id: string
@@ -48,18 +54,24 @@ const STATUS_COLORS: Record<string, string> = {
 export default function CustomerPortalPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [bookings, setBookings] = useState<Booking[]>([])
-  const [showBookings, setShowBookings] = useState(false)
   const [customerEmail, setCustomerEmail] = useState('')
+  const [step, setStep] = useState<Step>('email')
+  const [notice, setNotice] = useState('')
 
-  const form = useForm<EmailFormValues>({
+  const emailForm = useForm<EmailFormValues>({
     resolver: zodResolver(emailSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: { email: '' },
   })
 
-  async function onSubmit(values: EmailFormValues) {
+  const codeForm = useForm<CodeFormValues>({
+    resolver: zodResolver(codeSchema),
+    defaultValues: { code: '' },
+  })
+
+  async function requestCode(values: EmailFormValues) {
     setIsLoading(true)
+    setNotice('')
+
     try {
       const response = await fetch('/api/customer/bookings', {
         method: 'POST',
@@ -67,145 +79,228 @@ export default function CustomerPortalPage() {
         body: JSON.stringify({ email: values.email }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const error = await response.json()
-        form.setError('email', {
-          message: error.error || 'Failed to fetch bookings',
+        emailForm.setError('email', {
+          message: data.error || 'Failed to send access code',
         })
         return
       }
 
-      const data = await response.json()
-      setBookings(data.bookings || [])
       setCustomerEmail(values.email)
-      setShowBookings(true)
+      setStep('code')
+      setNotice(data.message || 'We sent a secure access code to your email.')
     } catch (error) {
-      form.setError('email', {
-        message: 'An error occurred while fetching your bookings',
+      emailForm.setError('email', {
+        message: 'An error occurred while sending your access code',
       })
     } finally {
       setIsLoading(false)
     }
   }
 
+  async function verifyCode(values: CodeFormValues) {
+    setIsLoading(true)
+    setNotice('')
+
+    try {
+      const response = await fetch('/api/customer/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customerEmail, code: values.code }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        codeForm.setError('code', {
+          message: data.error || 'Failed to verify code',
+        })
+        return
+      }
+
+      setBookings(data.bookings || [])
+      setStep('bookings')
+    } catch (error) {
+      codeForm.setError('code', {
+        message: 'An error occurred while verifying your code',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  function resetAccess() {
+    setStep('email')
+    setBookings([])
+    setCustomerEmail('')
+    setNotice('')
+    emailForm.reset()
+    codeForm.reset()
+  }
+
   return (
     <main className="min-h-screen">
-      {/* Hero */}
-      <section className="py-12 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-transparent border-b border-primary/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
+      <section className="border-b border-primary/10 bg-gradient-to-b from-primary/5 to-transparent px-4 py-12 md:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="mb-4 font-serif text-4xl text-foreground md:text-5xl">
             Your Bookings
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            View your appointment history and booking details
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+            Securely view your Hauslash appointment history with a one-time email code.
           </p>
         </div>
       </section>
 
-      {/* Content */}
-      <section className="py-16 px-4 md:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          {!showBookings ? (
-            // Login Form
-            <Card className="p-8 border-primary/10">
-              <h2 className="font-serif text-2xl text-foreground mb-6">
-                Access Your Bookings
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Enter the email address associated with your HausLash booking to view your appointment history.
-              </p>
+      <section className="px-4 py-16 md:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          {step === 'email' && (
+            <Card className="border-primary/10 p-8">
+              <div className="mb-6 flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Mail className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-2xl text-foreground">
+                    Access your bookings
+                  </h2>
+                  <p className="mt-2 text-muted-foreground">
+                    Enter the email address used for your booking. We will send a short-lived code before showing any appointment details.
+                  </p>
+                </div>
+              </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(requestCode)} className="space-y-6">
                   <FormField
-                    control={form.control}
+                    control={emailForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address</FormLabel>
+                        <FormLabel>Email address</FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="your@email.com"
-                            {...field}
-                            disabled={isLoading}
-                          />
+                          <Input type="email" placeholder="your@email.com" {...field} disabled={isLoading} />
                         </FormControl>
                         <FormDescription>
-                          Enter the email used for your booking
+                          For privacy, appointment history is only shown after email verification.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    size="lg"
-                    className="w-full rounded-full"
-                  >
+                  <Button type="submit" disabled={isLoading} size="lg" className="w-full rounded-full">
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    View My Bookings
+                    Send secure code
                   </Button>
                 </form>
               </Form>
             </Card>
-          ) : (
-            // Bookings List
-            <div>
-              <div className="flex items-center justify-between mb-8">
+          )}
+
+          {step === 'code' && (
+            <Card className="border-primary/10 p-8">
+              <div className="mb-6 flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <h2 className="font-serif text-2xl text-foreground mb-1">
-                    Your Appointments
+                  <h2 className="font-serif text-2xl text-foreground">
+                    Check your email
                   </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {customerEmail}
+                  <p className="mt-2 text-muted-foreground">
+                    Enter the 6 digit code sent to {customerEmail}. It expires after 10 minutes.
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowBookings(false)
-                    form.reset()
-                  }}
-                >
-                  Change Email
+              </div>
+
+              {notice && (
+                <p className="mb-6 rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
+                  {notice}
+                </p>
+              )}
+
+              <Form {...codeForm}>
+                <form onSubmit={codeForm.handleSubmit(verifyCode)} className="space-y-6">
+                  <FormField
+                    control={codeForm.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Access code</FormLabel>
+                        <FormControl>
+                          <Input
+                            inputMode="numeric"
+                            maxLength={6}
+                            placeholder="123456"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Codes can only be used once.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={isLoading} size="lg" className="w-full rounded-full">
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    View my bookings
+                  </Button>
+                </form>
+              </Form>
+
+              <button
+                type="button"
+                onClick={resetAccess}
+                className="mt-5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
+                Use a different email
+              </button>
+            </Card>
+          )}
+
+          {step === 'bookings' && (
+            <div>
+              <div className="mb-8 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="mb-1 font-serif text-2xl text-foreground">
+                    Your appointments
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{customerEmail}</p>
+                </div>
+                <Button variant="outline" onClick={resetAccess}>
+                  Change email
                 </Button>
               </div>
 
               {bookings.length === 0 ? (
-                <Card className="p-8 text-center border-primary/10">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <h3 className="font-serif text-xl text-foreground mb-2">
-                    No Bookings Found
+                <Card className="border-primary/10 p-8 text-center">
+                  <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground opacity-50" />
+                  <h3 className="mb-2 font-serif text-xl text-foreground">
+                    No bookings found
                   </h3>
-                  <p className="text-muted-foreground mb-6">
-                    You haven't made any bookings yet. Would you like to book an appointment?
+                  <p className="mb-6 text-muted-foreground">
+                    No appointments were found for this verified email address.
                   </p>
                   <Button asChild className="rounded-full">
-                    <a href="/book">Book Now</a>
+                    <a href="/book">Book now</a>
                   </Button>
                 </Card>
               ) : (
                 <div className="space-y-4">
                   {bookings.map((booking) => (
-                    <Card
-                      key={booking.id}
-                      className="p-6 border-primary/10 hover:border-primary/30 transition-colors"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Booking Details */}
+                    <Card key={booking.id} className="border-primary/10 p-6 transition-colors hover:border-primary/30">
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-4">
                           <div>
-                            <h3 className="font-serif text-lg text-foreground mb-2">
+                            <h3 className="mb-2 font-serif text-lg text-foreground">
                               {booking.service_name}
                             </h3>
-                            <Badge
-                              className={`${
-                                STATUS_COLORS[booking.status] || 'bg-muted text-muted-foreground'
-                              }`}
-                            >
+                            <Badge className={STATUS_COLORS[booking.status] || 'bg-muted text-muted-foreground'}>
                               {booking.status.replace('_', ' ')}
                             </Badge>
                           </div>
@@ -213,68 +308,53 @@ export default function CustomerPortalPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-3 text-foreground">
                               <Calendar className="h-4 w-4 text-primary" />
-                              <span>
-                                {format(
-                                  new Date(booking.start_at),
-                                  'EEEE, d MMMM yyyy'
-                                )}
-                              </span>
+                              <span>{format(new Date(booking.start_at), 'EEEE, d MMMM yyyy')}</span>
                             </div>
                             <div className="flex items-center gap-3 text-foreground">
                               <Clock className="h-4 w-4 text-primary" />
                               <span>
-                                {format(new Date(booking.start_at), 'HH:mm')} -{' '}
-                                {format(new Date(booking.end_at), 'HH:mm')}
+                                {format(new Date(booking.start_at), 'HH:mm')} - {format(new Date(booking.end_at), 'HH:mm')}
                               </span>
                             </div>
                             <div className="flex items-center gap-3 text-foreground">
                               <DollarSign className="h-4 w-4 text-primary" />
                               <span>
-                                Non-refundable deposit: {formatPence(booking.deposit_amount_pence)}
+                                {booking.deposit_amount_pence > 0
+                                  ? `Non-refundable deposit: ${formatPence(booking.deposit_amount_pence)}`
+                                  : 'Free appointment'}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        {/* Status Info */}
-                        <div className="bg-muted/30 rounded-lg p-4 flex items-center justify-center">
+                        <div className="flex items-center justify-center rounded-lg bg-muted/30 p-4">
                           {booking.status === 'confirmed' && (
                             <div className="text-center">
-                              <p className="text-sm text-muted-foreground mb-2">
-                                Appointment Confirmed
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                We'll send you a reminder before your appointment
-                              </p>
+                              <p className="mb-2 text-sm text-muted-foreground">Appointment confirmed</p>
+                              <p className="text-xs text-muted-foreground">We will send you a reminder before your appointment.</p>
                             </div>
                           )}
                           {booking.status === 'pending_payment' && (
                             <div className="text-center">
-                              <p className="text-sm text-amber-700 mb-2">
-                                Awaiting Payment
-                              </p>
+                              <p className="mb-2 text-sm text-amber-700">Awaiting payment</p>
                               <Button asChild size="sm" className="rounded-full">
-                                <a href="/book">Complete Booking</a>
+                                <a href="/book">Complete booking</a>
                               </Button>
                             </div>
                           )}
                           {booking.status === 'completed' && (
                             <div className="text-center">
-                              <p className="text-sm text-emerald-700">
-                                Appointment Completed
-                              </p>
+                              <p className="text-sm text-emerald-700">Appointment completed</p>
                               <Button asChild variant="outline" size="sm" className="mt-2 rounded-full">
-                                <a href="/book">Book Again</a>
+                                <a href="/book">Book again</a>
                               </Button>
                             </div>
                           )}
                           {booking.status === 'cancelled' && (
                             <div className="text-center">
-                              <p className="text-sm text-red-700">
-                                Appointment Cancelled
-                              </p>
+                              <p className="text-sm text-red-700">Appointment cancelled</p>
                               <Button asChild size="sm" className="mt-2 rounded-full">
-                                <a href="/book">Book a New Appointment</a>
+                                <a href="/book">Book a new appointment</a>
                               </Button>
                             </div>
                           )}
@@ -286,9 +366,9 @@ export default function CustomerPortalPage() {
               )}
 
               {bookings.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-primary/10">
+                <div className="mt-8 border-t border-primary/10 pt-8">
                   <Button asChild className="rounded-full">
-                    <a href="/book">Book Another Appointment</a>
+                    <a href="/book">Book another appointment</a>
                   </Button>
                 </div>
               )}
