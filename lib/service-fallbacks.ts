@@ -20,7 +20,7 @@ export const FALLBACK_SERVICES: Service[] = [
     name: 'Korean Lash Lift - Mobile Outcall',
     slug: 'korean-lash-lift-mobile',
     description:
-      'Luxury brings itself to you. Our mobile Korean lash lift service offers the same premium treatment in the comfort of your own home, including consultation, professional setup, and aftercare guidance.',
+      'Luxury brings itself to you. Our mobile Korean lash lift service offers the same premium treatment in the comfort of your own home, including consultation, professional setup, and aftercare guidance. After booking, please message Hauslash on Instagram with your location and treatment address.',
     duration_minutes: 90,
     price_pence: 5000,
     deposit_pence: 1500,

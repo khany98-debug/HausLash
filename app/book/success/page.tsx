@@ -7,6 +7,7 @@ import { CheckCircle, Calendar, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { AddToCalendarButton } from '@/components/booking/add-to-calendar'
+import { getAppointmentLocationDetails } from '@/lib/appointment-location'
 
 export const dynamic = 'force-dynamic'
 
@@ -99,6 +100,10 @@ export default async function BookingSuccessPage({
   const depositPence = booking.deposit_amount_pence as number
   const pricePence = booking.price_pence as number | null
   const remainingPence = pricePence ? pricePence - depositPence : null
+  const locationDetails = getAppointmentLocationDetails(booking.service_name as string)
+  const calendarDescription = locationDetails.href
+    ? 'Mobile outcall appointment. Please message Hauslash on Instagram to confirm where you are located and the treatment address: https://ig.me/m/hauslash_co'
+    : 'Your Hauslash appointment. Please arrive with clean makeup-free eyes.'
 
   return (
     <>
@@ -146,6 +151,21 @@ export default async function BookingSuccessPage({
 
             </div>
 
+            <div className="mt-4 rounded-lg bg-muted p-4 text-sm">
+              <p className="font-medium text-foreground">{locationDetails.label}</p>
+              <p className="mt-1 leading-6 text-muted-foreground">{locationDetails.value}</p>
+              {locationDetails.href && (
+                <a
+                  href={locationDetails.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex text-sm font-medium text-foreground underline underline-offset-4"
+                >
+                  {locationDetails.linkLabel}
+                </a>
+              )}
+            </div>
+
             <div className="mt-4 border-t border-border/60 pt-4">
 
               {depositPence > 0 ? (
@@ -186,6 +206,8 @@ export default async function BookingSuccessPage({
               title={booking.service_name}
               startAt={booking.start_at}
               endAt={booking.end_at}
+              location={locationDetails.calendarLocation}
+              description={calendarDescription}
             />
 
             <Button asChild variant="outline" className="rounded-full">
@@ -205,6 +227,7 @@ export default async function BookingSuccessPage({
               <li>Arrive with clean, makeup-free eyes</li>
               <li>Avoid waterproof mascara for 48 hours prior</li>
               <li>Remove contact lenses before the treatment</li>
+              {locationDetails.href && <li>Message Hauslash on Instagram to confirm your location for the mobile outcall.</li>}
               <li>If this is your first Hauslash treatment, your free patch test must be completed at least 24 hours before your lash lift.</li>
 
             </ul>

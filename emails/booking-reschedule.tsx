@@ -10,10 +10,10 @@ import {
   Link,
   Img,
 } from "@react-email/components"
+import { getAppointmentLocationDetails } from "@/lib/appointment-location"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
-const STUDIO_ADDRESS = "5 Leawood Road, Stoke-On-Trent, ST4 6JZ"
 
 const styles = {
   body: {
@@ -122,6 +122,12 @@ const styles = {
     textDecoration: "none",
     marginLeft: "8px",
   },
+  lightLink: {
+    color: "#fffdf9",
+    fontSize: "14px",
+    fontWeight: 700,
+    textDecoration: "underline",
+  },
   footer: {
     color: "#8d8174",
     fontSize: "12px",
@@ -149,6 +155,8 @@ export default function BookingRescheduleEmail({
   reason?: string | null
   calendarUrl?: string
 }) {
+  const locationDetails = getAppointmentLocationDetails(service)
+
   return (
     <Html>
       <Head />
@@ -169,7 +177,13 @@ export default function BookingRescheduleEmail({
               <Text style={styles.lightValue}>
                 {newDate} at {newTime}
               </Text>
-              <Text style={styles.lightValue}>{STUDIO_ADDRESS}</Text>
+              <Text style={styles.lightLabel}>{locationDetails.label}</Text>
+              <Text style={styles.lightValue}>{locationDetails.value}</Text>
+              {locationDetails.href && (
+                <Link href={locationDetails.href} style={styles.lightLink}>
+                  {locationDetails.linkLabel}
+                </Link>
+              )}
             </Section>
 
             <Section style={styles.card}>
@@ -208,7 +222,7 @@ export default function BookingRescheduleEmail({
             <Hr style={{ borderColor: "#e7ded2", margin: "30px 0" }} />
 
             <Text style={styles.footer}>
-              Hauslash, {STUDIO_ADDRESS}
+              {locationDetails.footer}
               <br />
               Need to ask something before your appointment? Visit{" "}
               <Link href={`${SITE_URL}/contact`} style={{ color: "#1d1a17" }}>

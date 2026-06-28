@@ -10,10 +10,10 @@ import {
   Link,
   Img,
 } from "@react-email/components"
+import { getAppointmentLocationDetails } from "@/lib/appointment-location"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
-const STUDIO_ADDRESS = "5 Leawood Road, Stoke-On-Trent, ST4 6JZ"
 
 const styles = {
   body: {
@@ -127,6 +127,8 @@ export default function BookingConfirmationEmail({
   remaining?: string | null
   calendarUrl?: string
 }) {
+  const locationDetails = getAppointmentLocationDetails(service)
+
   return (
     <Html>
       <Head />
@@ -150,8 +152,13 @@ export default function BookingConfirmationEmail({
                 {date} at {time}
               </Text>
 
-              <Text style={styles.label}>Studio address</Text>
-              <Text style={styles.value}>{STUDIO_ADDRESS}</Text>
+              <Text style={styles.label}>{locationDetails.label}</Text>
+              <Text style={styles.value}>{locationDetails.value}</Text>
+              {locationDetails.href && (
+                <Link href={locationDetails.href} style={{ ...styles.button, marginTop: "6px" }}>
+                  {locationDetails.linkLabel}
+                </Link>
+              )}
             </Section>
 
             <Section style={styles.card}>
@@ -188,7 +195,7 @@ export default function BookingConfirmationEmail({
             <Hr style={{ borderColor: "#e7ded2", margin: "30px 0" }} />
 
             <Text style={styles.footer}>
-              Hauslash, {STUDIO_ADDRESS}
+              {locationDetails.footer}
               <br />
               After your appointment, we would love to hear about your experience.
               {" "}

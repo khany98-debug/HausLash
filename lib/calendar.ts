@@ -1,4 +1,6 @@
-export const STUDIO_ADDRESS = '5 Leawood Road, Stoke-On-Trent, ST4 6JZ'
+import { getAppointmentLocationDetails, STUDIO_ADDRESS } from '@/lib/appointment-location'
+
+export { STUDIO_ADDRESS }
 
 type CalendarEventInput = {
   uid: string
@@ -88,10 +90,13 @@ export function createBookingCalendarEvent({
   const start = new Date(startAt)
   const end = getBookingEndAt(start, endAt, durationMinutes || 60)
   const title = `${service} at Hauslash`
+  const locationDetails = getAppointmentLocationDetails(service)
   const description = [
     customerName ? `Appointment for ${customerName}.` : null,
-    'Please arrive with clean, makeup-free lashes.',
-    'Hauslash Korean lash lift studio.',
+    locationDetails.href
+      ? 'Mobile outcall appointment. Please message Hauslash on Instagram to confirm the treatment address and where you are located: https://ig.me/m/hauslash_co'
+      : 'Please arrive with clean, makeup-free lashes.',
+    locationDetails.href ? null : 'Hauslash Korean lash lift studio.',
   ]
     .filter(Boolean)
     .join('\n')
@@ -102,7 +107,7 @@ export function createBookingCalendarEvent({
     startAt: start,
     endAt: end,
     description,
-    location: STUDIO_ADDRESS,
+    location: locationDetails.calendarLocation,
   }
 }
 

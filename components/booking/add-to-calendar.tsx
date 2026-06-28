@@ -7,10 +7,14 @@ export function AddToCalendarButton({
   title,
   startAt,
   endAt,
+  location,
+  description,
 }: {
   title: string
   startAt: string
   endAt: string
+  location?: string
+  description?: string
 }) {
   function handleDownload() {
     const start = new Date(startAt)
@@ -19,6 +23,8 @@ export function AddToCalendarButton({
     const pad = (n: number) => String(n).padStart(2, '0')
     const formatICS = (d: Date) =>
       `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`
+    const escapeICS = (value: string) =>
+      value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;')
 
     const ics = [
       'BEGIN:VCALENDAR',
@@ -27,11 +33,12 @@ export function AddToCalendarButton({
       'BEGIN:VEVENT',
       `DTSTART:${formatICS(start)}`,
       `DTEND:${formatICS(end)}`,
-      `SUMMARY:${title} - Hauslash`,
-      'DESCRIPTION:Your Hauslash appointment. Please arrive with clean makeup-free eyes.',
+      `SUMMARY:${escapeICS(`${title} - Hauslash`)}`,
+      location ? `LOCATION:${escapeICS(location)}` : null,
+      `DESCRIPTION:${escapeICS(description || 'Your Hauslash appointment. Please arrive with clean makeup-free eyes.')}`,
       'END:VEVENT',
       'END:VCALENDAR',
-    ].join('\r\n')
+    ].filter(Boolean).join('\r\n')
 
     const blob = new Blob([ics], { type: 'text/calendar' })
     const url = URL.createObjectURL(blob)

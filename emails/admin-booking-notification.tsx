@@ -10,10 +10,10 @@ import {
   Link,
   Img,
 } from "@react-email/components"
+import { getAppointmentLocationDetails } from "@/lib/appointment-location"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
-const STUDIO_ADDRESS = "5 Leawood Road, Stoke-On-Trent, ST4 6JZ"
 
 const styles = {
   body: {
@@ -142,6 +142,7 @@ export default function AdminBookingNotificationEmail({
 }) {
   const mailto = `mailto:${customerEmail}`
   const tel = customerPhone ? `tel:${customerPhone.replace(/\s+/g, "")}` : undefined
+  const locationDetails = getAppointmentLocationDetails(service)
 
   return (
     <Html>
@@ -161,7 +162,8 @@ export default function AdminBookingNotificationEmail({
               <Text style={styles.value}>
                 {date} at {time}
               </Text>
-              <Text style={styles.value}>{STUDIO_ADDRESS}</Text>
+              <Text style={styles.label}>{locationDetails.label}</Text>
+              <Text style={styles.value}>{locationDetails.value}</Text>
             </Section>
 
             <Section style={styles.card}>

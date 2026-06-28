@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, Loader2, Calendar, Clock, User, Mail, Phone } from 'lucide-react'
 import { format, parse } from 'date-fns'
 import { toast } from 'sonner'
+import { getAppointmentLocationDetails } from '@/lib/appointment-location'
 
 export function ReviewStep({
   data,
@@ -23,6 +24,7 @@ export function ReviewStep({
 
   const formattedDate = format(new Date(data.date), 'EEEE d MMMM yyyy')
   const isFreeBooking = service.deposit_pence <= 0
+  const locationDetails = getAppointmentLocationDetails(service.name)
 
   async function handleConfirm() {
     setSubmitting(true)
@@ -101,6 +103,21 @@ export function ReviewStep({
             </p>
           )}
         </div>
+
+        {locationDetails.href && (
+          <div className="mt-5 rounded-lg bg-muted p-4 text-sm">
+            <p className="font-medium text-foreground">{locationDetails.label}</p>
+            <p className="mt-1 leading-6 text-muted-foreground">{locationDetails.value}</p>
+            <a
+              href={locationDetails.href}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex font-medium text-foreground underline underline-offset-4"
+            >
+              {locationDetails.linkLabel}
+            </a>
+          </div>
+        )}
 
         <div className="mt-6 border-t border-border/60 pt-4">
           <div className="flex items-center justify-between">
