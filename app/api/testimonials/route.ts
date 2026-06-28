@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
+import { enforceRateLimit } from '@/lib/rate-limit'
 import { isMissingDatabaseConfig } from '@/lib/service-fallbacks'
 import { z } from 'zod'
 
@@ -16,6 +17,14 @@ const testimonialSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await enforceRateLimit(request, {
+      bucket: 'testimonial-submit',
+      limit: 3,
+      windowMs: 60 * 60 * 1000,
+    })
+
+    if (limited) return limited
+
     const body = await request.json()
     const parsed = testimonialSchema.safeParse(body)
 
@@ -28,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     const { name, serviceId, rating, review, website } = parsed.data
 
-    // Honeypot field: acknowledge automated submissions without storing them.
     if (website) {
       return NextResponse.json({ success: true })
     }
@@ -122,7 +130,7 @@ export async function POST(request: NextRequest) {
         ${selectedServiceId},
         ${rating},
         ${review},
-        'approved'
+        'pending'
       )
       RETURNING id, status
     `
@@ -130,7 +138,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Thank you for your review! It is now visible on the reviews page.',
+        message: 'Thank you for your review. It will appear once Hauslash has approved it.',
         testimonial: {
           ...testimonialRows[0],
           verified_booking: verifiedBooking,
@@ -167,7 +175,6 @@ export async function GET(request: NextRequest) {
 
     const sql = getDb()
 
-    // Get all approved testimonials
     const testimonials = await sql`
       SELECT
         t.id,
@@ -184,7 +191,7 @@ export async function GET(request: NextRequest) {
           AND b.status IN ('confirmed', 'completed')
         ) AS verified_booking
       FROM testimonials t
-      WHERE t.status IN ('approved', 'pending')
+      WHERE t.status = 'approved'
       ORDER BY t.created_at DESC
       LIMIT ${limit}
     `
