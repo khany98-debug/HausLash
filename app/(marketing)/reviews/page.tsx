@@ -54,7 +54,7 @@ async function getReviewPageData() {
         LEFT JOIN services s
           ON s.id::text = t.service_id
           OR s.slug = t.service_id
-        WHERE t.status IN ('approved', 'pending')
+        WHERE t.status = 'approved'
         ORDER BY t.featured DESC, t.created_at DESC
         LIMIT 12
       `,
@@ -143,7 +143,7 @@ export default async function ReviewsPage() {
               Client reviews will appear here.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted-foreground">
-              Once a customer shares their experience, it will be displayed in this section so future clients can read real Hauslash stories before booking.
+              Once a customer shares their experience and it is approved, it will be displayed in this section so future clients can read real Hauslash stories before booking.
             </p>
             <Button asChild variant="outline" className="mt-7 rounded-full border-foreground/15 bg-transparent">
               <Link href="#leave-a-review">Leave the first review</Link>
@@ -161,7 +161,7 @@ export default async function ReviewsPage() {
               <span className="block italic">feel confident booking.</span>
             </h2>
             <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
-              Tell us about your treatment, your result, or how the experience made you feel. Reviews appear publicly after submission so future clients can read real experiences.
+              Tell us about your treatment, your result, or how the experience made you feel. Reviews are checked before they appear publicly.
             </p>
             <div className="mt-8 space-y-4 border-t border-foreground/10 pt-7 text-sm text-muted-foreground">
               <p className="flex gap-3">
