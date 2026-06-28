@@ -9,22 +9,24 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   if (!signature) {
     return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
   }
 
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured')
+    return NextResponse.json(
+      { error: 'Webhook is not configured' },
+      { status: 500 }
+    )
+  }
+
   let event: Stripe.Event
 
   try {
-    // If webhook secret is configured, verify signature
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-    if (webhookSecret) {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-    } else {
-      // In development/sandbox, parse without verification
-      event = JSON.parse(body) as Stripe.Event
-    }
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
@@ -52,9 +54,8 @@ export async function POST(request: NextRequest) {
 
     case 'checkout.session.expired': {
       const session = event.data.object as Stripe.Checkout.Session
-      // Cancel the booking when checkout expires
       await sql`
-        UPDATE bookings 
+        UPDATE bookings
         SET status = 'cancelled', updated_at = now()
         WHERE stripe_checkout_session_id = ${session.id}
         AND status = 'pending_payment'
