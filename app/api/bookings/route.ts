@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 import { sendConfirmedBookingEmails } from "@/lib/confirm-booking"
+import { enforceRateLimit } from "@/lib/rate-limit"
 import { isMissingDatabaseConfig } from "@/lib/service-fallbacks"
 import { normalisePublicService } from "@/lib/service-display"
 import { stripe } from "@/lib/stripe"
@@ -21,6 +22,14 @@ const bookingSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await enforceRateLimit(request, {
+      bucket: "booking-create",
+      limit: 10,
+      windowMs: 15 * 60 * 1000,
+    })
+
+    if (limited) return limited
+
     const body = await request.json()
     const parsed = bookingSchema.safeParse(body)
 
@@ -34,7 +43,6 @@ export async function POST(request: NextRequest) {
     const { serviceId, date, time, name, email, phone, notes } = parsed.data
     const sql = getDb()
 
-    // Get service
     const serviceRows = await sql`
       SELECT * FROM services WHERE id = ${serviceId} AND active = true
     `
@@ -45,7 +53,6 @@ export async function POST(request: NextRequest) {
 
     const service = normalisePublicService(serviceRows[0] as Service)
 
-    // Calculate appointment times
     const startAt = `${date}T${time}:00Z`
 
     const startMinutes =
@@ -58,7 +65,6 @@ export async function POST(request: NextRequest) {
 
     const endAt = `${date}T${endH}:${endM}:00Z`
 
-    // Prevent double bookings
     const conflicts = await sql`
       SELECT id FROM bookings
       WHERE start_at < ${endAt}::timestamptz
@@ -77,12 +83,10 @@ export async function POST(request: NextRequest) {
     const depositPence = service.deposit_pence as number
     const isFreeBooking = depositPence <= 0
 
-    // Hold paid bookings for 30 minutes while checkout is completed.
     const expiresAt = isFreeBooking
       ? null
       : new Date(Date.now() + 30 * 60 * 1000).toISOString()
 
-    // Create booking
     const bookingRows = await sql`
       INSERT INTO bookings (
         service_id,
@@ -131,7 +135,6 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Stripe checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -141,7 +144,7 @@ export async function POST(request: NextRequest) {
             currency: "gbp",
             product_data: {
               name: `${service.name} - Deposit`,
-              description: `Appointment on ${date} at ${time}`,
+              description: `Appointment on ${date} at ${time}. Deposits are non-refundable once the booking has been made.`,
             },
             unit_amount: depositPence,
           },
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
       customer_email: email,
       success_url: `${baseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/book?cancelled=true`,
-      expires_at: Math.floor(Date.now() / 1000) + 1800, // 30 minutes
+      expires_at: Math.floor(Date.now() / 1000) + 1800,
     })
 
     await sql`
