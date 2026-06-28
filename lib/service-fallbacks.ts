@@ -7,8 +7,8 @@ export const FALLBACK_SERVICES: Service[] = [
     name: 'Korean Lash Lift - In-Studio',
     slug: 'korean-lash-lift-studio',
     description:
-      'Experience our signature Korean lash lift technique in our serene studio setting. This advanced treatment creates beautifully curled, lifted lashes that appear longer and fuller for 8-10 weeks. Includes professional tinting and our signature aftercare treatment.',
-    duration_minutes: 75,
+      'Experience the signature Hauslash Korean lash lift in a calm studio setting. Includes consultation, premium product use, tinting, aftercare guidance, and a refined lifted finish designed for natural lashes and low-maintenance mornings.',
+    duration_minutes: 90,
     price_pence: 3500,
     deposit_pence: 1500,
     active: true,
@@ -20,7 +20,7 @@ export const FALLBACK_SERVICES: Service[] = [
     name: 'Korean Lash Lift - Mobile Outcall',
     slug: 'korean-lash-lift-mobile',
     description:
-      'Luxury brings itself to you. Our mobile Korean lash lift service offers the same premium treatment in the comfort of your own home, including consultation, professional setup, and aftercare guidance. After booking, please message Hauslash on Instagram with your location and treatment address.',
+      'The Hauslash Korean lash lift brought to you. Includes professional setup, consultation, premium product use, tinting, and aftercare guidance in the comfort of your own home. After booking, please message Hauslash on Instagram with your location and treatment address.',
     duration_minutes: 90,
     price_pence: 5000,
     deposit_pence: 1500,
@@ -64,7 +64,7 @@ export function getFallbackAvailabilitySlots(date: string): TimeSlot[] {
     })
     .map((start) => ({
       start,
-      end: addMinutes(start, 75),
+      end: addMinutes(start, 90),
       available: true,
     }))
 }
