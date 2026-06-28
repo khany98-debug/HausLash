@@ -11,6 +11,12 @@ const LINKS = [
   { label: 'My bookings', href: '/bookings' },
 ]
 
+const LEGAL_LINKS = [
+  { label: 'Terms', href: '/terms' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Cookies', href: '/cookies' },
+]
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-white/10 bg-[#1b1917] text-[#f4f0e9]">
@@ -68,9 +74,15 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-[#8f877d] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-[#8f877d] sm:flex-row sm:items-center sm:justify-between">
           <p>{new Date().getFullYear()} Hauslash. All rights reserved.</p>
-          <p>Precision treatments. Naturally elevated results.</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {LEGAL_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="transition-colors hover:text-white">
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
