@@ -13,10 +13,13 @@ export async function GET() {
     { url: '/aftercare', priority: 0.8, changefreq: 'monthly' },
     { url: '/reviews', priority: 0.8, changefreq: 'weekly' },
     { url: '/book', priority: 0.95, changefreq: 'daily' },
+    { url: '/bookings', priority: 0.7, changefreq: 'monthly' },
     { url: '/policies', priority: 0.7, changefreq: 'yearly' },
+    { url: '/terms', priority: 0.6, changefreq: 'yearly' },
+    { url: '/privacy', priority: 0.6, changefreq: 'yearly' },
+    { url: '/cookies', priority: 0.6, changefreq: 'yearly' },
   ]
 
-  // Get services from database for additional sitemap entries
   let services: any[] = []
   try {
     const sql = getDb()
