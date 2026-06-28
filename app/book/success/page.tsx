@@ -1,6 +1,6 @@
 import { getDb } from '@/lib/db'
 import { formatPence, formatDuration } from '@/lib/types'
-import { confirmPaidBooking } from '@/lib/confirm-booking'
+import { confirmPaidBooking, sendConfirmedBookingEmails } from '@/lib/confirm-booking'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Calendar, Clock } from 'lucide-react'
@@ -17,13 +17,14 @@ export const metadata = {
 export default async function BookingSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ session_id?: string; booking_id?: string }>
 }) {
 
   const params = await searchParams
   const sessionId = params.session_id
+  const bookingId = params.booking_id
 
-  if (!sessionId) {
+  if (!sessionId && !bookingId) {
     return (
       <>
         <SiteHeader />
@@ -45,20 +46,30 @@ export default async function BookingSuccessPage({
   let confirmationEmailSent = false
 
   try {
-    const result = await confirmPaidBooking(sessionId)
+    const result = sessionId
+      ? await confirmPaidBooking(sessionId)
+      : await sendConfirmedBookingEmails(bookingId!)
     confirmationEmailSent = result.customerEmailSent
   } catch (error) {
     console.error('Could not complete booking confirmation email:', error)
   }
 
   const sql = getDb()
-  const bookings = await sql`
-    SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
-    FROM bookings b
-    JOIN services s ON b.service_id = s.id
-    WHERE b.stripe_checkout_session_id = ${sessionId}
-    AND b.status = 'confirmed'
-  `
+  const bookings = sessionId
+    ? await sql`
+      SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
+      FROM bookings b
+      JOIN services s ON b.service_id = s.id
+      WHERE b.stripe_checkout_session_id = ${sessionId}
+      AND b.status = 'confirmed'
+    `
+    : await sql`
+      SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
+      FROM bookings b
+      JOIN services s ON b.service_id = s.id
+      WHERE b.id = ${bookingId}
+      AND b.status = 'confirmed'
+    `
 
   if (bookings.length === 0) {
     return (
@@ -137,13 +148,22 @@ export default async function BookingSuccessPage({
 
             <div className="mt-4 border-t border-border/60 pt-4">
 
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Deposit paid</span>
-                <span className="font-medium">{formatPence(depositPence)}</span>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                Deposits are non-refundable once the booking has been made.
-              </p>
+              {depositPence > 0 ? (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Deposit paid</span>
+                    <span className="font-medium">{formatPence(depositPence)}</span>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    Deposits are non-refundable once the booking has been made.
+                  </p>
+                </>
+              ) : (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Payment</span>
+                  <span className="font-medium">Free booking</span>
+                </div>
+              )}
 
               {remainingPence !== null && remainingPence > 0 && (
                 <div className="flex justify-between text-sm mt-1">
@@ -185,7 +205,7 @@ export default async function BookingSuccessPage({
               <li>Arrive with clean, makeup-free eyes</li>
               <li>Avoid waterproof mascara for 48 hours prior</li>
               <li>Remove contact lenses before the treatment</li>
-              <li>If you would like a patch test before your appointment, please contact us and we will arrange this for you.</li>
+              <li>If this is your first Hauslash treatment, your free patch test must be completed at least 24 hours before your lash lift.</li>
 
             </ul>
 

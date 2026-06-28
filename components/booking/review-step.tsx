@@ -22,6 +22,7 @@ export function ReviewStep({
   const [submitting, setSubmitting] = useState(false)
 
   const formattedDate = format(new Date(data.date), 'EEEE d MMMM yyyy')
+  const isFreeBooking = service.deposit_pence <= 0
 
   async function handleConfirm() {
     setSubmitting(true)
@@ -103,15 +104,19 @@ export function ReviewStep({
 
         <div className="mt-6 border-t border-border/60 pt-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Deposit to pay now</span>
+            <span className="text-sm text-muted-foreground">
+              {isFreeBooking ? 'Payment due now' : 'Deposit to pay now'}
+            </span>
             <span className="text-lg font-medium text-foreground">
-              {formatPence(service.deposit_pence)}
+              {isFreeBooking ? 'Free' : formatPence(service.deposit_pence)}
             </span>
           </div>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Deposits are non-refundable once the booking has been made.
-          </p>
-          {service.price_pence && (
+          {!isFreeBooking && (
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              Deposits are non-refundable once the booking has been made.
+            </p>
+          )}
+          {service.price_pence && service.price_pence > 0 && (
             <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
               <span>Remaining balance (pay at appointment)</span>
               <span>{formatPence(service.price_pence - service.deposit_pence)}</span>
@@ -132,13 +137,14 @@ export function ReviewStep({
             Creating booking...
           </>
         ) : (
-          `Pay Deposit ${formatPence(service.deposit_pence)}`
+          isFreeBooking ? 'Confirm free booking' : `Pay Deposit ${formatPence(service.deposit_pence)}`
         )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        You will be redirected to our secure payment provider to complete your deposit.
-        Your appointment will be held for 30 minutes while you complete payment. Deposits are non-refundable once the booking has been made.
+        {isFreeBooking
+          ? 'No payment is needed for this appointment. You will receive a confirmation email once it is booked.'
+          : 'You will be redirected to our secure payment provider to complete your deposit. Your appointment will be held for 30 minutes while you complete payment. Deposits are non-refundable once the booking has been made.'}
       </p>
     </div>
   )

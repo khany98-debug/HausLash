@@ -15,7 +15,7 @@ export function getOrganizationSchema() {
       postalCode: 'ST3',
       addressCountry: 'UK',
     },
-    email: 'info@hauslash.co',
+    email: 'Hauslash@outlook.com',
     url: 'https://hauslash.co.uk',
     sameAs: [
       'https://www.instagram.com/hauslash_co/',

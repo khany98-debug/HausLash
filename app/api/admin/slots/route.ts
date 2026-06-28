@@ -34,6 +34,23 @@ export async function POST(request: NextRequest) {
   const { date, start_time, end_time } = await request.json()
   const sql = getDb()
 
+  if (!date || !start_time || !end_time || start_time >= end_time) {
+    return NextResponse.json({ error: 'A valid date, start time, and end time are required' }, { status: 400 })
+  }
+
+  const overlapping = await sql`
+    SELECT id
+    FROM availability_slots
+    WHERE date = ${date}
+    AND start_time < ${end_time}::time
+    AND end_time > ${start_time}::time
+    LIMIT 1
+  `
+
+  if (overlapping.length > 0) {
+    return NextResponse.json({ error: 'This slot overlaps an existing slot for that date' }, { status: 409 })
+  }
+
   await sql`
     INSERT INTO availability_slots (date,start_time,end_time)
     VALUES (${date},${start_time},${end_time})

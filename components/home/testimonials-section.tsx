@@ -21,7 +21,7 @@ export default function TestimonialsSection() {
 
   return (
     <section className="border-y border-foreground/10 bg-card/55">
-      <div className="mx-auto max-w-5xl px-5 py-20 text-center sm:px-8 md:py-28">
+      <div className="mx-auto max-w-5xl px-5 pb-20 pt-28 text-center sm:px-8 sm:pt-24 md:py-28">
         <Quote className="mx-auto h-7 w-7 text-muted-foreground/50" />
         <p className="mt-7 eyebrow">Client words</p>
         <blockquote className="mx-auto mt-7 max-w-4xl font-serif text-3xl leading-[1.3] tracking-[-0.025em] sm:text-4xl md:text-5xl">

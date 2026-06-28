@@ -51,9 +51,9 @@ export function SiteFooter() {
                 <MapPin className="h-4 w-4 text-[#8f877d]" />
                 Stoke-on-Trent, England
               </span>
-              <a href="mailto:info@hauslash.co" className="flex items-center gap-3 transition-colors hover:text-white">
+              <a href="mailto:Hauslash@outlook.com" className="flex items-center gap-3 transition-colors hover:text-white">
                 <Mail className="h-4 w-4 text-[#8f877d]" />
-                info@hauslash.co
+                Hauslash@outlook.com
               </a>
               <a
                 href="https://www.instagram.com/hauslash_co/"

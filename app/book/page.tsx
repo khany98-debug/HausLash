@@ -1,5 +1,6 @@
 import { getDb } from '@/lib/db'
 import { FALLBACK_SERVICES, isMissingDatabaseConfig } from '@/lib/service-fallbacks'
+import { normalisePublicServices } from '@/lib/service-display'
 import { Service } from '@/lib/types'
 import { BookingWizard } from '@/components/booking/booking-wizard'
 import { SiteHeader } from '@/components/site-header'
@@ -8,17 +9,17 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Book an Appointment',
-  description: 'Choose your treatment, pick a date and time, and secure your booking with a non-refundable deposit.',
+  description: 'Choose your treatment, pick a date and time, and secure your booking online.',
 }
 
 async function getServices(): Promise<Service[]> {
   try {
     const sql = getDb()
     const rows = await sql`SELECT * FROM services WHERE active = true ORDER BY sort_order ASC`
-    return rows as Service[]
+    return normalisePublicServices(rows as Service[])
   } catch (error) {
     if (isMissingDatabaseConfig(error)) {
-      return FALLBACK_SERVICES
+      return normalisePublicServices(FALLBACK_SERVICES)
     }
 
     throw error
@@ -44,7 +45,7 @@ export default async function BookPage({
               Reserve your appointment
             </h1>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-muted-foreground">
-              Choose your treatment and preferred time, then secure it with a non-refundable deposit. The remaining balance is paid at your appointment.
+              Choose your treatment and preferred time. Lash lifts are secured with a non-refundable deposit; patch tests are free to book.
             </p>
           </div>
           <div className="luxury-card p-5 sm:p-8">

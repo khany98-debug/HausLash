@@ -33,9 +33,9 @@ export function ServiceStep({
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <h3 className="min-w-0 text-base font-medium leading-snug text-foreground">{service.name}</h3>
                 <div className="flex shrink-0 items-center gap-2">
-                  {service.price_pence && (
+                  {service.price_pence !== null && (
                     <span className="text-sm font-medium text-foreground">
-                      {formatPence(service.price_pence)}
+                      {service.price_pence > 0 ? formatPence(service.price_pence) : 'Free'}
                     </span>
                   )}
                   {isSelected && (
@@ -53,7 +53,11 @@ export function ServiceStep({
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatDuration(service.duration_minutes)}
-                <span>Non-refundable deposit: {formatPence(service.deposit_pence)}</span>
+                <span>
+                  {service.deposit_pence > 0
+                    ? `Non-refundable deposit: ${formatPence(service.deposit_pence)}`
+                    : 'Free booking'}
+                </span>
               </div>
             </button>
           )

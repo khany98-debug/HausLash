@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { isAdminRequest } from '@/lib/admin-auth'
+import { normalisePublicServices } from '@/lib/service-display'
+import { Service } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
   const sql = getDb()
   const services = await sql`SELECT * FROM services ORDER BY sort_order ASC`
-  return NextResponse.json({ services })
+  return NextResponse.json({ services: normalisePublicServices(services as Service[]) })
 }
 
 // POST create a new service
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   await sql`
     INSERT INTO services (name, slug, description, duration_minutes, price_pence, deposit_pence, active, sort_order)
-    VALUES (${body.name}, ${slug}, ${body.description || null}, ${body.duration_minutes}, ${body.price_pence || null}, ${body.deposit_pence || 1500}, ${body.active ?? true}, ${body.sort_order || 0})
+    VALUES (${body.name}, ${slug}, ${body.description || null}, ${body.duration_minutes}, ${body.price_pence ?? null}, ${body.deposit_pence ?? 1500}, ${body.active ?? true}, ${body.sort_order || 0})
   `
   return NextResponse.json({ success: true })
 }
@@ -43,8 +45,8 @@ export async function PATCH(request: NextRequest) {
       name = ${body.name},
       description = ${body.description || null},
       duration_minutes = ${body.duration_minutes},
-      price_pence = ${body.price_pence || null},
-      deposit_pence = ${body.deposit_pence || 1500},
+      price_pence = ${body.price_pence ?? null},
+      deposit_pence = ${body.deposit_pence ?? 1500},
       active = ${body.active ?? true},
       sort_order = ${body.sort_order || 0}
     WHERE id = ${body.id}

@@ -152,7 +152,15 @@ export async function PATCH(request: NextRequest) {
       const startDate = new Date(booking.start_at)
       const formattedDate = format(startDate, 'EEEE, d MMMM yyyy')
       const formattedTime = format(startDate, 'HH:mm')
-      const depositAmount = formatPence(booking.deposit_pence)
+      const depositAmount = formatPence(booking.deposit_amount_pence ?? booking.deposit_pence ?? 0)
+      const calendarEvent = createBookingCalendarEvent({
+        bookingId,
+        service: booking.service_name,
+        customerName: booking.customer_name,
+        startAt: booking.start_at,
+        endAt: booking.end_at,
+        durationMinutes: booking.duration_minutes,
+      })
       const subject = 'Your Hauslash appointment has been cancelled'
 
       await assertEmailSent(
@@ -164,7 +172,9 @@ export async function PATCH(request: NextRequest) {
           resend.emails.send({
             from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
             to: booking.customer_email,
+            replyTo: process.env.ADMIN_EMAIL || 'Hauslash@outlook.com',
             subject,
+            attachments: [createBookingCalendarAttachment(calendarEvent, 'CANCEL')],
             react: BookingCancellationEmail({
               name: booking.customer_name,
               service: booking.service_name,
@@ -252,6 +262,7 @@ export async function PATCH(request: NextRequest) {
           resend.emails.send({
             from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
             to: booking.customer_email,
+            replyTo: process.env.ADMIN_EMAIL || 'Hauslash@outlook.com',
             subject,
             attachments: [createBookingCalendarAttachment(calendarEvent)],
             react: BookingRescheduleEmail({

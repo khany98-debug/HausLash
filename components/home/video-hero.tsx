@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, Pause, Play } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 import { BrandMark } from '@/components/brand-mark'
 import { cn } from '@/lib/utils'
@@ -11,40 +11,23 @@ export function VideoHero() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
 
-  useEffect(() => {
+  function keepVideoPlaying() {
     const video = videoRef.current
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-
-    if (!video || !reducedMotion.matches) {
-      return
-    }
-
-    video.pause()
-    setIsPlaying(false)
-  }, [])
-
-  async function togglePlayback() {
-    const video = videoRef.current
-
     if (!video) {
       return
     }
 
-    if (video.paused) {
-      try {
-        await video.play()
-        setIsPlaying(true)
-      } catch {
-        setIsPlaying(false)
-      }
-      return
-    }
-
-    video.pause()
-    setIsPlaying(false)
+    video.muted = true
+    video.loop = true
+    video.play().catch(() => {
+      // Muted inline video should autoplay in modern browsers; keep the poster visible if blocked.
+    })
   }
+
+  useEffect(() => {
+    keepVideoPlaying()
+  }, [])
 
   return (
     <section
@@ -80,17 +63,21 @@ export function VideoHero() {
                 muted
                 playsInline
                 preload="auto"
-                onLoadedData={() => setIsReady(true)}
-                onCanPlay={() => setIsReady(true)}
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noplaybackrate"
+                onLoadedData={() => {
+                  setIsReady(true)
+                  keepVideoPlaying()
+                }}
+                onCanPlay={() => {
+                  setIsReady(true)
+                  keepVideoPlaying()
+                }}
                 onPlaying={() => {
                   setIsReady(true)
-                  setIsPlaying(true)
                 }}
-                onPause={() => setIsPlaying(false)}
-                onError={() => {
-                  setHasError(true)
-                  setIsPlaying(false)
-                }}
+                onPause={keepVideoPlaying}
+                onError={() => setHasError(true)}
                 className={cn(
                   'absolute inset-0 z-10 h-full w-full object-cover object-center transition-opacity duration-700',
                   isReady ? 'opacity-100' : 'opacity-0',
@@ -99,21 +86,6 @@ export function VideoHero() {
               >
                 <source src="/videos/logo-animation.mp4" type="video/mp4" />
               </video>
-            )}
-
-            {isReady && !hasError && (
-              <button
-                type="button"
-                onClick={togglePlayback}
-                className="absolute bottom-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/35 bg-black/25 text-white opacity-100 shadow-lg backdrop-blur-md transition hover:bg-black/40 focus-visible:opacity-100 sm:bottom-5 sm:right-5 sm:opacity-0 sm:group-hover:opacity-100"
-                aria-label={isPlaying ? 'Pause welcome film' : 'Play welcome film'}
-              >
-                {isPlaying ? (
-                  <Pause className="h-4 w-4 fill-current" />
-                ) : (
-                  <Play className="ml-0.5 h-4 w-4 fill-current" />
-                )}
-              </button>
             )}
 
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden items-end justify-between bg-gradient-to-t from-black/35 via-black/5 to-transparent p-5 text-white sm:flex">

@@ -166,7 +166,7 @@ export default function BookingConfirmationEmail({
             </Section>
 
             <Text style={styles.copy}>
-              Please arrive with clean, makeup-free lashes. If you would like a patch test before your appointment, send us a message and we will arrange this with you.
+              Please arrive with clean, makeup-free lashes. If this is your first Hauslash treatment, your patch test must be completed at least 24 hours before your lash lift.
             </Text>
 
             <Section style={{ textAlign: "center", marginTop: "26px" }}>

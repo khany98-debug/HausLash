@@ -1,4 +1,5 @@
 import { Service, TimeSlot } from '@/lib/types'
+import { PATCH_TEST_DESCRIPTION } from '@/lib/service-display'
 
 export const FALLBACK_SERVICES: Service[] = [
   {
@@ -25,6 +26,18 @@ export const FALLBACK_SERVICES: Service[] = [
     deposit_pence: 1500,
     active: true,
     sort_order: 2,
+    created_at: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: '4fda73fb-3b88-4d79-9f5f-c9636aa4ef67',
+    name: 'Patch Test',
+    slug: 'patch-test',
+    description: PATCH_TEST_DESCRIPTION,
+    duration_minutes: 15,
+    price_pence: 0,
+    deposit_pence: 0,
+    active: true,
+    sort_order: 3,
     created_at: '2026-01-01T00:00:00.000Z',
   },
 ]

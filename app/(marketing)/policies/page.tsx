@@ -26,15 +26,15 @@ export default function PoliciesPage() {
           <div className="mt-4 flex flex-col gap-3 text-sm leading-relaxed text-muted-foreground">
             <p>
               Please ensure you are able to attend your appointment before booking,
-              as all appointments require a deposit to secure the time slot.
+              as lash lift appointments require a deposit to secure the time slot.
             </p>
 
             <ul className="ml-4 flex flex-col gap-2 list-disc">
 
               <li>
                 <strong className="text-foreground">Deposits are non-refundable:</strong>{' '}
-                All appointments require a deposit to secure the booking and this
-                deposit is non-refundable once the booking has been made.
+                Lash lift appointments require a deposit to secure the booking and this
+                deposit is non-refundable once the booking has been made. Patch tests are free.
               </li>
 
               <li>
@@ -63,8 +63,9 @@ export default function PoliciesPage() {
 
           <div className="mt-4 flex flex-col gap-3 text-sm leading-relaxed text-muted-foreground">
             <p>
-              For your safety, a patch test is required at least 48 hours before your
-              first lash treatment with us.
+              For your safety, a patch test is required before your first lash
+              treatment with us. Results are known after 24 hours, so please book
+              your patch test at least 24 hours before your lash lift.
             </p>
 
             <p>
@@ -116,7 +117,7 @@ export default function PoliciesPage() {
             <li>Remove contact lenses before the treatment</li>
             <li>Avoid caffeine immediately before to reduce eye sensitivity</li>
             <li>Let us know about any allergies or sensitivities</li>
-            <li>If you require a patch test, please let us know when booking</li>
+            <li>If this is your first Hauslash treatment, book or enquire about your patch test before your lash lift</li>
           </ul>
         </section>
 

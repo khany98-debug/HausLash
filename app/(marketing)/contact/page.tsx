@@ -10,8 +10,8 @@ const CONTACTS = [
   {
     icon: Mail,
     label: 'Email',
-    value: 'info@hauslash.co',
-    href: 'mailto:info@hauslash.co',
+    value: 'Hauslash@outlook.com',
+    href: 'mailto:Hauslash@outlook.com',
   },
   {
     icon: Instagram,

@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
-        to: process.env.ADMIN_EMAIL || 'admin@hauslash.co',
+        to: process.env.ADMIN_EMAIL || 'Hauslash@outlook.com',
         subject: `New Contact Inquiry from ${name}`,
         html: `
           <h2>New Contact Inquiry</h2>

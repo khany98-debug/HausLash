@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
+import { sendConfirmedBookingEmails } from "@/lib/confirm-booking"
 import { isMissingDatabaseConfig } from "@/lib/service-fallbacks"
+import { normalisePublicService } from "@/lib/service-display"
 import { stripe } from "@/lib/stripe"
+import { Service } from "@/lib/types"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 })
     }
 
-    const service = serviceRows[0]
+    const service = normalisePublicService(serviceRows[0] as Service)
 
     // Calculate appointment times
     const startAt = `${date}T${time}:00Z`
@@ -71,10 +74,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hold booking for 30 minutes
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
-
     const depositPence = service.deposit_pence as number
+    const isFreeBooking = depositPence <= 0
+
+    // Hold paid bookings for 30 minutes while checkout is completed.
+    const expiresAt = isFreeBooking
+      ? null
+      : new Date(Date.now() + 30 * 60 * 1000).toISOString()
 
     // Create booking
     const bookingRows = await sql`
@@ -98,9 +104,9 @@ export async function POST(request: NextRequest) {
         ${email},
         ${phone},
         ${notes || null},
-        'pending_payment',
+        ${isFreeBooking ? 'confirmed' : 'pending_payment'},
         ${depositPence},
-        ${expiresAt}::timestamptz
+        ${expiresAt ? `${expiresAt}` : null}::timestamptz
       )
       RETURNING id
     `
@@ -111,6 +117,19 @@ export async function POST(request: NextRequest) {
       request.headers.get("origin") || request.headers.get("host") || ""
 
     const baseUrl = origin.startsWith("http") ? origin : `https://${origin}`
+
+    if (isFreeBooking) {
+      try {
+        await sendConfirmedBookingEmails(bookingId)
+      } catch (emailError) {
+        console.error("Free booking confirmation email failed:", emailError)
+      }
+
+      return NextResponse.json({
+        bookingId,
+        checkoutUrl: `${baseUrl}/book/success?booking_id=${bookingId}`,
+      })
+    }
 
     // Stripe checkout
     const session = await stripe.checkout.sessions.create({

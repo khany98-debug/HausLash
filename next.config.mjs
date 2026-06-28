@@ -1,6 +1,9 @@
 /** @type {import('next).NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  experimental: {
+    cpus: 1,
+  },
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000,

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowUpRight, Clock3, Sparkles } from 'lucide-react'
 import { getDb } from '@/lib/db'
 import { FALLBACK_SERVICES, isMissingDatabaseConfig } from '@/lib/service-fallbacks'
+import { normalisePublicServices } from '@/lib/service-display'
 import { Service, formatDuration, formatPence } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
@@ -11,10 +12,10 @@ async function getServices(): Promise<Service[]> {
   try {
     const sql = getDb()
     const rows = await sql`SELECT * FROM services WHERE active = true ORDER BY sort_order ASC`
-    return rows as Service[]
+    return normalisePublicServices(rows as Service[])
   } catch (error) {
     if (isMissingDatabaseConfig(error)) {
-      return FALLBACK_SERVICES
+      return normalisePublicServices(FALLBACK_SERVICES)
     }
 
     throw error
@@ -80,7 +81,11 @@ export default async function ServicesPage() {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-5 md:flex-col md:items-end">
-                {service.price_pence && <p className="font-serif text-4xl tracking-tight">{formatPence(service.price_pence)}</p>}
+                {service.price_pence !== null && (
+                  <p className="font-serif text-4xl tracking-tight">
+                    {service.price_pence > 0 ? formatPence(service.price_pence) : 'Free'}
+                  </p>
+                )}
                 <Button asChild variant="outline" className="rounded-full border-foreground/15 bg-transparent">
                   <Link href={`/book?service=${service.slug}`}>
                     Book
@@ -96,7 +101,7 @@ export default async function ServicesPage() {
           <div>
             <p className="eyebrow text-primary-foreground/50">Booking note</p>
             <p className="mt-2 max-w-xl text-sm leading-6 text-primary-foreground/70">
-              A {formatPence(1500)} non-refundable deposit secures your appointment and is deducted from your treatment total on the day.
+              Lash lift appointments are secured with a {formatPence(1500)} non-refundable deposit. Patch tests are free and should be booked at least 24 hours before a first treatment.
             </p>
           </div>
           <Button asChild variant="secondary" className="mt-5 rounded-full sm:mt-0">

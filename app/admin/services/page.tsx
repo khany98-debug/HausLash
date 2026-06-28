@@ -90,8 +90,8 @@ export default function AdminServicesPage() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {formatDuration(s.duration_minutes)}
-                  {s.price_pence ? ` / ${formatPence(s.price_pence)}` : ''}
-                  {' / Deposit: '}{formatPence(s.deposit_pence)}
+                  {' / '}{s.price_pence && s.price_pence > 0 ? formatPence(s.price_pence) : 'Free'}
+                  {' / Deposit: '}{s.deposit_pence > 0 ? formatPence(s.deposit_pence) : 'Free'}
                 </p>
               </div>
               <Button

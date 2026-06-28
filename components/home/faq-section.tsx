@@ -15,7 +15,7 @@ const FAQS = [
   },
   {
     q: 'Do I need a patch test?',
-    a: 'If you require a patch test, please let us know when booking. We will arrange it before your appointment.',
+    a: 'Yes, if this is your first Hauslash treatment. Patch test results are known after 24 hours, so please book or enquire about this before your lash lift appointment.',
   },
   {
     q: 'How long do results last?',
@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: 'Is a deposit required to book?',
-    a: 'Yes, we take a non-refundable deposit when you book online. This secures your appointment and is deducted from the total treatment cost on the day.',
+    a: 'Korean lash lift appointments require a non-refundable deposit when you book online. Patch tests are free to book.',
   },
   {
     q: 'What is your cancellation policy?',

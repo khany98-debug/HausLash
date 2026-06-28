@@ -118,6 +118,7 @@ async function sendCustomerEmail(booking: BookingDetails) {
   const response = await resend.emails.send({
     from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
     to: booking.customer_email,
+    replyTo: process.env.ADMIN_EMAIL || 'Hauslash@outlook.com',
     subject,
     attachments: [createBookingCalendarAttachment(calendarEvent)],
     react: BookingConfirmationEmail({
@@ -157,7 +158,7 @@ async function sendCustomerEmail(booking: BookingDetails) {
 async function sendAdminEmail(booking: BookingDetails) {
   const emailType = 'booking_confirmation_admin'
   const subject = 'New HausLash booking'
-  const recipient = process.env.ADMIN_EMAIL || 'admin@hauslash.co'
+  const recipient = process.env.ADMIN_EMAIL || 'Hauslash@outlook.com'
 
   if (await hasSuccessfulEmailLog(booking.id, emailType)) {
     return
@@ -184,6 +185,7 @@ async function sendAdminEmail(booking: BookingDetails) {
   const response = await resend.emails.send({
     from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
     to: recipient,
+    replyTo: booking.customer_email,
     subject,
     attachments: [createBookingCalendarAttachment(calendarEvent)],
     react: AdminBookingNotificationEmail({
@@ -283,6 +285,61 @@ export async function confirmPaidBooking(
     FROM bookings b
     JOIN services s ON s.id = b.service_id
     WHERE b.stripe_checkout_session_id = ${checkoutSessionId}
+    AND b.status = 'confirmed'
+  `
+
+  if (bookingRows.length === 0) {
+    return {
+      booking: null,
+      confirmed: false,
+      customerEmailSent: false,
+    }
+  }
+
+  const booking = bookingRows[0] as BookingDetails
+
+  try {
+    await createReminders(booking)
+  } catch (error) {
+    console.error('Could not create booking reminders:', error)
+  }
+
+  const customerEmailSent = await sendCustomerEmail(booking)
+
+  try {
+    await sendAdminEmail(booking)
+  } catch (error) {
+    console.error('Could not send admin booking notification:', error)
+  }
+
+  return {
+    booking,
+    confirmed: true,
+    customerEmailSent,
+  }
+}
+
+export async function sendConfirmedBookingEmails(
+  bookingId: string
+): Promise<ConfirmationResult> {
+  const sql = getDb()
+
+  const bookingRows = await sql`
+    SELECT
+      b.id,
+      b.customer_name,
+      b.customer_email,
+      b.customer_phone,
+      b.notes,
+      b.start_at,
+      b.end_at,
+      b.deposit_amount_pence,
+      s.name AS service_name,
+      s.duration_minutes,
+      s.price_pence
+    FROM bookings b
+    JOIN services s ON s.id = b.service_id
+    WHERE b.id = ${bookingId}
     AND b.status = 'confirmed'
   `
 

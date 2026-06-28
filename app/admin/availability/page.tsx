@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { Trash2, Copy, ChevronDown, ChevronUp, Clock, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const LASH_LIFT_SLOT_MINUTES = 90
+const QUICK_SLOT_STARTS = ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30']
 
 interface AvailabilityRule {
   id: string
@@ -31,6 +33,20 @@ interface BlockedTime {
   start_at: string
   end_at: string
   reason?: string
+}
+
+function addMinutesToTime(time: string, minutes: number) {
+  const [hours, mins] = time.split(':').map(Number)
+  const total = hours * 60 + mins + minutes
+  const nextHours = Math.floor(total / 60)
+  const nextMins = total % 60
+  return `${String(nextHours).padStart(2, '0')}:${String(nextMins).padStart(2, '0')}`
+}
+
+function getSlotDuration(start: string, end: string) {
+  const [startHours, startMins] = start.slice(0, 5).split(':').map(Number)
+  const [endHours, endMins] = end.slice(0, 5).split(':').map(Number)
+  return endHours * 60 + endMins - (startHours * 60 + startMins)
 }
 
 export default function AdminAvailabilityPage() {
@@ -126,15 +142,23 @@ export default function AdminAvailabilityPage() {
     return true
   }
 
-  async function createSlot() {
+  async function createSlot(startOverride?: string, endOverride?: string) {
     if (!slotDate) {
       toast.error('Please select a date')
       return
     }
 
-    if (!validateTimeRange(slotStart, slotEnd, 'Slot time')) return
+    const start = startOverride || slotStart
+    const end = endOverride || slotEnd || (start ? addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES) : '')
 
-    setProcessingActionId('create-slot')
+    if (!start) {
+      toast.error('Please choose a start time')
+      return
+    }
+
+    if (!validateTimeRange(start, end, 'Slot time')) return
+
+    setProcessingActionId(startOverride ? `create-slot-${startOverride}` : 'create-slot')
     try {
       const res = await fetch('/api/admin/slots', {
         method: 'POST',
@@ -144,13 +168,13 @@ export default function AdminAvailabilityPage() {
         },
         body: JSON.stringify({
           date: slotDate,
-          start_time: slotStart,
-          end_time: slotEnd,
+          start_time: start,
+          end_time: end,
         }),
       })
 
       if (res.ok) {
-        toast.success('Slot added successfully')
+        toast.success(`Slot added: ${start} - ${end}`)
         setSlotStart('')
         setSlotEnd('')
         await loadSlots(slotDate)
@@ -160,6 +184,82 @@ export default function AdminAvailabilityPage() {
       }
     } catch (error) {
       toast.error('Failed to add slot')
+    } finally {
+      setProcessingActionId(null)
+    }
+  }
+
+  async function createPresetDaySlots() {
+    if (!slotDate) {
+      toast.error('Please select a date')
+      return
+    }
+
+    setProcessingActionId('create-preset-day')
+    try {
+      const existingStarts = new Set(slots.map((slot) => slot.start_time.slice(0, 5)))
+      let created = 0
+      let skipped = 0
+
+      for (const start of QUICK_SLOT_STARTS) {
+        if (existingStarts.has(start)) {
+          skipped++
+          continue
+        }
+
+        const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
+        const res = await fetch('/api/admin/slots', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            date: slotDate,
+            start_time: start,
+            end_time: end,
+          }),
+        })
+
+        if (res.ok) {
+          created++
+        } else {
+          skipped++
+        }
+      }
+
+      await loadSlots(slotDate)
+      toast.success(`${created} 90-minute slot${created !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped` : ''}`)
+    } catch (error) {
+      toast.error('Failed to add preset slots')
+    } finally {
+      setProcessingActionId(null)
+    }
+  }
+
+  async function clearSlotsForDate() {
+    if (!slotDate || slots.length === 0) return
+
+    const confirmed = window.confirm(`Remove all ${slots.length} slot${slots.length !== 1 ? 's' : ''} for ${slotDate}?`)
+    if (!confirmed) return
+
+    setProcessingActionId('clear-slots')
+    try {
+      for (const slot of slots) {
+        await fetch('/api/admin/slots', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id: slot.id }),
+        })
+      }
+
+      toast.success('All slots removed for this date')
+      await loadSlots(slotDate)
+    } catch (error) {
+      toast.error('Failed to clear slots')
     } finally {
       setProcessingActionId(null)
     }
@@ -436,7 +536,7 @@ export default function AdminAvailabilityPage() {
       <div>
         <h1 className="font-serif text-3xl text-foreground">Availability Management</h1>
         <p className="text-muted-foreground mt-1">
-          Manage your weekly availability rules, specific time slots, and blocked times
+          Add 90-minute lash lift slots quickly, copy them across dates, and block time when needed.
         </p>
       </div>
 
@@ -458,7 +558,7 @@ export default function AdminAvailabilityPage() {
         {expandedSections.rules && (
           <div className="border-t border-primary/10 p-4 gap-4 flex flex-col">
             <p className="text-sm text-muted-foreground">
-              Set your recurring availability for each day of the week. These are the default hours shown to customers.
+              Set recurring opening windows if you need them. For day-to-day bookings, use the 90-minute slots below.
             </p>
 
             {editingRuleDay === null ? (
@@ -472,7 +572,7 @@ export default function AdminAvailabilityPage() {
                         {rule ? (
                           <p className="text-sm text-muted-foreground">
                             {rule.start_time} — {rule.end_time}
-                            <span className="ml-2 text-xs">(Buffer: {rule.buffer_minutes}min)</span>
+                            <span className="ml-2 text-xs">(Buffer: {rule.buffer_minutes} min)</span>
                           </p>
                         ) : (
                           <p className="text-sm text-muted-foreground italic">Not set</p>
@@ -490,7 +590,7 @@ export default function AdminAvailabilityPage() {
                             } else {
                               setRuleStart('09:00')
                               setRuleEnd('17:00')
-                              setRuleBuffer('15')
+                              setRuleBuffer('0')
                             }
                             setEditingRuleDay(index)
                           }}
@@ -566,12 +666,12 @@ export default function AdminAvailabilityPage() {
         </button>
 
         {expandedSections.dailySlots && (
-          <div className="border-t border-primary/10 p-4 gap-4 flex flex-col">
+          <div className="border-t border-primary/10 p-4 gap-5 flex flex-col">
             <p className="text-sm text-muted-foreground">
-              Add specific time slots for individual dates. These override your weekly availability rules.
+              Pick a date, then add ready-made 90-minute lash lift slots. The quick buttons are set up as 09:00, 10:30, 12:00, 13:30, 15:00, and 16:30.
             </p>
 
-            <div className="grid gap-3 sm:grid-cols-4">
+            <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
               <div>
                 <label className="text-sm font-medium">Date</label>
                 <Input
@@ -579,27 +679,85 @@ export default function AdminAvailabilityPage() {
                   value={slotDate}
                   onChange={(e) => {
                     setSlotDate(e.target.value)
+                    if (!slotStart) {
+                      setSlotStart('09:00')
+                      setSlotEnd(addMinutesToTime('09:00', LASH_LIFT_SLOT_MINUTES))
+                    }
                     loadSlots(e.target.value)
                   }}
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Start Time</label>
-                <Input type="time" value={slotStart} onChange={(e) => setSlotStart(e.target.value)} />
+                <Input
+                  type="time"
+                  value={slotStart}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setSlotStart(value)
+                    setSlotEnd(value ? addMinutesToTime(value, LASH_LIFT_SLOT_MINUTES) : '')
+                  }}
+                />
               </div>
               <div>
-                <label className="text-sm font-medium">End Time</label>
+                <label className="text-sm font-medium">End Time (auto 90 min)</label>
                 <Input type="time" value={slotEnd} onChange={(e) => setSlotEnd(e.target.value)} />
               </div>
               <div className="flex items-end">
                 <Button
-                  onClick={createSlot}
+                  onClick={() => createSlot()}
                   disabled={processingActionId === 'create-slot' || !slotDate}
                   className="w-full"
                 >
                   {processingActionId === 'create-slot' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Add Slot
                 </Button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-primary/10 bg-accent/20 p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Quick add 90-minute slots</p>
+                  <p className="text-xs text-muted-foreground">Use one slot, or build a full working day in one click.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_SLOT_STARTS.map((start) => {
+                    const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
+                    const exists = slots.some((slot) => slot.start_time.slice(0, 5) === start)
+                    return (
+                      <Button
+                        key={start}
+                        size="sm"
+                        variant={exists ? 'secondary' : 'outline'}
+                        onClick={() => createSlot(start, end)}
+                        disabled={!slotDate || exists || processingActionId === `create-slot-${start}`}
+                      >
+                        {processingActionId === `create-slot-${start}` && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                        {start}
+                      </Button>
+                    )
+                  })}
+                  <Button
+                    size="sm"
+                    onClick={createPresetDaySlots}
+                    disabled={!slotDate || processingActionId === 'create-preset-day'}
+                  >
+                    {processingActionId === 'create-preset-day' && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                    Add full day
+                  </Button>
+                  {slots.length > 0 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={clearSlotsForDate}
+                      disabled={processingActionId === 'clear-slots'}
+                    >
+                      {processingActionId === 'clear-slots' && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                      Clear date
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -615,6 +773,9 @@ export default function AdminAvailabilityPage() {
                           <span className="font-medium">
                             {slot.start_time.slice(0, 5)} — {slot.end_time.slice(0, 5)}
                           </span>
+                          <Badge variant="outline" className="text-[10px]">
+                            {getSlotDuration(slot.start_time, slot.end_time)} min
+                          </Badge>
                         </div>
                         <Button
                           size="sm"
