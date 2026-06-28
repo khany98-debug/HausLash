@@ -83,13 +83,13 @@ export function SiteHeader() {
 
           <nav className="flex min-w-0 items-center justify-end gap-5 justify-self-end" aria-label="Booking and information navigation">
             <Link
-              href="/bookings"
+              href="/contact"
               className={cn(
                 'whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
-                pathname === '/bookings' && 'text-foreground',
+                pathname === '/contact' && 'text-foreground',
               )}
             >
-              My bookings
+              Contact
             </Link>
             <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-5">
               <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
