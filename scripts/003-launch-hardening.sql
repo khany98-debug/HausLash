@@ -30,6 +30,25 @@ END $$;
 
 CREATE INDEX IF NOT EXISTS idx_availability_slots_date ON availability_slots(date);
 CREATE INDEX IF NOT EXISTS idx_availability_slots_date_start ON availability_slots(date, start_time);
+
+-- Remove exact duplicate availability slots before enforcing uniqueness.
+-- Keeps the oldest row for each date/start/end combination.
+DELETE FROM availability_slots a
+USING (
+  SELECT
+    ctid,
+    ROW_NUMBER() OVER (
+      PARTITION BY date, start_time, end_time
+      ORDER BY created_at NULLS LAST, ctid
+    ) AS row_num
+  FROM availability_slots
+  WHERE date IS NOT NULL
+    AND start_time IS NOT NULL
+    AND end_time IS NOT NULL
+) duplicates
+WHERE a.ctid = duplicates.ctid
+  AND duplicates.row_num > 1;
+
 CREATE UNIQUE INDEX IF NOT EXISTS uniq_availability_slots_date_time
   ON availability_slots(date, start_time, end_time)
   WHERE date IS NOT NULL AND start_time IS NOT NULL AND end_time IS NOT NULL;
