@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
+import { enforceRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -29,6 +30,14 @@ function escapeHtml(value: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const limited = await enforceRateLimit(request, {
+      bucket: 'contact-form',
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+    })
+
+    if (limited) return limited
+
     const body = await request.json()
     const parsed = contactSchema.safeParse(body)
 
@@ -46,7 +55,6 @@ export async function POST(request: NextRequest) {
     const safeMessage = escapeHtml(message).replace(/\n/g, '<br>')
     const sql = getDb()
 
-    // Store contact inquiry in database
     const result = await sql`
       INSERT INTO contact_inquiries (
         name,
@@ -67,7 +75,6 @@ export async function POST(request: NextRequest) {
 
     const inquiryId = result[0].id
 
-    // Send confirmation email to customer
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
@@ -76,7 +83,7 @@ export async function POST(request: NextRequest) {
         html: `
           <h2>We've received your message</h2>
           <p>Hi ${safeName},</p>
-          <p>Thank you for reaching out to HausLash! We've received your inquiry and will get back to you as soon as possible.</p>
+          <p>Thank you for reaching out to HausLash. We've received your inquiry and will get back to you as soon as possible.</p>
           <p><strong>Your message:</strong></p>
           <p style="padding: 10px; background-color: #f5f5f5; border-left: 3px solid #333;">
             ${safeMessage}
@@ -86,10 +93,8 @@ export async function POST(request: NextRequest) {
       })
     } catch (emailError) {
       console.error('Error sending customer confirmation email:', emailError)
-      // Don't fail the request if email fails
     }
 
-    // Send admin notification email
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co',
@@ -115,7 +120,6 @@ export async function POST(request: NextRequest) {
       })
     } catch (emailError) {
       console.error('Error sending admin notification email:', emailError)
-      // Don't fail the request if email fails
     }
 
     return NextResponse.json({

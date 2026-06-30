@@ -6,6 +6,7 @@ import BookingRescheduleEmail from '@/emails/booking-reschedule'
 import { formatPence } from '@/lib/types'
 import { format } from 'date-fns'
 import { isAdminRequest } from '@/lib/admin-auth'
+import { enforceRateLimit } from '@/lib/rate-limit'
 import {
   createBookingCalendarAttachment,
   createBookingCalendarEvent,
@@ -13,6 +14,21 @@ import {
 } from '@/lib/calendar'
 
 export const dynamic = 'force-dynamic'
+
+async function rejectUnauthorizedAdmin(request: NextRequest) {
+  if (isAdminRequest(request)) {
+    return null
+  }
+
+  const limited = await enforceRateLimit(request, {
+    bucket: 'admin-auth-attempt',
+    limit: 8,
+    windowMs: 15 * 60 * 1000,
+    message: 'Too many admin sign-in attempts. Please wait before trying again.',
+  })
+
+  return limited || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
 
 async function recordEmailResult(
   bookingId: string,
@@ -72,9 +88,8 @@ async function assertEmailSent(
 }
 
 export async function GET(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const unauthorized = await rejectUnauthorizedAdmin(request)
+  if (unauthorized) return unauthorized
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
@@ -108,9 +123,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const unauthorized = await rejectUnauthorizedAdmin(request)
+  if (unauthorized) return unauthorized
 
   try {
     const body = await request.json()
@@ -125,7 +139,6 @@ export async function PATCH(request: NextRequest) {
 
     const sql = getDb()
 
-    // Get booking details
     const bookingRows = await sql`
       SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence, s.deposit_pence
       FROM bookings b
@@ -140,7 +153,6 @@ export async function PATCH(request: NextRequest) {
     const booking = bookingRows[0]
 
     if (action === 'cancel') {
-      // Cancel the booking
       const updatedRows = await sql`
         UPDATE bookings
         SET status = 'cancelled', updated_at = now()
@@ -148,7 +160,6 @@ export async function PATCH(request: NextRequest) {
         RETURNING *
       `
 
-      // Send cancellation email
       const startDate = new Date(booking.start_at)
       const formattedDate = format(startDate, 'EEEE, d MMMM yyyy')
       const formattedTime = format(startDate, 'HH:mm')
@@ -192,7 +203,6 @@ export async function PATCH(request: NextRequest) {
         booking: updatedRows[0],
       })
     } else if (action === 'reschedule') {
-      // Validate new date and time
       if (!newDate || !newTime) {
         return NextResponse.json(
           { error: 'Missing required fields for reschedule: newDate and newTime' },
@@ -208,7 +218,6 @@ export async function PATCH(request: NextRequest) {
       const endM = String(endMinutes % 60).padStart(2, '0')
       const newEndAt = `${newDate}T${endH}:${endM}:00Z`
 
-      // Check for conflicts
       const conflicts = await sql`
         SELECT id FROM bookings
         WHERE start_at < ${newEndAt}::timestamptz
@@ -225,7 +234,6 @@ export async function PATCH(request: NextRequest) {
         )
       }
 
-      // Update booking with new date/time
       const updatedRows = await sql`
         UPDATE bookings
         SET start_at = ${newStartAt}::timestamptz,
@@ -235,7 +243,6 @@ export async function PATCH(request: NextRequest) {
         RETURNING *
       `
 
-      // Send reschedule email
       const oldStartDate = new Date(booking.start_at)
       const oldFormattedDate = format(oldStartDate, 'EEEE, d MMMM yyyy')
       const oldFormattedTime = format(oldStartDate, 'HH:mm')

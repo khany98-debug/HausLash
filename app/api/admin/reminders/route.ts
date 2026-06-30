@@ -14,15 +14,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const sql = getDb()
+    const fromAddress = process.env.RESEND_FROM_ADDRESS || 'noreply@hauslash.co'
+    const replyTo = process.env.ADMIN_EMAIL || 'Hauslash@outlook.com'
 
-    // Get current time
-    const now = new Date()
-    const inOneHour = new Date(now.getTime() + 60 * 60 * 1000)
-    const in25Hours = new Date(now.getTime() + 25 * 60 * 60 * 1000)
-
-    // Find 24h reminders to send (appointment is between now+23h and now+25h)
     const reminders24h = await sql`
-      SELECT 
+      SELECT
         ar.id,
         ar.booking_id,
         b.customer_name,
@@ -39,9 +35,8 @@ export async function POST(request: NextRequest) {
       LIMIT 50
     `
 
-    // Find 1h reminders to send (appointment is between now and now+1h)
     const reminders1h = await sql`
-      SELECT 
+      SELECT
         ar.id,
         ar.booking_id,
         b.customer_name,
@@ -61,7 +56,6 @@ export async function POST(request: NextRequest) {
     let sentCount = 0
     let failedCount = 0
 
-    // Send 24h reminders
     for (const reminder of reminders24h) {
       try {
         const appointmentDate = new Date(reminder.start_at)
@@ -69,8 +63,9 @@ export async function POST(request: NextRequest) {
         const formattedTime = format(appointmentDate, 'HH:mm')
 
         await resend.emails.send({
-          from: 'noreply@hauslash.co',
+          from: fromAddress,
           to: reminder.customer_email,
+          replyTo,
           subject: 'Appointment Reminder - HausLash',
           react: AppointmentReminderEmail({
             name: reminder.customer_name,
@@ -81,7 +76,6 @@ export async function POST(request: NextRequest) {
           }),
         })
 
-        // Mark as sent
         await sql`
           UPDATE appointment_reminders
           SET sent_at = now()
@@ -95,7 +89,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send 1h reminders
     for (const reminder of reminders1h) {
       try {
         const appointmentDate = new Date(reminder.start_at)
@@ -103,8 +96,9 @@ export async function POST(request: NextRequest) {
         const formattedTime = format(appointmentDate, 'HH:mm')
 
         await resend.emails.send({
-          from: 'noreply@hauslash.co',
+          from: fromAddress,
           to: reminder.customer_email,
+          replyTo,
           subject: 'Your Appointment is Coming Up - HausLash',
           react: AppointmentReminderEmail({
             name: reminder.customer_name,
@@ -115,7 +109,6 @@ export async function POST(request: NextRequest) {
           }),
         })
 
-        // Mark as sent
         await sql`
           UPDATE appointment_reminders
           SET sent_at = now()
@@ -148,7 +141,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check reminder status
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -158,7 +150,7 @@ export async function GET(request: NextRequest) {
     const sql = getDb()
 
     const pendingReminders = await sql`
-      SELECT 
+      SELECT
         ar.id,
         ar.reminder_type,
         ar.scheduled_for,
@@ -174,7 +166,7 @@ export async function GET(request: NextRequest) {
     `
 
     const recentlySent = await sql`
-      SELECT 
+      SELECT
         ar.id,
         ar.reminder_type,
         ar.sent_at,
