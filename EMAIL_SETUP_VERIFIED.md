@@ -9,7 +9,7 @@
 Your `.env.local` has all required email variables configured:
 
 ```env
-RESEND_API_KEY=re_4xBVupjZ_F4bK7AU7AHpRrmVJ4wMDJaks
+RESEND_API_KEY=YOUR_RESEND_API_KEY
 RESEND_FROM_ADDRESS=noreply@hauslash.co
 ADMIN_EMAIL=bigknoor@gmail.com
 ADMIN_PASSWORD=123456
@@ -77,7 +77,7 @@ From: noreply@hauslash.co
 
 ## Resend Configuration
 
-**API Key**: `re_4xBVupjZ_F4bK7AU7AHpRrmVJ4wMDJaks` ✅
+**API Key**: `YOUR_RESEND_API_KEY` ✅
 **From Address**: `noreply@hauslash.co` ✅
 **Status**: Active and verified
 

@@ -25,7 +25,7 @@ Your HausLash booking system now sends **two separate emails** for every booking
 Your `.env.local` now has all required fields:
 
 ```env
-RESEND_API_KEY=re_4xBVupjZ_F4bK7AU7AHpRrmVJ4wMDJaks
+RESEND_API_KEY=YOUR_RESEND_API_KEY
 RESEND_FROM_ADDRESS=noreply@hauslash.co
 ADMIN_EMAIL=bigknoor@gmail.com
 ```
@@ -80,7 +80,7 @@ Success page displays confirmation message
 
 **Check 1**: Verify Resend account
 - Go to https://resend.com
-- Check you have API key: `re_4xBVupjZ_F4bK7AU7AHpRrmVJ4wMDJaks` ✅
+- Check you have API key: `YOUR_RESEND_API_KEY` ✅
 
 **Check 2**: Verify domain is authorized
 - In Resend dashboard → Domains
@@ -112,7 +112,7 @@ Success page displays confirmation message
 
 | Variable | Purpose | Current Value |
 |----------|---------|---|
-| `RESEND_API_KEY` | Resend authentication | `re_4xBVupjZ_...` |
+| `RESEND_API_KEY` | Resend authentication | `YOUR_RESEND_API_KEY` |
 | `RESEND_FROM_ADDRESS` | Email sender address | `noreply@hauslash.co` |
 | `ADMIN_EMAIL` | Your admin email | `bigknoor@gmail.com` |
 
