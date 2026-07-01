@@ -59,10 +59,12 @@ export function ServiceStep({
                     </h3>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-foreground">
-                      {priceLabel}
-                    </span>
-                    {isSelected && (
+                    {!isPatchTest && (
+                      <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-foreground">
+                        {priceLabel}
+                      </span>
+                    )}
+                    {isSelected && !isPatchTest && (
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
                         <Check className="h-3 w-3 text-primary-foreground" />
                       </div>
@@ -84,6 +86,18 @@ export function ServiceStep({
                   isPatchTest && 'lg:mt-0 lg:min-w-64 lg:flex-col lg:items-end lg:border-l lg:border-t-0 lg:py-2 lg:pl-8 lg:pt-0 lg:text-right'
                 )}
               >
+                {isPatchTest && (
+                  <span className="mb-1 inline-flex items-center gap-2 self-start lg:self-end">
+                    <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-semibold text-foreground">
+                      {priceLabel}
+                    </span>
+                    {isSelected && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </span>
+                    )}
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1.5">
                   <Clock className="h-3 w-3" />
                   {formatDuration(service.duration_minutes)}
