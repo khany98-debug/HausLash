@@ -236,6 +236,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   Contact
                 </Link>
 
+                <Link
+                  href="/admin/install"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Install App
+                </Link>
+
               </nav>
 
               <Button
@@ -328,6 +335,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Contact
+                </Link>
+
+                <Link
+                  href="/admin/install"
+                  className="px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-b border-border/40"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Install App
                 </Link>
 
                 <button
