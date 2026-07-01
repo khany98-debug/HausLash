@@ -43,6 +43,10 @@ interface Booking {
   created_at: string
 }
 
+function isPatchTestBooking(serviceName: string) {
+  return serviceName.toLowerCase().includes('patch') && serviceName.toLowerCase().includes('test')
+}
+
 const STATUS_COLORS: Record<string, string> = {
   confirmed: 'bg-emerald-100 text-emerald-800',
   pending_payment: 'bg-amber-100 text-amber-800',
@@ -320,7 +324,9 @@ export default function CustomerPortalPage() {
                               <DollarSign className="h-4 w-4 text-primary" />
                               <span>
                                 {booking.deposit_amount_pence > 0
-                                  ? `Non-refundable deposit: ${formatPence(booking.deposit_amount_pence)}`
+                                  ? isPatchTestBooking(booking.service_name)
+                                    ? `Refundable attendance deposit: ${formatPence(booking.deposit_amount_pence)}`
+                                    : `Non-refundable deposit: ${formatPence(booking.deposit_amount_pence)}`
                                   : 'Free appointment'}
                               </span>
                             </div>

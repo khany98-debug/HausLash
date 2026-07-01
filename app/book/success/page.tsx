@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { AddToCalendarButton } from '@/components/booking/add-to-calendar'
 import { getAppointmentLocationDetails } from '@/lib/appointment-location'
+import { isPatchTestService } from '@/lib/service-display'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,7 @@ export default async function BookingSuccessPage({
   const bookings = sessionId
     ? await sql`
       SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
+      , s.slug as service_slug
       FROM bookings b
       JOIN services s ON b.service_id = s.id
       WHERE b.stripe_checkout_session_id = ${sessionId}
@@ -66,6 +68,7 @@ export default async function BookingSuccessPage({
     `
     : await sql`
       SELECT b.*, s.name as service_name, s.duration_minutes, s.price_pence
+      , s.slug as service_slug
       FROM bookings b
       JOIN services s ON b.service_id = s.id
       WHERE b.id = ${bookingId}
@@ -100,6 +103,10 @@ export default async function BookingSuccessPage({
   const depositPence = booking.deposit_amount_pence as number
   const pricePence = booking.price_pence as number | null
   const remainingPence = pricePence ? pricePence - depositPence : null
+  const isPatchTest = isPatchTestService({
+    name: booking.service_name as string,
+    slug: booking.service_slug as string,
+  })
   const locationDetails = getAppointmentLocationDetails(booking.service_name as string)
   const calendarDescription = locationDetails.href
     ? 'Mobile outcall appointment. Please message Hauslash on Instagram to confirm where you are located and the treatment address: https://ig.me/m/hauslash_co'
@@ -171,11 +178,15 @@ export default async function BookingSuccessPage({
               {depositPence > 0 ? (
                 <>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Deposit paid</span>
+                    <span className="text-muted-foreground">
+                      {isPatchTest ? 'Refundable deposit paid' : 'Deposit paid'}
+                    </span>
                     <span className="font-medium">{formatPence(depositPence)}</span>
                   </div>
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                    Deposits are non-refundable once the booking has been made.
+                    {isPatchTest
+                      ? 'Your £5 patch test attendance deposit is refunded once you attend.'
+                      : 'Deposits are non-refundable once the booking has been made.'}
                   </p>
                 </>
               ) : (
@@ -228,7 +239,7 @@ export default async function BookingSuccessPage({
               <li>Avoid waterproof mascara for 48 hours prior</li>
               <li>Remove contact lenses before the treatment</li>
               {locationDetails.href && <li>Message Hauslash on Instagram to confirm your location for the mobile outcall.</li>}
-              <li>If this is your first Hauslash treatment, your free patch test must be completed at least 24 hours before your lash lift.</li>
+              <li>If this is your first Hauslash treatment, your patch test must be completed at least 24 hours before your lash lift.</li>
 
             </ul>
 

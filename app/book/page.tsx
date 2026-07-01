@@ -45,7 +45,7 @@ export default async function BookPage({
               Reserve your appointment
             </h1>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-muted-foreground">
-              Choose your treatment and preferred time. Lash lifts are secured with a non-refundable deposit; patch tests are free to book.
+              Choose your treatment and preferred time. Lash lifts are secured with a non-refundable deposit; patch tests are secured with a £5 refundable attendance deposit.
             </p>
           </div>
           <div className="luxury-card p-5 sm:p-8">

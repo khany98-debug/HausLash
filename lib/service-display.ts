@@ -2,7 +2,9 @@ import { Service } from '@/lib/types'
 import { isMobileOutcallService } from '@/lib/appointment-location'
 
 export const PATCH_TEST_DESCRIPTION =
-  'A free patch test and consultation for first-time Hauslash clients. Results are known after 24 hours, so please book or enquire about this at least 24 hours before your lash lift appointment.'
+  'A patch test and consultation for first-time Hauslash clients. Results are known after 24 hours, so please book this at least 24 hours before your lash lift appointment. The £5 attendance deposit is refunded once you attend.'
+
+export const PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE = 500
 
 export const MOBILE_OUTCALL_DESCRIPTION =
   'The Hauslash Korean lash lift brought to you. Includes professional setup, consultation, premium product use, tinting, and aftercare guidance in the comfort of your own home. After booking, please message Hauslash on Instagram with your location and treatment address.'
@@ -31,8 +33,8 @@ export function normalisePublicService<T extends Service>(service: T): T {
       ...service,
       description: PATCH_TEST_DESCRIPTION,
       duration_minutes: 15,
-      price_pence: 0,
-      deposit_pence: 0,
+      price_pence: PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE,
+      deposit_pence: PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE,
     }
   }
 

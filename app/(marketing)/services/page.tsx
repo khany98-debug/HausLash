@@ -101,7 +101,7 @@ export default async function ServicesPage() {
           <div>
             <p className="eyebrow text-primary-foreground/50">Booking note</p>
             <p className="mt-2 max-w-xl text-sm leading-6 text-primary-foreground/70">
-              Lash lift appointments are secured with a {formatPence(1500)} non-refundable deposit. Patch tests are free and should be booked at least 24 hours before a first treatment.
+              Lash lift appointments are secured with a {formatPence(1500)} non-refundable deposit. Patch tests are secured with a {formatPence(500)} refundable attendance deposit and should be booked at least 24 hours before a first treatment.
             </p>
           </div>
           <Button asChild variant="secondary" className="mt-5 rounded-full sm:mt-0">

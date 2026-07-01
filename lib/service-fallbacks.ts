@@ -1,5 +1,5 @@
 import { Service, TimeSlot } from '@/lib/types'
-import { PATCH_TEST_DESCRIPTION } from '@/lib/service-display'
+import { PATCH_TEST_DESCRIPTION, PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE } from '@/lib/service-display'
 
 export const FALLBACK_SERVICES: Service[] = [
   {
@@ -34,8 +34,8 @@ export const FALLBACK_SERVICES: Service[] = [
     slug: 'patch-test',
     description: PATCH_TEST_DESCRIPTION,
     duration_minutes: 15,
-    price_pence: 0,
-    deposit_pence: 0,
+    price_pence: PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE,
+    deposit_pence: PATCH_TEST_REFUNDABLE_DEPOSIT_PENCE,
     active: true,
     sort_order: 3,
     created_at: '2026-01-01T00:00:00.000Z',

@@ -21,7 +21,7 @@ export default function TermsPage() {
         <section>
           <h2 className="font-serif text-2xl text-foreground">Bookings</h2>
           <p className="mt-3">
-            Appointments can be booked online through the Hauslash website. A booking is confirmed once the required deposit has been paid, or immediately for free services such as a patch test.
+            Appointments can be booked online through the Hauslash website. A booking is confirmed once the required deposit has been paid.
           </p>
         </section>
 
@@ -32,7 +32,7 @@ export default function TermsPage() {
             <li><strong className="text-foreground">Deposits are non-refundable once the booking has been made.</strong></li>
             <li>The remaining balance is due at the appointment unless otherwise agreed.</li>
             <li>Payments are processed securely by Stripe. Hauslash does not store full card details.</li>
-            <li>Patch tests are free and do not require a deposit.</li>
+            <li>Patch tests require a £5 attendance deposit, which is refunded once the customer attends the patch test.</li>
           </ul>
         </section>
 

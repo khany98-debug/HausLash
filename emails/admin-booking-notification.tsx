@@ -11,6 +11,7 @@ import {
   Img,
 } from "@react-email/components"
 import { getAppointmentLocationDetails } from "@/lib/appointment-location"
+import { isPatchTestService } from "@/lib/service-display"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
@@ -143,6 +144,7 @@ export default function AdminBookingNotificationEmail({
   const mailto = `mailto:${customerEmail}`
   const tel = customerPhone ? `tel:${customerPhone.replace(/\s+/g, "")}` : undefined
   const locationDetails = getAppointmentLocationDetails(service)
+  const isPatchTest = isPatchTestService({ name: service, slug: "" })
 
   return (
     <Html>
@@ -175,9 +177,13 @@ export default function AdminBookingNotificationEmail({
 
             <Section style={styles.card}>
               <Text style={styles.label}>Payment</Text>
-              <Text style={styles.value}>Deposit paid: {deposit}</Text>
+              <Text style={styles.value}>
+                {isPatchTest ? "Refundable deposit paid" : "Deposit paid"}: {deposit}
+              </Text>
               <Text style={styles.copy}>
-                Deposits are non-refundable once the booking has been made.
+                {isPatchTest
+                  ? "Patch test deposit is refundable once the client attends."
+                  : "Deposits are non-refundable once the booking has been made."}
               </Text>
               {remaining && <Text style={styles.value}>Balance due at appointment: {remaining}</Text>}
             </Section>

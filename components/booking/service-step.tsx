@@ -1,6 +1,7 @@
 import { Service, formatPence, formatDuration } from '@/lib/types'
 import { Clock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isPatchTestService } from '@/lib/service-display'
 
 export function ServiceStep({
   services,
@@ -17,6 +18,7 @@ export function ServiceStep({
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5">
         {services.map((service) => {
           const isSelected = service.id === selectedId
+          const isPatchTest = isPatchTestService(service)
           return (
             <button
               key={service.id}
@@ -54,8 +56,10 @@ export function ServiceStep({
                 <Clock className="h-3 w-3" />
                 {formatDuration(service.duration_minutes)}
                 <span>
-                  {service.deposit_pence > 0
-                    ? `Non-refundable deposit: ${formatPence(service.deposit_pence)}`
+                  {isPatchTest && service.deposit_pence > 0
+                    ? `Refundable attendance deposit: ${formatPence(service.deposit_pence)}`
+                    : service.deposit_pence > 0
+                      ? `Non-refundable deposit: ${formatPence(service.deposit_pence)}`
                     : 'Free booking'}
                 </span>
               </div>

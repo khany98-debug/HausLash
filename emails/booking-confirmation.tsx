@@ -11,6 +11,7 @@ import {
   Img,
 } from "@react-email/components"
 import { getAppointmentLocationDetails } from "@/lib/appointment-location"
+import { isPatchTestService } from "@/lib/service-display"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
@@ -128,6 +129,7 @@ export default function BookingConfirmationEmail({
   calendarUrl?: string
 }) {
   const locationDetails = getAppointmentLocationDetails(service)
+  const isPatchTest = isPatchTestService({ name: service, slug: "" })
 
   return (
     <Html>
@@ -163,9 +165,13 @@ export default function BookingConfirmationEmail({
 
             <Section style={styles.card}>
               <Text style={styles.label}>Payment</Text>
-              <Text style={styles.value}>Deposit paid: {deposit}</Text>
+              <Text style={styles.value}>
+                {isPatchTest ? "Refundable deposit paid" : "Deposit paid"}: {deposit}
+              </Text>
               <Text style={styles.copy}>
-                Deposits are non-refundable once the booking has been made.
+                {isPatchTest
+                  ? "Your £5 patch test attendance deposit is refunded once you attend."
+                  : "Deposits are non-refundable once the booking has been made."}
               </Text>
               {remaining && (
                 <Text style={styles.value}>Remaining balance due at appointment: {remaining}</Text>

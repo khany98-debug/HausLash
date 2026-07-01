@@ -11,6 +11,13 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 })
 
+const previewImage = {
+  url: '/images/hauslash-social-preview.jpg',
+  width: 1200,
+  height: 630,
+  alt: 'Hauslash Korean lash lift studio in Stoke-on-Trent',
+}
+
 export const metadata: Metadata = {
   title: {
     default: 'Hauslash | Premium Lash Lift Studio',
@@ -27,6 +34,26 @@ export const metadata: Metadata = {
     'beauty studio',
     'eyelash treatment',
   ],
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Hauslash | Premium Korean Lash Lift Studio',
+    description:
+      'Expert Korean lash lifts and lash tinting in Stoke-on-Trent. Book your appointment online.',
+    url: '/',
+    siteName: 'Hauslash',
+    images: [previewImage],
+    locale: 'en_GB',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Hauslash | Premium Korean Lash Lift Studio',
+    description:
+      'Expert Korean lash lifts and lash tinting in Stoke-on-Trent. Book your appointment online.',
+    images: [previewImage],
+  },
   icons: {
     icon: [
       { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },

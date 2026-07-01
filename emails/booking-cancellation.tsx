@@ -11,6 +11,7 @@ import {
   Img,
 } from "@react-email/components"
 import { getAppointmentLocationDetails } from "@/lib/appointment-location"
+import { isPatchTestService } from "@/lib/service-display"
 
 const SITE_URL = "https://hauslash.co.uk"
 const LOGO_URL = `${SITE_URL}/images/brand/hauslash-original-wordmark.png`
@@ -114,6 +115,7 @@ export default function BookingCancellationEmail({
   reason?: string | null
 }) {
   const locationDetails = getAppointmentLocationDetails(service)
+  const isPatchTest = isPatchTestService({ name: service, slug: "" })
 
   return (
     <Html>
@@ -141,9 +143,13 @@ export default function BookingCancellationEmail({
 
             <Section style={styles.card}>
               <Text style={styles.label}>Deposit policy</Text>
-              <Text style={styles.value}>Deposit paid: {depositAmount}</Text>
+              <Text style={styles.value}>
+                {isPatchTest ? "Patch test deposit paid" : "Deposit paid"}: {depositAmount}
+              </Text>
               <Text style={styles.copy}>
-                Deposits are non-refundable once the booking has been made. A new deposit will be required to secure another appointment.
+                {isPatchTest
+                  ? "Patch test deposits are attendance deposits and are refunded after an attended patch test. If you have questions about this cancellation, please contact Hauslash."
+                  : "Deposits are non-refundable once the booking has been made. A new deposit will be required to secure another appointment."}
               </Text>
               {reason && (
                 <>

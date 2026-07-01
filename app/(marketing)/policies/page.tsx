@@ -34,7 +34,7 @@ export default function PoliciesPage() {
               <li>
                 <strong className="text-foreground">Deposits are non-refundable:</strong>{' '}
                 Lash lift appointments require a deposit to secure the booking and this
-                deposit is non-refundable once the booking has been made. Patch tests are free.
+                deposit is non-refundable once the booking has been made. Patch tests require a £5 refundable attendance deposit.
               </li>
 
               <li>
@@ -74,9 +74,9 @@ export default function PoliciesPage() {
             </p>
 
             <p>
-              The patch test is quick, free, and can be arranged when you book your
-              first appointment. Please contact us to schedule one if it is your first
-              visit.
+              The patch test is quick and can be arranged when you book your first
+              appointment. A £5 attendance deposit is taken online and refunded once
+              you attend your patch test.
             </p>
           </div>
         </section>

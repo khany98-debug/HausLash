@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: 'Is a deposit required to book?',
-    a: 'Korean lash lift appointments require a non-refundable deposit when you book online. Patch tests are free to book.',
+    a: 'Korean lash lift appointments require a non-refundable deposit when you book online. Patch tests require a £5 refundable attendance deposit, which is refunded once you attend.',
   },
   {
     q: 'What is your cancellation policy?',

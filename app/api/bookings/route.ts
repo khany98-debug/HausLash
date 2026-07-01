@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db"
 import { sendConfirmedBookingEmails } from "@/lib/confirm-booking"
 import { enforceRateLimit } from "@/lib/rate-limit"
 import { isMissingDatabaseConfig } from "@/lib/service-fallbacks"
-import { normalisePublicService } from "@/lib/service-display"
+import { isPatchTestService, normalisePublicService } from "@/lib/service-display"
 import { stripe } from "@/lib/stripe"
 import { Service } from "@/lib/types"
 import { z } from "zod"
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const service = normalisePublicService(serviceRows[0] as Service)
+    const isPatchTest = isPatchTestService(service)
 
     const startAt = `${date}T${time}:00Z`
 
@@ -144,7 +145,9 @@ export async function POST(request: NextRequest) {
             currency: "gbp",
             product_data: {
               name: `${service.name} - Deposit`,
-              description: `Appointment on ${date} at ${time}. Deposits are non-refundable once the booking has been made.`,
+              description: isPatchTest
+                ? `Patch test on ${date} at ${time}. This £5 attendance deposit is refunded once you attend.`
+                : `Appointment on ${date} at ${time}. Deposits are non-refundable once the booking has been made.`,
             },
             unit_amount: depositPence,
           },

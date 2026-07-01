@@ -9,6 +9,7 @@ import { ChevronLeft, Loader2, Calendar, Clock, User, Mail, Phone } from 'lucide
 import { format, parse } from 'date-fns'
 import { toast } from 'sonner'
 import { getAppointmentLocationDetails } from '@/lib/appointment-location'
+import { isPatchTestService } from '@/lib/service-display'
 
 export function ReviewStep({
   data,
@@ -24,6 +25,11 @@ export function ReviewStep({
 
   const formattedDate = format(new Date(data.date), 'EEEE d MMMM yyyy')
   const isFreeBooking = service.deposit_pence <= 0
+  const isPatchTest = isPatchTestService(service)
+  const remainingPence =
+    service.price_pence && service.price_pence > service.deposit_pence
+      ? service.price_pence - service.deposit_pence
+      : null
   const locationDetails = getAppointmentLocationDetails(service.name)
 
   async function handleConfirm() {
@@ -122,7 +128,11 @@ export function ReviewStep({
         <div className="mt-6 border-t border-border/60 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              {isFreeBooking ? 'Payment due now' : 'Deposit to pay now'}
+              {isFreeBooking
+                ? 'Payment due now'
+                : isPatchTest
+                  ? 'Refundable deposit to pay now'
+                  : 'Deposit to pay now'}
             </span>
             <span className="text-lg font-medium text-foreground">
               {isFreeBooking ? 'Free' : formatPence(service.deposit_pence)}
@@ -130,13 +140,15 @@ export function ReviewStep({
           </div>
           {!isFreeBooking && (
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Deposits are non-refundable once the booking has been made.
+              {isPatchTest
+                ? 'This £5 attendance deposit is refunded once you attend your patch test.'
+                : 'Deposits are non-refundable once the booking has been made.'}
             </p>
           )}
-          {service.price_pence && service.price_pence > 0 && (
+          {remainingPence !== null && (
             <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
               <span>Remaining balance (pay at appointment)</span>
-              <span>{formatPence(service.price_pence - service.deposit_pence)}</span>
+              <span>{formatPence(remainingPence)}</span>
             </div>
           )}
         </div>
@@ -154,14 +166,20 @@ export function ReviewStep({
             Creating booking...
           </>
         ) : (
-          isFreeBooking ? 'Confirm free booking' : `Pay Deposit ${formatPence(service.deposit_pence)}`
+          isFreeBooking
+            ? 'Confirm free booking'
+            : isPatchTest
+              ? `Pay refundable deposit ${formatPence(service.deposit_pence)}`
+              : `Pay Deposit ${formatPence(service.deposit_pence)}`
         )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
         {isFreeBooking
           ? 'No payment is needed for this appointment. You will receive a confirmation email once it is booked.'
-          : 'You will be redirected to our secure payment provider to complete your deposit. Your appointment will be held for 30 minutes while you complete payment. Deposits are non-refundable once the booking has been made.'}
+          : isPatchTest
+            ? 'You will be redirected to our secure payment provider to complete your refundable patch test deposit. It is refunded once you attend your patch test.'
+            : 'You will be redirected to our secure payment provider to complete your deposit. Your appointment will be held for 30 minutes while you complete payment. Deposits are non-refundable once the booking has been made.'}
       </p>
     </div>
   )
