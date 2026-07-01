@@ -49,5 +49,23 @@ export function normalisePublicService<T extends Service>(service: T): T {
 }
 
 export function normalisePublicServices<T extends Service>(services: T[]) {
-  return services.map((service) => normalisePublicService(service))
+  return services
+    .map((service) => normalisePublicService(service))
+    .sort((a, b) => {
+      const rankA = getPublicServiceDisplayRank(a)
+      const rankB = getPublicServiceDisplayRank(b)
+
+      if (rankA !== rankB) return rankA - rankB
+      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+
+      return a.name.localeCompare(b.name)
+    })
+}
+
+function getPublicServiceDisplayRank(service: Pick<Service, 'name' | 'slug'>) {
+  if (isPatchTestService(service)) return 30
+  if (isMobileOutcallService(service.name)) return 20
+  if (isKoreanLashLiftService(service)) return 10
+
+  return 40
 }

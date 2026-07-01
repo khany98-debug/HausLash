@@ -38,7 +38,7 @@ export default async function BookPage({
     <>
       <SiteHeader />
       <main className="min-h-[80vh]">
-        <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-8 md:py-20">
+        <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 md:py-20">
           <div className="mb-10 text-center">
             <p className="eyebrow">Online booking</p>
             <h1 className="mx-auto mt-4 max-w-[11ch] font-serif text-3xl leading-tight tracking-tight text-foreground sm:max-w-none sm:text-4xl md:text-5xl">
@@ -48,7 +48,7 @@ export default async function BookPage({
               Choose your treatment and preferred time. Lash lifts are secured with a non-refundable deposit; patch tests are secured with a £5 refundable attendance deposit.
             </p>
           </div>
-          <div className="luxury-card p-5 sm:p-8">
+          <div className="luxury-card p-5 sm:p-8 lg:p-10">
             <BookingWizard services={services} preselectedSlug={params.service} />
           </div>
         </div>

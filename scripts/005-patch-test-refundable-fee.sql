@@ -6,5 +6,6 @@ SET
   price_pence = 500,
   deposit_pence = 500,
   duration_minutes = 15,
+  sort_order = 3,
   description = 'A patch test and consultation for first-time Hauslash clients. Results are known after 24 hours, so please book this at least 24 hours before your lash lift appointment. The £5 attendance deposit is refunded once you attend.'
 WHERE slug = 'patch-test';
