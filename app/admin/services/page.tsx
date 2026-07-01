@@ -9,7 +9,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Plus, Pencil, X } from 'lucide-react'
+import { Plus, Pencil, X, Scissors } from 'lucide-react'
+import {
+  AdminEmptyState,
+  AdminLoadingState,
+  AdminPageHeader,
+} from '@/components/admin/admin-page-shell'
 
 interface ServiceRow {
   id: string
@@ -47,12 +52,16 @@ export default function AdminServicesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl text-foreground">Services</h1>
-        <Button size="sm" onClick={() => setCreating(true)} className="gap-1">
-          <Plus className="h-4 w-4" /> Add Service
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="Menu control"
+        title="Services"
+        description="Update treatment names, durations, prices, deposits, and booking visibility."
+        action={
+          <Button onClick={() => setCreating(true)} className="gap-2 rounded-full">
+            <Plus className="h-4 w-4" /> Add Service
+          </Button>
+        }
+      />
 
       {(creating || editing) && (
         <ServiceForm
@@ -71,13 +80,24 @@ export default function AdminServicesPage() {
       )}
 
       {loading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">Loading...</p>
+        <AdminLoadingState label="Loading services..." />
+      ) : services.length === 0 ? (
+        <AdminEmptyState
+          title="No services yet"
+          description="Create a service so customers can choose it when booking online."
+          icon={Scissors}
+          action={
+            <Button onClick={() => setCreating(true)} className="rounded-full">
+              Add the first service
+            </Button>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {services.map((s) => (
             <div
               key={s.id}
-              className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-4 rounded-2xl border border-foreground/10 bg-card/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <div className="flex items-center gap-2">
@@ -93,12 +113,17 @@ export default function AdminServicesPage() {
                   {' / '}{s.price_pence && s.price_pence > 0 ? formatPence(s.price_pence) : 'Free'}
                   {' / Deposit: '}{s.deposit_pence > 0 ? formatPence(s.deposit_pence) : 'Free'}
                 </p>
+                {s.description && (
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                    {s.description}
+                  </p>
+                )}
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setEditing(s)}
-                className="gap-1"
+                className="gap-1 rounded-full"
               >
                 <Pencil className="h-3 w-3" /> Edit
               </Button>
@@ -153,7 +178,7 @@ function ServiceForm({
   }
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-6">
+    <div className="rounded-[1.5rem] border border-foreground/10 bg-card/85 p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-medium text-foreground">
           {service ? 'Edit Service' : 'New Service'}
@@ -216,8 +241,8 @@ function ServiceForm({
         </div>
       </div>
       <div className="mt-4 flex gap-2">
-        <Button onClick={handleSubmit}>{service ? 'Update' : 'Create'}</Button>
-        <Button variant="outline" onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit} className="rounded-full">{service ? 'Update' : 'Create'}</Button>
+        <Button variant="outline" onClick={onClose} className="rounded-full">Cancel</Button>
       </div>
     </div>
   )

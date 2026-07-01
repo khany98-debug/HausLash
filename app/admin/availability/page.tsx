@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Trash2, Copy, ChevronDown, ChevronUp, Clock, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { Trash2, Copy, ChevronDown, ChevronUp, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { AdminLoadingState, AdminPageHeader } from '@/components/admin/admin-page-shell'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const LASH_LIFT_SLOT_MINUTES = 90
@@ -521,27 +522,19 @@ export default function AdminAvailabilityPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading availability settings...
-        </div>
-      </div>
-    )
+    return <AdminLoadingState label="Loading availability settings..." />
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl">
-      <div>
-        <h1 className="font-serif text-3xl text-foreground">Availability Management</h1>
-        <p className="text-muted-foreground mt-1">
-          Add 90-minute lash lift slots quickly, copy them across dates, and block time when needed.
-        </p>
-      </div>
+    <div className="flex max-w-6xl flex-col gap-6">
+      <AdminPageHeader
+        eyebrow="Schedule control"
+        title="Availability"
+        description="Add 90-minute lash lift slots quickly, copy them across dates, and block time when needed."
+      />
 
       {/* WEEKLY AVAILABILITY RULES */}
-      <Card className="border-primary/10">
+      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
         <button
           onClick={() => toggleSection('rules')}
           className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
@@ -651,7 +644,7 @@ export default function AdminAvailabilityPage() {
       </Card>
 
       {/* DAILY SLOTS */}
-      <Card className="border-primary/10">
+      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
         <button
           onClick={() => toggleSection('dailySlots')}
           className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
@@ -804,7 +797,7 @@ export default function AdminAvailabilityPage() {
       </Card>
 
       {/* COPY SCHEDULE */}
-      <Card className="border-primary/10">
+      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
         <button
           onClick={() => toggleSection('copySlots')}
           className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
@@ -901,7 +894,7 @@ export default function AdminAvailabilityPage() {
       </Card>
 
       {/* BLOCKED TIMES */}
-      <Card className="border-primary/10">
+      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
         <button
           onClick={() => toggleSection('blockedTimes')}
           className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"

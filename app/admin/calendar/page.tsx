@@ -7,8 +7,9 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { format, addDays, isSameDay, parseISO } from 'date-fns'
-import { Clock, Phone, Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Clock, Phone, Mail, CheckCircle, XCircle, Loader2, CalendarDays, CreditCard, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { AdminEmptyState, AdminPageHeader, AdminStatCard } from '@/components/admin/admin-page-shell'
 
 interface Booking {
   id: string
@@ -152,13 +153,17 @@ export default function AdminCalendarPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl text-foreground">Booking Schedule</h1>
-        <div className="flex gap-2">
+      <AdminPageHeader
+        eyebrow="Calendar"
+        title="Booking Schedule"
+        description="See the week ahead, scan customer contact details, and mark appointments as completed after the visit."
+        action={
+          <div className="flex rounded-full border border-foreground/10 bg-background/80 p-1">
           <Button
             size="sm"
             variant={viewMode === 'timeline' ? 'default' : 'outline'}
             onClick={() => setViewMode('timeline')}
+            className="rounded-full"
           >
             Timeline
           </Button>
@@ -166,21 +171,23 @@ export default function AdminCalendarPage() {
             size="sm"
             variant={viewMode === 'calendar' ? 'default' : 'outline'}
             onClick={() => setViewMode('calendar')}
+            className="rounded-full"
           >
             Calendar
           </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* Filters and Search */}
       {viewMode === 'timeline' && (
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-foreground/10 bg-card/70 p-3 shadow-sm sm:flex-row sm:items-center">
           <input
             type="text"
             placeholder="Search by name, email, phone, or service..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="rounded-full border border-foreground/10 bg-background/80 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <div className="flex gap-1 flex-wrap">
             {(['all', 'confirmed', 'pending_payment', 'completed', 'cancelled'] as const).map((status) => (
@@ -189,7 +196,7 @@ export default function AdminCalendarPage() {
                 size="sm"
                 variant={statusFilter === status ? 'default' : 'outline'}
                 onClick={() => setStatusFilter(status)}
-                className="whitespace-nowrap text-xs"
+                className="whitespace-nowrap rounded-full text-xs"
               >
                 {status === 'all' ? 'All' : status.replace('_', ' ')}
                 {status !== 'all' && (
@@ -207,36 +214,44 @@ export default function AdminCalendarPage() {
       {viewMode === 'timeline' && (
         <div className="flex flex-col gap-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-4 border-primary/10">
-              <p className="text-sm text-muted-foreground mb-1">Upcoming (7 days)</p>
-              <p className="text-2xl font-bold text-foreground">{totalUpcoming}</p>
-              <p className="text-xs text-muted-foreground mt-1">{confirmedCount} confirmed</p>
-            </Card>
-            <Card className="p-4 border-primary/10">
-              <p className="text-sm text-muted-foreground mb-1">Confirmed Revenue</p>
-              <p className="text-2xl font-bold text-green-600">£{confirmedRevenueGBP}</p>
-              <p className="text-xs text-muted-foreground mt-1">{confirmedCount + completedCount} bookings</p>
-            </Card>
-            <Card className="p-4 border-primary/10">
-              <p className="text-sm text-muted-foreground mb-1">Pending Payment</p>
-              <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
-              <p className="text-xs text-muted-foreground mt-1">Action needed</p>
-            </Card>
-            <Card className="p-4 border-primary/10">
-              <p className="text-sm text-muted-foreground mb-1">Completion Rate</p>
-              <p className="text-2xl font-bold text-blue-600">{totalUpcoming > 0 ? Math.round((completedCount / totalUpcoming) * 100) : 0}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{completedCount} completed</p>
-            </Card>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <AdminStatCard
+              label="Upcoming"
+              value={totalUpcoming}
+              detail={`${confirmedCount} confirmed in 7 days`}
+              icon={CalendarDays}
+            />
+            <AdminStatCard
+              label="Revenue"
+              value={`£${confirmedRevenueGBP}`}
+              detail={`${confirmedCount + completedCount} confirmed/completed`}
+              icon={CreditCard}
+              tone="success"
+            />
+            <AdminStatCard
+              label="Pending"
+              value={pendingCount}
+              detail="Payment action needed"
+              icon={AlertCircle}
+              tone={pendingCount > 0 ? 'warning' : 'neutral'}
+            />
+            <AdminStatCard
+              label="Done"
+              value={`${totalUpcoming > 0 ? Math.round((completedCount / totalUpcoming) * 100) : 0}%`}
+              detail={`${completedCount} completed`}
+              icon={CheckCircle}
+            />
           </div>
 
           {/* Upcoming Bookings Timeline */}
           <div className="flex flex-col gap-4">
             <h2 className="font-semibold text-lg text-foreground">Next 7 Days</h2>
             {upcomingBookings.length === 0 ? (
-              <Card className="p-6 text-center border-primary/10">
-                <p className="text-muted-foreground">No upcoming bookings in the next 7 days</p>
-              </Card>
+              <AdminEmptyState
+                title="No upcoming bookings"
+                description="No appointments match this view for the next 7 days."
+                icon={CalendarDays}
+              />
             ) : (
               <div className="space-y-6">
                 {/* Group bookings by day */}
@@ -280,7 +295,7 @@ export default function AdminCalendarPage() {
                             return (
                               <Card
                                 key={booking.id}
-                                className={`p-4 border-primary/10 transition-all hover:shadow-md ${config.bg}`}
+                                className={`rounded-2xl border-foreground/10 p-4 transition-all hover:shadow-md ${config.bg}`}
                               >
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                                   {/* Left: Time */}
@@ -304,7 +319,7 @@ export default function AdminCalendarPage() {
                                           <div className="flex gap-1 flex-shrink-0">
                                             {/* Service Type Badge */}
                                             <Badge variant="outline" className="text-xs whitespace-nowrap">
-                                              {isServiceMobile ? '🚗 Mobile' : '🏢 Studio'}
+                                              {isServiceMobile ? 'Mobile' : 'Studio'}
                                             </Badge>
                                           </div>
                                         </div>

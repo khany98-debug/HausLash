@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAdminAuth } from '../layout'
 import { useToast } from '@/hooks/use-toast'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Mail, Phone, Trash2, Loader2, Send, ChevronDown } from 'lucide-react'
+import { Mail, Phone, Trash2, Loader2, Send } from 'lucide-react'
+import { AdminEmptyState, AdminPageHeader } from '@/components/admin/admin-page-shell'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -253,25 +252,25 @@ export default function ContactInquiriesAdmin() {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="border-b bg-background px-6 py-4">
-        <h1 className="text-2xl font-serif text-foreground">Contact Inquiries</h1>
-        <p className="text-sm text-muted-foreground">Manage customer messages</p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader
+        eyebrow="Inbox"
+        title="Contact Inquiries"
+        description="Reply to customers, archive conversations, and keep new messages from slipping through."
+      />
 
       {/* Main Content - Split View */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-[calc(100vh-18rem)] flex-col overflow-hidden rounded-[1.75rem] border border-foreground/10 bg-card/80 shadow-sm lg:flex-row">
         {/* Left Sidebar - Contact List */}
-        <div className="w-96 border-r flex flex-col overflow-hidden bg-muted/20">
+        <div className="flex max-h-[430px] flex-col overflow-hidden border-b bg-muted/20 lg:max-h-none lg:w-96 lg:border-b-0 lg:border-r">
           {/* Filter Buttons */}
-          <div className="flex gap-2 p-4 border-b overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto border-b border-foreground/10 p-4">
             {(['all', 'new', 'replied', 'archived'] as const).map((status) => (
               <Button
                 key={status}
                 variant={filter === status ? 'default' : 'outline'}
                 onClick={() => setFilter(status)}
-                className="capitalize text-xs whitespace-nowrap"
+                className="whitespace-nowrap rounded-full text-xs capitalize"
                 size="sm"
               >
                 {status}
@@ -286,19 +285,23 @@ export default function ContactInquiriesAdmin() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : inquiries.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground">
-                No inquiries found
+              <div className="p-4">
+                <AdminEmptyState
+                  title="No inquiries found"
+                  description="New contact messages will appear here."
+                  icon={Mail}
+                />
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-foreground/10">
                 {inquiries.map((inquiry) => (
                   <button
                     key={inquiry.id}
                     onClick={() => fetchConversation(inquiry.id)}
                     className={`w-full p-4 text-left transition-colors ${
                       selectedInquiry?.inquiry.id === inquiry.id
-                        ? 'bg-primary/10 border-l-2 border-primary'
-                        : 'hover:bg-muted'
+                        ? 'border-l-2 border-primary bg-primary/10'
+                        : 'hover:bg-muted/70'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
@@ -327,15 +330,15 @@ export default function ContactInquiriesAdmin() {
 
         {/* Right Side - Conversation */}
         {selectedInquiry ? (
-          <div className="flex-1 flex flex-col overflow-hidden bg-background">
+          <div className="flex min-h-[560px] flex-1 flex-col overflow-hidden bg-background">
             {/* Conversation Header */}
-            <div className="border-b bg-muted/50 px-6 py-4">
-              <div className="flex items-start justify-between">
+            <div className="border-b border-foreground/10 bg-muted/45 px-5 py-4 sm:px-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">
                     {selectedInquiry.inquiry.name}
                   </h2>
-                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                  <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-4">
                     <a
                       href={`mailto:${selectedInquiry.inquiry.email}`}
                       className="hover:text-foreground flex items-center gap-1"
@@ -386,11 +389,11 @@ export default function ContactInquiriesAdmin() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 space-y-4 overflow-y-auto p-5 sm:p-6">
               {/* Initial customer message */}
               <div className="flex gap-3 justify-start">
                 <div className="flex-1">
-                  <div className="rounded-lg bg-muted p-4">
+                  <div className="rounded-2xl bg-muted p-4">
                     <p className="text-sm text-foreground whitespace-pre-wrap">
                       {selectedInquiry.inquiry.message}
                     </p>
@@ -409,7 +412,7 @@ export default function ContactInquiriesAdmin() {
                 >
                   <div className={`flex-1 max-w-md ${msg.sender === 'admin' ? 'text-right' : ''}`}>
                     <div
-                      className={`rounded-lg p-4 whitespace-pre-wrap ${
+                      className={`rounded-2xl p-4 whitespace-pre-wrap ${
                         msg.sender === 'admin'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
@@ -429,7 +432,7 @@ export default function ContactInquiriesAdmin() {
             </div>
 
             {/* Reply Input */}
-            <div className="border-t bg-background p-4">
+            <div className="border-t border-foreground/10 bg-background p-4">
               <div className="flex gap-2">
                 <textarea
                   value={replyText}
@@ -440,13 +443,13 @@ export default function ContactInquiriesAdmin() {
                     }
                   }}
                   placeholder="Type your reply... (Ctrl+Enter to send)"
-                  className="flex-1 p-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  className="flex-1 resize-none rounded-2xl border border-foreground/10 bg-background p-3 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   rows={3}
                 />
                 <Button
                   onClick={sendReply}
                   disabled={!replyText.trim() || replySending}
-                  className="self-end gap-2"
+                  className="self-end rounded-full"
                 >
                   {replySending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -458,11 +461,12 @@ export default function ContactInquiriesAdmin() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <Mail className="h-12 w-12 mx-auto mb-4 opacity-40" />
-              <p>Select a message to view the conversation</p>
-            </div>
+          <div className="flex min-h-[420px] flex-1 items-center justify-center p-6 text-muted-foreground">
+            <AdminEmptyState
+              title="Select a message"
+              description="Choose a customer from the inbox to view the conversation and reply."
+              icon={Mail}
+            />
           </div>
         )}
       </div>

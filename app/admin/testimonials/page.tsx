@@ -6,7 +6,13 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Star, Loader2, CheckCircle, XCircle, Trash2, ShieldCheck } from 'lucide-react'
+import { Star, CheckCircle, XCircle, Trash2, ShieldCheck, MessageSquareQuote } from 'lucide-react'
+import {
+  AdminEmptyState,
+  AdminLoadingState,
+  AdminPageHeader,
+  AdminStatCard,
+} from '@/components/admin/admin-page-shell'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -137,23 +143,32 @@ export default function TestimonialsAdmin() {
     )
   }
 
+  const pendingCount = testimonials.filter((testimonial) => testimonial.status === 'pending').length
+  const approvedCount = testimonials.filter((testimonial) => testimonial.status === 'approved').length
+  const verifiedCount = testimonials.filter((testimonial) => testimonial.verified_booking).length
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-serif text-foreground mb-2">Testimonials</h1>
-        <p className="text-muted-foreground">
-          Review and manage customer testimonials
-        </p>
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Client words"
+        title="Testimonials"
+        description="Approve new reviews, remove anything unsuitable, and keep the public reviews page polished."
+      />
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <AdminStatCard label="Pending" value={pendingCount} detail="Waiting for approval" icon={MessageSquareQuote} tone={pendingCount > 0 ? 'warning' : 'neutral'} />
+        <AdminStatCard label="Approved" value={approvedCount} detail="Visible when published" icon={CheckCircle} tone="success" />
+        <AdminStatCard label="Verified" value={verifiedCount} detail="Connected to bookings" icon={ShieldCheck} />
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-foreground/10 bg-card/70 p-3 shadow-sm">
         {(['all', 'pending', 'approved', 'rejected'] as const).map((status) => (
           <Button
             key={status}
             variant={filter === status ? 'default' : 'outline'}
             onClick={() => setFilter(status)}
-            className="capitalize"
+            className="rounded-full capitalize"
           >
             {status}
           </Button>
@@ -162,19 +177,17 @@ export default function TestimonialsAdmin() {
 
       {/* Loading State */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <AdminLoadingState label="Loading testimonials..." />
       ) : testimonials.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">
-            No testimonials found
-          </p>
-        </Card>
+        <AdminEmptyState
+          title="No testimonials found"
+          description="Customer reviews will appear here once submitted."
+          icon={Star}
+        />
       ) : (
         <div className="grid gap-4">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="p-6">
+            <Card key={testimonial.id} className="rounded-[1.5rem] border-foreground/10 bg-card/80 p-6 shadow-sm">
               <div className="space-y-4">
                 {/* Header */}
                 <div className="flex justify-between items-start">

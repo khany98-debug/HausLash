@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useAdminAuth } from './layout'
-import { formatPence, formatDuration } from '@/lib/types'
+import { formatPence } from '@/lib/types'
 import { format } from 'date-fns'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -27,7 +26,21 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2 } from 'lucide-react'
+import {
+  CalendarDays,
+  Clock,
+  CreditCard,
+  Inbox,
+  Loader2,
+  Sparkles,
+  Users,
+} from 'lucide-react'
+import {
+  AdminEmptyState,
+  AdminLoadingState,
+  AdminPageHeader,
+  AdminStatCard,
+} from '@/components/admin/admin-page-shell'
 
 interface BookingRow {
   id: string
@@ -85,6 +98,23 @@ export default function AdminBookingsPage() {
       .catch(() => setBookings([]))
       .finally(() => setLoading(false))
   }, [token, statusFilter])
+
+  const confirmedBookings = bookings.filter((booking) => booking.status === 'confirmed')
+  const pendingBookings = bookings.filter((booking) => booking.status === 'pending_payment')
+  const upcomingBookings = bookings.filter(
+    (booking) =>
+      ['confirmed', 'pending_payment'].includes(booking.status) &&
+      new Date(booking.start_at).getTime() >= Date.now()
+  )
+  const todayKey = format(new Date(), 'yyyy-MM-dd')
+  const todayBookings = bookings.filter(
+    (booking) =>
+      format(new Date(booking.start_at), 'yyyy-MM-dd') === todayKey &&
+      !['cancelled', 'refunded'].includes(booking.status)
+  )
+  const depositTotal = bookings
+    .filter((booking) => ['confirmed', 'completed'].includes(booking.status))
+    .reduce((sum, booking) => sum + (booking.deposit_amount_pence || 0), 0)
 
   const handleCancelClick = (booking: BookingRow) => {
     setSelectedBookingForCancel(booking)
@@ -196,72 +226,122 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
-        <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-[180px] focus-visible:ring-2 focus-visible:ring-primary">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="pending_payment">Pending Payment</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+      <AdminPageHeader
+        eyebrow="Studio command"
+        title="Bookings"
+        description="Manage upcoming appointments, reschedule customers, and keep every booking status tidy from one calm dashboard."
+        action={
+          <div className="flex w-full min-w-48 flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Filter
+            </span>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full rounded-full bg-background/80 focus-visible:ring-2 focus-visible:ring-primary md:w-[190px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="pending_payment">Pending Payment</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AdminStatCard
+          label="Today"
+          value={todayBookings.length}
+          detail="Appointments happening today"
+          icon={CalendarDays}
+        />
+        <AdminStatCard
+          label="Upcoming"
+          value={upcomingBookings.length}
+          detail={`${confirmedBookings.length} confirmed in this view`}
+          icon={Clock}
+          tone="success"
+        />
+        <AdminStatCard
+          label="Needs Payment"
+          value={pendingBookings.length}
+          detail="Pending appointments to watch"
+          icon={Inbox}
+          tone={pendingBookings.length > 0 ? 'warning' : 'neutral'}
+        />
+        <AdminStatCard
+          label="Deposits"
+          value={formatPence(depositTotal)}
+          detail="Confirmed and completed deposits"
+          icon={CreditCard}
+        />
       </div>
 
       {actionMessage && (
-        <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-sm">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-sm">
           {actionMessage}
         </div>
       )}
 
       {loading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">Loading...</p>
+        <AdminLoadingState label="Loading bookings..." />
       ) : bookings.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">No bookings found.</p>
+        <AdminEmptyState
+          title="No bookings found"
+          description="Once customers reserve a lash lift, their appointments and details will appear here."
+          icon={Users}
+        />
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block rounded-xl border border-border/60 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/60 bg-muted/50">
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Customer</th>
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Service</th>
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Date & Time</th>
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Status</th>
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Deposit</th>
-                  <th className="px-4 py-3 text-left font-medium text-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="hidden overflow-hidden rounded-[1.5rem] border border-foreground/10 bg-card/80 shadow-sm backdrop-blur md:block">
+            <div className="flex items-center justify-between border-b border-foreground/10 px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Appointment list</p>
+                <p className="text-xs text-muted-foreground">Newest bookings in the selected status view.</p>
+              </div>
+              <Sparkles className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-foreground/10 bg-muted/35">
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Customer</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Service</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Date & Time</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Status</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Deposit</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-border/30 last:border-0">
-                    <td className="px-4 py-3">
+                  <tr key={b.id} className="border-b border-foreground/10 last:border-0 hover:bg-muted/25">
+                    <td className="px-5 py-4">
                       <div className="font-medium text-foreground">{b.customer_name}</div>
                       <div className="text-xs text-muted-foreground">{b.customer_email}</div>
                       <div className="text-xs text-muted-foreground">{b.customer_phone}</div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{b.service_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-5 py-4 text-muted-foreground">{b.service_name}</td>
+                    <td className="px-5 py-4 text-muted-foreground">
                       {format(new Date(b.start_at), 'EEE d MMM yyyy')}
                       <br />
                       <span className="text-xs">{format(new Date(b.start_at), 'HH:mm')}</span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4">
                       <span
                         className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[b.status] || 'bg-muted text-muted-foreground'}`}
                       >
                         {b.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-5 py-4 text-muted-foreground">
                       {formatPence(b.deposit_amount_pence)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4">
                       <div className="flex gap-2">
                         {b.status === 'confirmed' && (
                           <>
@@ -297,14 +377,15 @@ export default function AdminBookingsPage() {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Mobile Card View */}
           <div className="md:hidden flex flex-col gap-3">
             {bookings.map((b) => (
-              <div key={b.id} className="rounded-lg border border-border/60 bg-card p-4 space-y-3">
+              <div key={b.id} className="space-y-3 rounded-2xl border border-foreground/10 bg-card/80 p-4 shadow-sm">
                 {/* Header: Customer Name and Status */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">

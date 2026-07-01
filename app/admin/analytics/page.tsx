@@ -8,6 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { formatPence } from '@/lib/types'
 import { format } from 'date-fns'
 import { TrendingUp, DollarSign, Calendar, BarChart3 } from 'lucide-react'
+import {
+  AdminEmptyState,
+  AdminLoadingState,
+  AdminPageHeader,
+  AdminStatCard,
+} from '@/components/admin/admin-page-shell'
 
 interface AnalyticsData {
   period: string
@@ -72,95 +78,71 @@ export default function AdminAnalyticsPage() {
   }, [token, period])
 
   if (loading) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Loading analytics...</p>
-      </div>
-    )
+    return <AdminLoadingState label="Loading analytics..." />
   }
 
   if (!data) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Failed to load analytics</p>
-      </div>
+      <AdminEmptyState
+        title="Analytics could not be loaded"
+        description="Refresh the page and try again. If it continues, the analytics API may need checking."
+        icon={BarChart3}
+      />
     )
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl text-foreground">Analytics</h1>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">Last 7 Days</SelectItem>
-            <SelectItem value="30">Last 30 Days</SelectItem>
-            <SelectItem value="90">Last 90 Days</SelectItem>
-            <SelectItem value="365">Last Year</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <AdminPageHeader
+        eyebrow="Performance"
+        title="Analytics"
+        description="Track revenue, booking health, popular services, and the appointments coming up next."
+        action={
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-full rounded-full bg-background/80 sm:w-[180px]">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">Last 7 Days</SelectItem>
+              <SelectItem value="30">Last 30 Days</SelectItem>
+              <SelectItem value="90">Last 90 Days</SelectItem>
+              <SelectItem value="365">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
+        }
+      />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-6 border-primary/10">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
-              <p className="text-2xl font-bold text-foreground">
-                {formatPence(data.summary?.totalRevenue || 0)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                From {data.summary?.totalBookings || 0} bookings
-              </p>
-            </div>
-            <DollarSign className="h-8 w-8 text-primary opacity-50" />
-          </div>
-        </Card>
-
-        <Card className="p-6 border-primary/10">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Bookings</p>
-              <p className="text-2xl font-bold text-foreground">
-                {data.summary?.totalBookings || 0}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Average: {formatPence(data.summary?.averageRevenue || 0)} per booking
-              </p>
-            </div>
-            <Calendar className="h-8 w-8 text-primary opacity-50" />
-          </div>
-        </Card>
-
-        <Card className="p-6 border-primary/10">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Confirmation Rate</p>
-              <p className="text-2xl font-bold text-foreground">
-                {data.summary && data.summary.totalBookings > 0 && data.statusBreakdown
-                  ? Math.round(
-                      ((data.statusBreakdown.find((s) => s.status === 'confirmed')?.count || 0) /
-                        data.summary.totalBookings) *
-                        100
-                    )
-                  : 0}
-                %
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Confirmed appointments
-              </p>
-            </div>
-            <TrendingUp className="h-8 w-8 text-primary opacity-50" />
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <AdminStatCard
+          label="Total revenue"
+          value={formatPence(data.summary?.totalRevenue || 0)}
+          detail={`From ${data.summary?.totalBookings || 0} bookings`}
+          icon={DollarSign}
+          tone="success"
+        />
+        <AdminStatCard
+          label="Total bookings"
+          value={data.summary?.totalBookings || 0}
+          detail={`Average ${formatPence(data.summary?.averageRevenue || 0)} per booking`}
+          icon={Calendar}
+        />
+        <AdminStatCard
+          label="Confirmation rate"
+          value={`${data.summary && data.summary.totalBookings > 0 && data.statusBreakdown
+            ? Math.round(
+                ((data.statusBreakdown.find((s) => s.status === 'confirmed')?.count || 0) /
+                  data.summary.totalBookings) *
+                  100
+              )
+            : 0}%`}
+          detail="Confirmed appointments"
+          icon={TrendingUp}
+        />
       </div>
 
       {/* Status Breakdown */}
-      <Card className="p-6 border-primary/10">
+      <Card className="rounded-[1.5rem] border-foreground/10 bg-card/80 p-6 shadow-sm">
         <h2 className="font-serif text-xl text-foreground mb-4">Booking Status</h2>
         {data.statusBreakdown && data.statusBreakdown.length > 0 ? (
           <div className="space-y-3">
@@ -191,7 +173,7 @@ export default function AdminAnalyticsPage() {
       </Card>
 
       {/* Popular Services */}
-      <Card className="p-6 border-primary/10">
+      <Card className="rounded-[1.5rem] border-foreground/10 bg-card/80 p-6 shadow-sm">
         <h2 className="font-serif text-xl text-foreground mb-4">Popular Services</h2>
         {data.popularServices && data.popularServices.length > 0 ? (
           <div className="space-y-3">
@@ -215,7 +197,7 @@ export default function AdminAnalyticsPage() {
       </Card>
 
       {/* Upcoming Appointments */}
-      <Card className="p-6 border-primary/10">
+      <Card className="rounded-[1.5rem] border-foreground/10 bg-card/80 p-6 shadow-sm">
         <h2 className="font-serif text-xl text-foreground mb-4">Upcoming Appointments</h2>
         {data.upcomingAppointments && data.upcomingAppointments.length > 0 ? (
           <div className="space-y-3">
