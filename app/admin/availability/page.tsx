@@ -1,18 +1,65 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAdminAuth } from '../layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Trash2, Copy, ChevronDown, ChevronUp, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import {
+  AlertCircle,
+  Ban,
+  CalendarDays,
+  CalendarPlus,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  Loader2,
+  Plus,
+  Repeat,
+  Scissors,
+  Settings2,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { AdminLoadingState, AdminPageHeader } from '@/components/admin/admin-page-shell'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const LASH_LIFT_SLOT_MINUTES = 90
-const QUICK_SLOT_STARTS = ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30']
+
+const SLOT_TEMPLATES = [
+  {
+    id: 'full',
+    label: 'Full studio day',
+    description: 'Six 90-minute appointments from 09:00 to 18:00.',
+    starts: ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30'],
+  },
+  {
+    id: 'balanced',
+    label: 'Balanced day',
+    description: 'Four calm appointments with space to reset.',
+    starts: ['10:00', '11:30', '13:30', '15:00'],
+  },
+  {
+    id: 'morning',
+    label: 'Morning only',
+    description: 'Open the first half of the day.',
+    starts: ['09:00', '10:30', '12:00'],
+  },
+  {
+    id: 'afternoon',
+    label: 'Afternoon only',
+    description: 'Open later appointments only.',
+    starts: ['13:30', '15:00', '16:30'],
+  },
+]
+
+const ALL_SLOT_STARTS = Array.from(
+  new Set(SLOT_TEMPLATES.flatMap((template) => template.starts))
+).sort()
 
 interface AvailabilityRule {
   id: string
@@ -50,59 +97,124 @@ function getSlotDuration(start: string, end: string) {
   return endHours * 60 + endMins - (startHours * 60 + startMins)
 }
 
+function formatDateInput(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseDateInput(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function addDays(date: Date, days: number) {
+  const copy = new Date(date)
+  copy.setDate(copy.getDate() + days)
+  return copy
+}
+
+function formatDisplayDate(date: string) {
+  return parseDateInput(date).toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+function getNextWeekday(targetWeekday: number) {
+  const today = new Date()
+  const diff = (targetWeekday + 7 - today.getDay()) % 7
+  return formatDateInput(addDays(today, diff || 7))
+}
+
+function buildDateRange(startDate: string, endDate: string, weekdays: number[]) {
+  if (!startDate || !endDate) return []
+
+  const dates: string[] = []
+  const start = parseDateInput(startDate)
+  const end = parseDateInput(endDate)
+
+  if (start > end) return dates
+
+  for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+    if (weekdays.includes(date.getDay())) {
+      dates.push(formatDateInput(date))
+    }
+  }
+
+  return dates
+}
+
 export default function AdminAvailabilityPage() {
   const { token } = useAdminAuth()
 
-  // State
   const [rules, setRules] = useState<AvailabilityRule[]>([])
   const [slots, setSlots] = useState<Slot[]>([])
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([])
   const [loading, setLoading] = useState(true)
   const [processingActionId, setProcessingActionId] = useState<string | null>(null)
 
-  // Daily Slots form
-  const [slotDate, setSlotDate] = useState('')
-  const [slotStart, setSlotStart] = useState('')
-  const [slotEnd, setSlotEnd] = useState('')
+  const [slotDate, setSlotDate] = useState(formatDateInput(new Date()))
+  const [selectedTemplateId, setSelectedTemplateId] = useState(SLOT_TEMPLATES[0].id)
+  const [selectedSlotStarts, setSelectedSlotStarts] = useState<string[]>(SLOT_TEMPLATES[0].starts)
+  const [customSlotStart, setCustomSlotStart] = useState('09:00')
 
-  // Copy Schedule form
-  const [copySourceDate, setCopySourceDate] = useState('')
-  const [copyStartDate, setCopyStartDate] = useState('')
-  const [copyEndDate, setCopyEndDate] = useState('')
-  const [copyDays, setCopyDays] = useState<number[]>([6, 0]) // default Sat + Sun
-  const [copyPreview, setCopyPreview] = useState<string[]>([])
+  const [repeatStartDate, setRepeatStartDate] = useState(formatDateInput(new Date()))
+  const [repeatEndDate, setRepeatEndDate] = useState(formatDateInput(addDays(new Date(), 14)))
+  const [repeatDays, setRepeatDays] = useState<number[]>([6])
 
-  // Rules form
   const [editingRuleDay, setEditingRuleDay] = useState<number | null>(null)
   const [ruleStart, setRuleStart] = useState('')
   const [ruleEnd, setRuleEnd] = useState('')
   const [ruleBuffer, setRuleBuffer] = useState('15')
 
-  // Blocked times form
   const [blockStart, setBlockStart] = useState('')
   const [blockEnd, setBlockEnd] = useState('')
   const [blockReason, setBlockReason] = useState('')
 
-  // UI state
   const [expandedSections, setExpandedSections] = useState({
-    rules: true,
-    dailySlots: true,
-    copySlots: false,
+    repeat: false,
+    rules: false,
     blockedTimes: false,
   })
 
-  // Load data on mount
+  const existingStarts = useMemo(
+    () => new Set(slots.map((slot) => slot.start_time.slice(0, 5))),
+    [slots]
+  )
+
+  const selectedTemplate = SLOT_TEMPLATES.find((template) => template.id === selectedTemplateId)
+  const selectedNewStarts = selectedSlotStarts.filter((start) => !existingStarts.has(start))
+  const selectedExistingStarts = selectedSlotStarts.filter((start) => existingStarts.has(start))
+  const repeatDates = useMemo(
+    () => buildDateRange(repeatStartDate, repeatEndDate, repeatDays),
+    [repeatStartDate, repeatEndDate, repeatDays]
+  )
+
   useEffect(() => {
     if (!token) return
     loadAllData()
+    loadSlots(slotDate)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
+
+  useEffect(() => {
+    if (!token || !slotDate) return
+    loadSlots(slotDate)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotDate, token])
 
   async function loadAllData() {
     try {
       setLoading(true)
       const [rulesRes, blockedRes] = await Promise.all([
         fetch('/api/admin/availability', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/availability', { method: 'PUT', headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/admin/availability', {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ])
 
       if (rulesRes.ok) {
@@ -114,7 +226,7 @@ export default function AdminAvailabilityPage() {
         const data = await blockedRes.json()
         setBlockedTimes(data.blocked || [])
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load availability data')
     } finally {
       setLoading(false)
@@ -129,13 +241,13 @@ export default function AdminAvailabilityPage() {
       })
       const data = await res.json()
       setSlots(data.slots || [])
-    } catch (error) {
+    } catch {
       toast.error('Failed to load slots')
     }
   }
 
   function validateTimeRange(start: string, end: string, fieldName = 'Time') {
-    if (!start || !end) return true // Let required validation handle this
+    if (!start || !end) return true
     if (start >= end) {
       toast.error(`${fieldName}: End time must be after start time`)
       return false
@@ -143,96 +255,119 @@ export default function AdminAvailabilityPage() {
     return true
   }
 
-  async function createSlot(startOverride?: string, endOverride?: string) {
-    if (!slotDate) {
-      toast.error('Please select a date')
-      return
-    }
+  async function createSlotForDate(date: string, start: string) {
+    const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
 
-    const start = startOverride || slotStart
-    const end = endOverride || slotEnd || (start ? addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES) : '')
+    const res = await fetch('/api/admin/slots', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        date,
+        start_time: start,
+        end_time: end,
+      }),
+    })
 
-    if (!start) {
-      toast.error('Please choose a start time')
-      return
-    }
-
-    if (!validateTimeRange(start, end, 'Slot time')) return
-
-    setProcessingActionId(startOverride ? `create-slot-${startOverride}` : 'create-slot')
-    try {
-      const res = await fetch('/api/admin/slots', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          date: slotDate,
-          start_time: start,
-          end_time: end,
-        }),
-      })
-
-      if (res.ok) {
-        toast.success(`Slot added: ${start} - ${end}`)
-        setSlotStart('')
-        setSlotEnd('')
-        await loadSlots(slotDate)
-      } else {
-        const error = await res.json()
-        toast.error(error.error || 'Failed to add slot')
-      }
-    } catch (error) {
-      toast.error('Failed to add slot')
-    } finally {
-      setProcessingActionId(null)
-    }
+    if (res.ok) return 'created'
+    if (res.status === 409) return 'skipped'
+    return 'failed'
   }
 
-  async function createPresetDaySlots() {
+  async function createSelectedSlots() {
     if (!slotDate) {
       toast.error('Please select a date')
       return
     }
 
-    setProcessingActionId('create-preset-day')
+    if (selectedSlotStarts.length === 0) {
+      toast.error('Please choose at least one slot')
+      return
+    }
+
+    if (selectedNewStarts.length === 0) {
+      toast.info('All selected slots already exist for this date')
+      return
+    }
+
+    setProcessingActionId('create-selected')
     try {
-      const existingStarts = new Set(slots.map((slot) => slot.start_time.slice(0, 5)))
       let created = 0
       let skipped = 0
+      let failed = 0
 
-      for (const start of QUICK_SLOT_STARTS) {
+      for (const start of selectedSlotStarts) {
         if (existingStarts.has(start)) {
           skipped++
           continue
         }
 
-        const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
-        const res = await fetch('/api/admin/slots', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            date: slotDate,
-            start_time: start,
-            end_time: end,
-          }),
-        })
+        const result = await createSlotForDate(slotDate, start)
+        if (result === 'created') created++
+        if (result === 'skipped') skipped++
+        if (result === 'failed') failed++
+      }
 
-        if (res.ok) {
-          created++
-        } else {
-          skipped++
+      await loadSlots(slotDate)
+      if (created > 0) {
+        toast.success(`${created} slot${created !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped` : ''}`)
+      } else if (failed > 0) {
+        toast.error('No slots were added')
+      } else {
+        toast.info('Those slots already exist')
+      }
+    } catch {
+      toast.error('Failed to add slots')
+    } finally {
+      setProcessingActionId(null)
+    }
+  }
+
+  async function createRepeatingSlots() {
+    if (repeatDates.length === 0) {
+      toast.error('Choose a valid date range and at least one day')
+      return
+    }
+
+    if (repeatDates.length > 90) {
+      toast.error('Please keep repeat ranges under 90 selected dates')
+      return
+    }
+
+    if (selectedSlotStarts.length === 0) {
+      toast.error('Please choose at least one slot')
+      return
+    }
+
+    setProcessingActionId('repeat-slots')
+    try {
+      let created = 0
+      let skipped = 0
+      let failed = 0
+
+      for (const date of repeatDates) {
+        for (const start of selectedSlotStarts) {
+          const result = await createSlotForDate(date, start)
+          if (result === 'created') created++
+          if (result === 'skipped') skipped++
+          if (result === 'failed') failed++
         }
       }
 
       await loadSlots(slotDate)
-      toast.success(`${created} 90-minute slot${created !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped` : ''}`)
-    } catch (error) {
-      toast.error('Failed to add preset slots')
+      if (created > 0) {
+        toast.success(
+          `${created} slot${created !== 1 ? 's' : ''} created across ${repeatDates.length} date${repeatDates.length !== 1 ? 's' : ''}${skipped ? `, ${skipped} skipped` : ''}`
+        )
+      } else if (failed > 0) {
+        toast.error('No repeat slots were created')
+      } else {
+        toast.info('All repeat slots already existed')
+      }
+    } catch {
+      toast.error('Failed to repeat slots')
     } finally {
       setProcessingActionId(null)
     }
@@ -259,7 +394,7 @@ export default function AdminAvailabilityPage() {
 
       toast.success('All slots removed for this date')
       await loadSlots(slotDate)
-    } catch (error) {
+    } catch {
       toast.error('Failed to clear slots')
     } finally {
       setProcessingActionId(null)
@@ -284,100 +419,8 @@ export default function AdminAvailabilityPage() {
       } else {
         toast.error('Failed to delete slot')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete slot')
-    } finally {
-      setProcessingActionId(null)
-    }
-  }
-
-  function generateCopyPreview() {
-    if (!copyStartDate || !copyEndDate) {
-      setCopyPreview([])
-      return
-    }
-
-    const dates: string[] = []
-    const start = new Date(copyStartDate)
-    const end = new Date(copyEndDate)
-
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const weekday = d.getDay()
-      if (copyDays.includes(weekday)) {
-        dates.push(d.toISOString().split('T')[0])
-      }
-    }
-
-    setCopyPreview(dates)
-  }
-
-  useEffect(() => {
-    generateCopyPreview()
-  }, [copyStartDate, copyEndDate, copyDays])
-
-  async function copySlots() {
-    if (!copySourceDate || !copyStartDate || !copyEndDate) {
-      toast.error('Please fill in all copy fields')
-      return
-    }
-
-    if (copyPreview.length === 0) {
-      toast.error('No dates selected to copy to')
-      return
-    }
-
-    setProcessingActionId('copy-slots')
-    try {
-      const sourceRes = await fetch(`/api/admin/slots?date=${copySourceDate}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      const sourceData = await sourceRes.json()
-      const sourceSlots = sourceData.slots || []
-
-      if (!sourceSlots.length) {
-        toast.error('No slots found on source date')
-        setProcessingActionId(null)
-        return
-      }
-
-      let created = 0
-      let failed = 0
-
-      for (const date of copyPreview) {
-        for (const slot of sourceSlots) {
-          try {
-            const res = await fetch('/api/admin/slots', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                date,
-                start_time: slot.start_time.slice(0, 5),
-                end_time: slot.end_time.slice(0, 5),
-              }),
-            })
-
-            if (res.ok) {
-              created++
-            } else {
-              failed++
-            }
-          } catch {
-            failed++
-          }
-        }
-      }
-
-      if (created > 0) {
-        toast.success(`${created} slot${created !== 1 ? 's' : ''} copied successfully${failed > 0 ? ` (${failed} failed)` : ''}`)
-      } else {
-        toast.error('No slots were copied')
-      }
-    } catch (error) {
-      toast.error('Failed to copy slots')
     } finally {
       setProcessingActionId(null)
     }
@@ -411,7 +454,7 @@ export default function AdminAvailabilityPage() {
       } else {
         toast.error('Failed to save availability rule')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to save availability rule')
     } finally {
       setProcessingActionId(null)
@@ -439,7 +482,7 @@ export default function AdminAvailabilityPage() {
       } else {
         toast.error('Failed to delete availability rule')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete availability rule')
     } finally {
       setProcessingActionId(null)
@@ -479,7 +522,7 @@ export default function AdminAvailabilityPage() {
       } else {
         toast.error('Failed to add blocked time')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to add blocked time')
     } finally {
       setProcessingActionId(null)
@@ -507,11 +550,38 @@ export default function AdminAvailabilityPage() {
       } else {
         toast.error('Failed to remove blocked time')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove blocked time')
     } finally {
       setProcessingActionId(null)
     }
+  }
+
+  function applyTemplate(templateId: string) {
+    const template = SLOT_TEMPLATES.find((item) => item.id === templateId)
+    if (!template) return
+    setSelectedTemplateId(templateId)
+    setSelectedSlotStarts(template.starts)
+  }
+
+  function toggleSlot(start: string) {
+    setSelectedTemplateId('custom')
+    setSelectedSlotStarts((current) =>
+      current.includes(start) ? current.filter((item) => item !== start) : [...current, start].sort()
+    )
+  }
+
+  function addCustomSlot() {
+    if (!customSlotStart) return
+    setSelectedTemplateId('custom')
+    setSelectedSlotStarts((current) => Array.from(new Set([...current, customSlotStart])).sort())
+    setCustomSlotStart(addMinutesToTime(customSlotStart, LASH_LIFT_SLOT_MINUTES))
+  }
+
+  function toggleRepeatDay(day: number) {
+    setRepeatDays((current) =>
+      current.includes(day) ? current.filter((item) => item !== day) : [...current, day].sort()
+    )
   }
 
   function toggleSection(section: keyof typeof expandedSections) {
@@ -526,59 +596,438 @@ export default function AdminAvailabilityPage() {
   }
 
   return (
-    <div className="flex max-w-6xl flex-col gap-6">
+    <div className="flex max-w-7xl flex-col gap-6">
       <AdminPageHeader
         eyebrow="Schedule control"
         title="Availability"
-        description="Add 90-minute lash lift slots quickly, copy them across dates, and block time when needed."
+        description="Create bookable 90-minute lash lift slots quickly, repeat your best days, and keep blocked time out of the booking calendar."
+        action={
+          <Button
+            className="rounded-full"
+            onClick={() => {
+              setSlotDate(formatDateInput(new Date()))
+              setExpandedSections((current) => ({ ...current, repeat: false }))
+            }}
+          >
+            <CalendarDays className="h-4 w-4" />
+            Today
+          </Button>
+        }
       />
 
-      {/* WEEKLY AVAILABILITY RULES */}
-      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
-        <button
-          onClick={() => toggleSection('rules')}
-          className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-lg">Weekly Availability Rules</h2>
-            <Badge variant="outline" className="text-xs">
-              {rules.length > 0 ? `${rules.length} days` : 'Setup required'}
-            </Badge>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)]">
+        <Card className="overflow-hidden rounded-[1.75rem] border-foreground/10 bg-card/85 shadow-sm">
+          <div className="border-b border-foreground/10 bg-muted/30 p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="eyebrow">Quick builder</p>
+                <h2 className="mt-2 font-serif text-2xl text-foreground">Add availability</h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                  Pick a date, choose the slots you want, then add them in one tap. Existing slots are skipped automatically.
+                </p>
+              </div>
+              <Badge variant="outline" className="w-fit rounded-full bg-background px-3 py-1">
+                {LASH_LIFT_SLOT_MINUTES} min slots
+              </Badge>
+            </div>
           </div>
-          {expandedSections.rules ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+
+          <div className="grid gap-6 p-5">
+            <section className="grid gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  1
+                </div>
+                <h3 className="font-semibold text-foreground">Choose date</h3>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <Input
+                  type="date"
+                  value={slotDate}
+                  onChange={(event) => setSlotDate(event.target.value)}
+                  className="rounded-full bg-background/80"
+                />
+                <div className="grid grid-cols-3 gap-2 sm:flex">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setSlotDate(formatDateInput(new Date()))}
+                  >
+                    Today
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setSlotDate(formatDateInput(addDays(new Date(), 1)))}
+                  >
+                    Tomorrow
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setSlotDate(getNextWeekday(6))}
+                  >
+                    Saturday
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  2
+                </div>
+                <h3 className="font-semibold text-foreground">Choose a slot pattern</h3>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SLOT_TEMPLATES.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => applyTemplate(template.id)}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      selectedTemplateId === template.id
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                        : 'border-foreground/10 bg-background/70 hover:border-foreground/25'
+                    }`}
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="font-semibold">{template.label}</span>
+                      <span className={`text-xs ${selectedTemplateId === template.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                        {template.starts.length} slots
+                      </span>
+                    </span>
+                    <span className={`mt-2 block text-sm leading-5 ${selectedTemplateId === template.id ? 'text-primary-foreground/75' : 'text-muted-foreground'}`}>
+                      {template.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="grid gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                  3
+                </div>
+                <h3 className="font-semibold text-foreground">Fine tune times</h3>
+              </div>
+
+              <div className="rounded-2xl border border-foreground/10 bg-background/70 p-4">
+                <div className="flex flex-wrap gap-2">
+                  {ALL_SLOT_STARTS.map((start) => {
+                    const selected = selectedSlotStarts.includes(start)
+                    const exists = existingStarts.has(start)
+                    const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
+
+                    return (
+                      <button
+                        key={start}
+                        type="button"
+                        onClick={() => toggleSlot(start)}
+                        className={`rounded-full border px-3 py-2 text-sm transition ${
+                          selected
+                            ? exists
+                              ? 'border-amber-300 bg-amber-50 text-amber-900'
+                              : 'border-primary bg-primary text-primary-foreground'
+                            : 'border-foreground/10 bg-card text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {start} - {end}
+                        {selected && exists ? ' exists' : ''}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-4 grid gap-2 border-t border-foreground/10 pt-4 sm:grid-cols-[1fr_auto]">
+                  <Input
+                    type="time"
+                    value={customSlotStart}
+                    onChange={(event) => setCustomSlotStart(event.target.value)}
+                    className="rounded-full bg-card"
+                  />
+                  <Button type="button" variant="outline" onClick={addCustomSlot} className="rounded-full">
+                    <Plus className="h-4 w-4" />
+                    Add custom time
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            <div className="rounded-2xl border border-foreground/10 bg-muted/35 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {selectedNewStarts.length} new slot{selectedNewStarts.length !== 1 ? 's' : ''} ready for {slotDate ? formatDisplayDate(slotDate) : 'this date'}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {selectedExistingStarts.length > 0
+                      ? `${selectedExistingStarts.length} selected slot${selectedExistingStarts.length !== 1 ? 's are' : ' is'} already open and will be skipped.`
+                      : selectedTemplate
+                        ? `Using the ${selectedTemplate.label.toLowerCase()} pattern.`
+                        : 'Custom pattern selected.'}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button
+                    onClick={createSelectedSlots}
+                    disabled={processingActionId === 'create-selected' || selectedNewStarts.length === 0}
+                    className="rounded-full"
+                  >
+                    {processingActionId === 'create-selected' ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CalendarPlus className="h-4 w-4" />
+                    )}
+                    Add selected slots
+                  </Button>
+                  {slots.length > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={clearSlotsForDate}
+                      disabled={processingActionId === 'clear-slots'}
+                      className="rounded-full"
+                    >
+                      {processingActionId === 'clear-slots' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Clear date
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="rounded-[1.75rem] border-foreground/10 bg-card/85 p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow">Selected day</p>
+              <h2 className="mt-2 font-serif text-2xl text-foreground">
+                {slotDate ? formatDisplayDate(slotDate) : 'Choose a date'}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {slots.length} live slot{slots.length !== 1 ? 's' : ''} open for booking.
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-foreground">
+              <Scissors className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-2">
+            {slots.length > 0 ? (
+              slots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-foreground/10 bg-background/80 p-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">
+                        {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {getSlotDuration(slot.start_time, slot.end_time)} minutes
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => deleteSlot(slot.id)}
+                    disabled={processingActionId === `delete-slot-${slot.id}`}
+                    className="rounded-full text-muted-foreground hover:text-destructive"
+                    aria-label="Delete slot"
+                  >
+                    {processingActionId === `delete-slot-${slot.id}` ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-foreground/15 bg-background/65 p-6 text-center">
+                <Sparkles className="mx-auto h-5 w-5 text-muted-foreground" />
+                <p className="mt-3 text-sm font-semibold text-foreground">No slots yet</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Choose a template and tap add selected slots to open this day.
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      <Card className="overflow-hidden rounded-[1.75rem] border-foreground/10 bg-card/80 shadow-sm">
+        <button
+          onClick={() => toggleSection('repeat')}
+          className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-muted/35"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Repeat className="h-4 w-4" />
+            </span>
+            <span>
+              <span className="block font-semibold text-foreground">Repeat this pattern</span>
+              <span className="block text-sm text-muted-foreground">
+                Create the selected slots across multiple dates.
+              </span>
+            </span>
+          </span>
+          {expandedSections.repeat ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </button>
 
-        {expandedSections.rules && (
-          <div className="border-t border-primary/10 p-4 gap-4 flex flex-col">
-            <p className="text-sm text-muted-foreground">
-              Set recurring opening windows if you need them. For day-to-day bookings, use the 90-minute slots below.
-            </p>
+        {expandedSections.repeat && (
+          <div className="grid gap-5 border-t border-foreground/10 p-5">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium">Start date</label>
+                <Input
+                  type="date"
+                  value={repeatStartDate}
+                  onChange={(event) => setRepeatStartDate(event.target.value)}
+                  className="mt-1 rounded-full bg-background/80"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">End date</label>
+                <Input
+                  type="date"
+                  value={repeatEndDate}
+                  onChange={(event) => setRepeatEndDate(event.target.value)}
+                  className="mt-1 rounded-full bg-background/80"
+                />
+              </div>
+            </div>
 
-            {editingRuleDay === null ? (
-              <div className="grid gap-3">
-                {DAYS.map((day, index) => {
-                  const rule = rules.find((r) => r.weekday === index)
+            <div>
+              <p className="text-sm font-medium text-foreground">Repeat on</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {DAYS.map((day, index) => (
+                  <Button
+                    key={day}
+                    type="button"
+                    size="sm"
+                    variant={repeatDays.includes(index) ? 'default' : 'outline'}
+                    className="rounded-full"
+                    onClick={() => toggleRepeatDay(index)}
+                  >
+                    {day.slice(0, 3)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-foreground/10 bg-background/70 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {repeatDates.length} date{repeatDates.length !== 1 ? 's' : ''} selected
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    This will try to create {repeatDates.length * selectedSlotStarts.length} slot{repeatDates.length * selectedSlotStarts.length !== 1 ? 's' : ''}. Existing overlaps are skipped.
+                  </p>
+                </div>
+                <Button
+                  onClick={createRepeatingSlots}
+                  disabled={processingActionId === 'repeat-slots' || repeatDates.length === 0 || selectedSlotStarts.length === 0}
+                  className="rounded-full"
+                >
+                  {processingActionId === 'repeat-slots' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  Create repeat slots
+                </Button>
+              </div>
+
+              {repeatDates.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {repeatDates.slice(0, 18).map((date) => (
+                    <span key={date} className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                      {formatDisplayDate(date)}
+                    </span>
+                  ))}
+                  {repeatDates.length > 18 && (
+                    <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                      +{repeatDates.length - 18} more
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="overflow-hidden rounded-[1.75rem] border-foreground/10 bg-card/80 shadow-sm">
+          <button
+            onClick={() => toggleSection('rules')}
+            className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-muted/35"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Settings2 className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="block font-semibold text-foreground">Advanced weekly rules</span>
+                <span className="block text-sm text-muted-foreground">
+                  Optional recurring windows. Daily slots are usually simpler.
+                </span>
+              </span>
+            </span>
+            {expandedSections.rules ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </button>
+
+          {expandedSections.rules && (
+            <div className="grid gap-3 border-t border-foreground/10 p-5">
+              {editingRuleDay === null ? (
+                DAYS.map((day, index) => {
+                  const rule = rules.find((item) => item.weekday === index)
+
                   return (
-                    <div key={day} className="flex items-center justify-between p-3 border border-primary/10 rounded-lg">
-                      <div className="flex-1">
+                    <div
+                      key={day}
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-foreground/10 bg-background/70 p-3"
+                    >
+                      <div>
                         <p className="font-medium text-foreground">{day}</p>
                         {rule ? (
                           <p className="text-sm text-muted-foreground">
-                            {rule.start_time} — {rule.end_time}
-                            <span className="ml-2 text-xs">(Buffer: {rule.buffer_minutes} min)</span>
+                            {rule.start_time.slice(0, 5)} - {rule.end_time.slice(0, 5)}
+                            <span className="ml-2 text-xs">Buffer: {rule.buffer_minutes} min</span>
                           </p>
                         ) : (
-                          <p className="text-sm text-muted-foreground italic">Not set</p>
+                          <p className="text-sm text-muted-foreground">Not set</p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="outline"
+                          className="rounded-full"
                           onClick={() => {
                             if (rule) {
-                              setRuleStart(rule.start_time)
-                              setRuleEnd(rule.end_time)
+                              setRuleStart(rule.start_time.slice(0, 5))
+                              setRuleEnd(rule.end_time.slice(0, 5))
                               setRuleBuffer(rule.buffer_minutes.toString())
                             } else {
                               setRuleStart('09:00')
@@ -591,398 +1040,159 @@ export default function AdminAvailabilityPage() {
                           {rule ? 'Edit' : 'Set'}
                         </Button>
                         {rule && (
-                          <Button size="sm" variant="ghost" onClick={() => deleteRule(index)} disabled={processingActionId?.startsWith('delete-rule')}>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            className="rounded-full text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteRule(index)}
+                            disabled={processingActionId?.startsWith('delete-rule')}
+                            aria-label={`Remove ${day} rule`}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
                     </div>
                   )
-                })}
-              </div>
-            ) : (
-              <div className="p-4 border border-primary/20 rounded-lg bg-accent/30 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{DAYS[editingRuleDay]}</h3>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingRuleDay(null)}>
-                    ✕
-                  </Button>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div>
-                    <label className="text-sm font-medium">Start Time</label>
-                    <Input type="time" value={ruleStart} onChange={(e) => setRuleStart(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">End Time</label>
-                    <Input type="time" value={ruleEnd} onChange={(e) => setRuleEnd(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Buffer (minutes)</label>
-                    <Input type="number" value={ruleBuffer} onChange={(e) => setRuleBuffer(e.target.value)} min="0" max="120" />
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={saveRule}
-                    disabled={processingActionId?.startsWith('rule-')}
-                    className="flex-1"
-                  >
-                    {processingActionId?.startsWith('rule-') && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Save
-                  </Button>
-                  <Button variant="outline" onClick={() => setEditingRuleDay(null)} className="flex-1">
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
-
-      {/* DAILY SLOTS */}
-      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
-        <button
-          onClick={() => toggleSection('dailySlots')}
-          className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-lg">Daily Slots</h2>
-            <Badge variant="outline" className="text-xs">
-              {slots.length} slot{slots.length !== 1 ? 's' : ''} on {slotDate || 'selected date'}
-            </Badge>
-          </div>
-          {expandedSections.dailySlots ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </button>
-
-        {expandedSections.dailySlots && (
-          <div className="border-t border-primary/10 p-4 gap-5 flex flex-col">
-            <p className="text-sm text-muted-foreground">
-              Pick a date, then add ready-made 90-minute lash lift slots. The quick buttons are set up as 09:00, 10:30, 12:00, 13:30, 15:00, and 16:30.
-            </p>
-
-            <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
-              <div>
-                <label className="text-sm font-medium">Date</label>
-                <Input
-                  type="date"
-                  value={slotDate}
-                  onChange={(e) => {
-                    setSlotDate(e.target.value)
-                    if (!slotStart) {
-                      setSlotStart('09:00')
-                      setSlotEnd(addMinutesToTime('09:00', LASH_LIFT_SLOT_MINUTES))
-                    }
-                    loadSlots(e.target.value)
-                  }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Start Time</label>
-                <Input
-                  type="time"
-                  value={slotStart}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSlotStart(value)
-                    setSlotEnd(value ? addMinutesToTime(value, LASH_LIFT_SLOT_MINUTES) : '')
-                  }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">End Time (auto 90 min)</label>
-                <Input type="time" value={slotEnd} onChange={(e) => setSlotEnd(e.target.value)} />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  onClick={() => createSlot()}
-                  disabled={processingActionId === 'create-slot' || !slotDate}
-                  className="w-full"
-                >
-                  {processingActionId === 'create-slot' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Add Slot
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-primary/10 bg-accent/20 p-3">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Quick add 90-minute slots</p>
-                  <p className="text-xs text-muted-foreground">Use one slot, or build a full working day in one click.</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {QUICK_SLOT_STARTS.map((start) => {
-                    const end = addMinutesToTime(start, LASH_LIFT_SLOT_MINUTES)
-                    const exists = slots.some((slot) => slot.start_time.slice(0, 5) === start)
-                    return (
-                      <Button
-                        key={start}
-                        size="sm"
-                        variant={exists ? 'secondary' : 'outline'}
-                        onClick={() => createSlot(start, end)}
-                        disabled={!slotDate || exists || processingActionId === `create-slot-${start}`}
-                      >
-                        {processingActionId === `create-slot-${start}` && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                        {start}
-                      </Button>
-                    )
-                  })}
-                  <Button
-                    size="sm"
-                    onClick={createPresetDaySlots}
-                    disabled={!slotDate || processingActionId === 'create-preset-day'}
-                  >
-                    {processingActionId === 'create-preset-day' && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                    Add full day
-                  </Button>
-                  {slots.length > 0 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={clearSlotsForDate}
-                      disabled={processingActionId === 'clear-slots'}
-                    >
-                      {processingActionId === 'clear-slots' && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                      Clear date
+                })
+              ) : (
+                <div className="rounded-2xl border border-foreground/10 bg-background/70 p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-foreground">{DAYS[editingRuleDay]}</h3>
+                    <Button size="icon-sm" variant="ghost" onClick={() => setEditingRuleDay(null)} className="rounded-full">
+                      <X className="h-4 w-4" />
                     </Button>
-                  )}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <label className="text-sm font-medium">Start time</label>
+                      <Input type="time" value={ruleStart} onChange={(event) => setRuleStart(event.target.value)} className="mt-1 rounded-full" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">End time</label>
+                      <Input type="time" value={ruleEnd} onChange={(event) => setRuleEnd(event.target.value)} className="mt-1 rounded-full" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Buffer minutes</label>
+                      <Input type="number" value={ruleBuffer} onChange={(event) => setRuleBuffer(event.target.value)} min="0" max="120" className="mt-1 rounded-full" />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      onClick={saveRule}
+                      disabled={processingActionId?.startsWith('rule-')}
+                      className="flex-1 rounded-full"
+                    >
+                      {processingActionId?.startsWith('rule-') && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Save rule
+                    </Button>
+                    <Button variant="outline" onClick={() => setEditingRuleDay(null)} className="flex-1 rounded-full">
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
+
+        <Card className="overflow-hidden rounded-[1.75rem] border-foreground/10 bg-card/80 shadow-sm">
+          <button
+            onClick={() => toggleSection('blockedTimes')}
+            className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-muted/35"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Ban className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="block font-semibold text-foreground">Blocked time</span>
+                <span className="block text-sm text-muted-foreground">
+                  Hide holidays, personal time, or unavailable hours.
+                </span>
+              </span>
+            </span>
+            {expandedSections.blockedTimes ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </button>
+
+          {expandedSections.blockedTimes && (
+            <div className="grid gap-4 border-t border-foreground/10 p-5">
+              <div className="grid gap-3">
+                <div>
+                  <label className="text-sm font-medium">Start date and time</label>
+                  <Input type="datetime-local" value={blockStart} onChange={(event) => setBlockStart(event.target.value)} className="mt-1 rounded-full" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">End date and time</label>
+                  <Input type="datetime-local" value={blockEnd} onChange={(event) => setBlockEnd(event.target.value)} className="mt-1 rounded-full" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Reason</label>
+                  <Input
+                    type="text"
+                    placeholder="Holiday, personal time, training"
+                    value={blockReason}
+                    onChange={(event) => setBlockReason(event.target.value)}
+                    className="mt-1 rounded-full"
+                  />
                 </div>
               </div>
-            </div>
 
-            {slotDate && (
-              <div>
-                {slots.length > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-foreground">Slots for {slotDate}</p>
-                    {slots.map((slot) => (
-                      <div key={slot.id} className="flex items-center justify-between p-3 border border-primary/10 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {slot.start_time.slice(0, 5)} — {slot.end_time.slice(0, 5)}
-                          </span>
-                          <Badge variant="outline" className="text-[10px]">
-                            {getSlotDuration(slot.start_time, slot.end_time)} min
-                          </Badge>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteSlot(slot.id)}
-                          disabled={processingActionId?.startsWith('delete-slot')}
-                        >
-                          {processingActionId === `delete-slot-${slot.id}` ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+              <Button
+                onClick={addBlockedTime}
+                disabled={processingActionId === 'add-blocked' || !blockStart || !blockEnd}
+                className="rounded-full"
+              >
+                {processingActionId === 'add-blocked' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <div className="p-3 border border-dashed border-primary/20 rounded-lg bg-accent/20 text-center">
-                    <p className="text-sm text-muted-foreground">No slots added for this date yet</p>
+                  <Plus className="h-4 w-4" />
+                )}
+                Add blocked time
+              </Button>
+
+              <div className="grid gap-2">
+                {blockedTimes.length > 0 ? (
+                  blockedTimes.map((blocked) => (
+                    <div key={blocked.id} className="flex items-start justify-between gap-3 rounded-2xl border border-foreground/10 bg-background/70 p-3">
+                      <div className="flex min-w-0 items-start gap-2">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground">
+                            {new Date(blocked.start_at).toLocaleDateString()} {new Date(blocked.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
+                            {new Date(blocked.end_at).toLocaleDateString()} {new Date(blocked.end_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          {blocked.reason && <p className="mt-1 text-xs text-muted-foreground">{blocked.reason}</p>}
+                        </div>
+                      </div>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => deleteBlockedTime(blocked.id)}
+                        disabled={processingActionId === `delete-blocked-${blocked.id}`}
+                        className="rounded-full text-muted-foreground hover:text-destructive"
+                        aria-label="Delete blocked time"
+                      >
+                        {processingActionId === `delete-blocked-${blocked.id}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-foreground/15 bg-background/65 p-5 text-center">
+                    <p className="text-sm text-muted-foreground">No blocked time set.</p>
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        )}
-      </Card>
-
-      {/* COPY SCHEDULE */}
-      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
-        <button
-          onClick={() => toggleSection('copySlots')}
-          className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-lg">Copy Schedule</h2>
-            {copyPreview.length > 0 && <Badge className="text-xs">{copyPreview.length} dates selected</Badge>}
-          </div>
-          {expandedSections.copySlots ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </button>
-
-        {expandedSections.copySlots && (
-          <div className="border-t border-primary/10 p-4 gap-4 flex flex-col">
-            <p className="text-sm text-muted-foreground">
-              Copy all slots from a source date to multiple dates. Filter by specific days of the week.
-            </p>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <label className="text-sm font-medium">Source Date (copy from)</label>
-                <Input
-                  type="date"
-                  value={copySourceDate}
-                  onChange={(e) => setCopySourceDate(e.target.value)}
-                  placeholder="Choose date to copy from"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Start Date (copy to)</label>
-                <Input
-                  type="date"
-                  value={copyStartDate}
-                  onChange={(e) => setCopyStartDate(e.target.value)}
-                  placeholder="First date in range"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">End Date (copy to)</label>
-                <Input
-                  type="date"
-                  value={copyEndDate}
-                  onChange={(e) => setCopyEndDate(e.target.value)}
-                  placeholder="Last date in range"
-                />
-              </div>
             </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Copy to these days of the week</label>
-              <div className="flex flex-wrap gap-2">
-                {DAYS.map((day, index) => (
-                  <Button
-                    key={day}
-                    size="sm"
-                    variant={copyDays.includes(index) ? 'default' : 'outline'}
-                    onClick={() => {
-                      if (copyDays.includes(index)) {
-                        setCopyDays(copyDays.filter((d) => d !== index))
-                      } else {
-                        setCopyDays([...copyDays, index])
-                      }
-                    }}
-                  >
-                    {day.slice(0, 3)}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {copyPreview.length > 0 && (
-              <div className="p-3 border border-primary/20 rounded-lg bg-accent/20">
-                <p className="text-sm font-medium mb-2">Will copy to {copyPreview.length} dates:</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {copyPreview.map((date) => (
-                    <div key={date} className="text-xs px-2 py-1 bg-primary/10 rounded text-center">
-                      {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <Button
-              onClick={copySlots}
-              disabled={processingActionId === 'copy-slots' || copyPreview.length === 0}
-              className="w-full"
-            >
-              {processingActionId === 'copy-slots' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Slots ({copyPreview.length})
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      {/* BLOCKED TIMES */}
-      <Card className="overflow-hidden rounded-[1.5rem] border-foreground/10 bg-card/80 shadow-sm">
-        <button
-          onClick={() => toggleSection('blockedTimes')}
-          className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-lg">Blocked Times</h2>
-            <Badge variant="outline" className="text-xs">
-              {blockedTimes.length} blocked
-            </Badge>
-          </div>
-          {expandedSections.blockedTimes ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </button>
-
-        {expandedSections.blockedTimes && (
-          <div className="border-t border-primary/10 p-4 gap-4 flex flex-col">
-            <p className="text-sm text-muted-foreground">
-              Mark time periods as unavailable (vacation, personal time, etc). Customers won't be able to book these times.
-            </p>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <label className="text-sm font-medium">Start Date & Time</label>
-                <Input type="datetime-local" value={blockStart} onChange={(e) => setBlockStart(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">End Date & Time</label>
-                <Input type="datetime-local" value={blockEnd} onChange={(e) => setBlockEnd(e.target.value)} />
-              </div>
-              <div className="flex gap-2 items-end flex-col">
-                <label className="text-sm font-medium w-full">Reason (optional)</label>
-                <Input
-                  type="text"
-                  placeholder="e.g., Vacation, Personal time"
-                  value={blockReason}
-                  onChange={(e) => setBlockReason(e.target.value)}
-                  className="!m-0"
-                />
-              </div>
-            </div>
-
-            <Button
-              onClick={addBlockedTime}
-              disabled={processingActionId === 'add-blocked' || !blockStart || !blockEnd}
-              className="w-full"
-            >
-              {processingActionId === 'add-blocked' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Add Blocked Time
-            </Button>
-
-            {blockedTimes.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Blocked Times</p>
-                {blockedTimes.map((blocked) => (
-                  <div key={blocked.id} className="flex items-start justify-between p-3 border border-primary/10 rounded-lg">
-                    <div className="flex items-start gap-2 flex-1">
-                      <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">
-                          {new Date(blocked.start_at).toLocaleDateString()} {new Date(blocked.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} —{' '}
-                          {new Date(blocked.end_at).toLocaleDateString()} {new Date(blocked.end_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                        {blocked.reason && <p className="text-xs text-muted-foreground mt-1">{blocked.reason}</p>}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteBlockedTime(blocked.id)}
-                      disabled={processingActionId?.startsWith('delete-blocked')}
-                      className="flex-shrink-0"
-                    >
-                      {processingActionId === `delete-blocked-${blocked.id}` ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-3 border border-dashed border-primary/20 rounded-lg bg-accent/20 text-center">
-                <p className="text-sm text-muted-foreground">No blocked times set</p>
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
+      </div>
     </div>
   )
 }
