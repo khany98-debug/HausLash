@@ -32,16 +32,22 @@ const LASH_LIFT_SLOT_MINUTES = 90
 
 const SLOT_TEMPLATES = [
   {
+    id: 'signature',
+    label: 'Signature day',
+    description: 'Your usual four slots: 10:30, 12:00, 14:30, and 18:00.',
+    starts: ['10:30', '12:00', '14:30', '18:00'],
+  },
+  {
     id: 'full',
     label: 'Full studio day',
     description: 'Six 90-minute appointments from 09:00 to 18:00.',
-    starts: ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30'],
+    starts: ['09:00', '10:30', '12:00', '14:30', '16:30', '18:00'],
   },
   {
     id: 'balanced',
     label: 'Balanced day',
     description: 'Four calm appointments with space to reset.',
-    starts: ['10:00', '11:30', '13:30', '15:00'],
+    starts: ['10:30', '12:00', '14:30', '18:00'],
   },
   {
     id: 'morning',
@@ -53,7 +59,7 @@ const SLOT_TEMPLATES = [
     id: 'afternoon',
     label: 'Afternoon only',
     description: 'Open later appointments only.',
-    starts: ['13:30', '15:00', '16:30'],
+    starts: ['14:30', '16:30', '18:00'],
   },
 ]
 
