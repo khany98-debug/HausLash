@@ -75,8 +75,19 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-[#8f877d] sm:flex-row sm:items-center sm:justify-between">
-          <p>{new Date().getFullYear()} Hauslash. All rights reserved.</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+          <div className="flex flex-col gap-2">
+            <p>{new Date().getFullYear()} Hauslash. All rights reserved.</p>
+            <a
+              href="https://www.instagram.com/webzi_co/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-fit items-center gap-1.5 transition-colors hover:text-white"
+            >
+              Website created by Webzi
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-2 sm:justify-end">
             {LEGAL_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="transition-colors hover:text-white">
                 {link.label}
