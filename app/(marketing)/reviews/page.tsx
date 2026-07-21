@@ -96,6 +96,35 @@ export default async function ReviewsPage() {
         </p>
       </section>
 
+      <section id="leave-a-review" className="scroll-mt-24 border-y border-foreground/10 bg-card/55">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+          <div className="lg:sticky lg:top-28">
+            <p className="eyebrow">Share your experience</p>
+            <h2 className="mt-5 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
+              Your words help someone else
+              <span className="block italic">feel confident booking.</span>
+            </h2>
+            <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
+              Tell us about your treatment, your result, or how the experience made you feel. Reviews are checked before they appear publicly.
+            </p>
+            <div className="mt-8 space-y-4 border-t border-foreground/10 pt-7 text-sm text-muted-foreground">
+              <p className="flex gap-3">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                Booking history is checked automatically so genuine clients can be marked as verified.
+              </p>
+              <p className="flex gap-3">
+                <Star className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                Constructive feedback is always welcome and helps Hauslash keep improving.
+              </p>
+            </div>
+          </div>
+
+          <div className="luxury-card p-6 sm:p-9">
+            <TestimonialForm services={services} />
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 md:pb-28">
         {reviews.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -150,35 +179,6 @@ export default async function ReviewsPage() {
             </Button>
           </div>
         )}
-      </section>
-
-      <section id="leave-a-review" className="scroll-mt-24 border-y border-foreground/10 bg-card/55">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-          <div className="lg:sticky lg:top-28">
-            <p className="eyebrow">Share your experience</p>
-            <h2 className="mt-5 font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
-              Your words help someone else
-              <span className="block italic">feel confident booking.</span>
-            </h2>
-            <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground">
-              Tell us about your treatment, your result, or how the experience made you feel. Reviews are checked before they appear publicly.
-            </p>
-            <div className="mt-8 space-y-4 border-t border-foreground/10 pt-7 text-sm text-muted-foreground">
-              <p className="flex gap-3">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
-                Booking history is checked automatically so genuine clients can be marked as verified.
-              </p>
-              <p className="flex gap-3">
-                <Star className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
-                Constructive feedback is always welcome and helps Hauslash keep improving.
-              </p>
-            </div>
-          </div>
-
-          <div className="luxury-card p-6 sm:p-9">
-            <TestimonialForm services={services} />
-          </div>
-        </div>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 py-20 text-center sm:px-8 md:py-28">
