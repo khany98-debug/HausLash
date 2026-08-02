@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 
@@ -77,7 +76,6 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         {children}
         <Toaster position="top-center" richColors />
-        <Analytics />
       </body>
     </html>
   )
