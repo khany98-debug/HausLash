@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { isAdminRequest } from '@/lib/admin-auth'
+import { localDateTimeInputToUtcIso } from '@/lib/appointment-time'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,9 +53,26 @@ export async function PATCH(request: NextRequest) {
   const sql = getDb()
 
   if (body.action === 'add') {
+    let startAt: string
+    let endAt: string
+
+    try {
+      startAt = localDateTimeInputToUtcIso(body.start_at)
+      endAt = localDateTimeInputToUtcIso(body.end_at)
+    } catch {
+      return NextResponse.json({ error: 'Invalid blocked time' }, { status: 400 })
+    }
+
+    if (new Date(startAt) >= new Date(endAt)) {
+      return NextResponse.json(
+        { error: 'Blocked time must end after it starts' },
+        { status: 400 }
+      )
+    }
+
     await sql`
       INSERT INTO blocked_times (start_at, end_at, reason)
-      VALUES (${body.start_at}::timestamptz, ${body.end_at}::timestamptz, ${body.reason || null})
+      VALUES (${startAt}::timestamptz, ${endAt}::timestamptz, ${body.reason || null})
     `
   } else if (body.action === 'delete') {
     await sql`DELETE FROM blocked_times WHERE id = ${body.id}`

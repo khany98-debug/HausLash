@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
 import AppointmentReminderEmail from '@/emails/appointment-reminder'
-import { format } from 'date-fns'
 import { isAdminRequest, isCronOrAdminRequest } from '@/lib/admin-auth'
+import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,9 +58,8 @@ export async function POST(request: NextRequest) {
 
     for (const reminder of reminders24h) {
       try {
-        const appointmentDate = new Date(reminder.start_at)
-        const formattedDate = format(appointmentDate, 'EEEE, d MMMM yyyy')
-        const formattedTime = format(appointmentDate, 'HH:mm')
+        const formattedDate = formatAppointmentDate(reminder.start_at)
+        const formattedTime = formatAppointmentTime(reminder.start_at)
 
         await resend.emails.send({
           from: fromAddress,
@@ -91,9 +90,8 @@ export async function POST(request: NextRequest) {
 
     for (const reminder of reminders1h) {
       try {
-        const appointmentDate = new Date(reminder.start_at)
-        const formattedDate = format(appointmentDate, 'EEEE, d MMMM yyyy')
-        const formattedTime = format(appointmentDate, 'HH:mm')
+        const formattedDate = formatAppointmentDate(reminder.start_at)
+        const formattedTime = formatAppointmentTime(reminder.start_at)
 
         await resend.emails.send({
           from: fromAddress,

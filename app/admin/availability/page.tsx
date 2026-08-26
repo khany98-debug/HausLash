@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react'
 import { AdminLoadingState, AdminPageHeader } from '@/components/admin/admin-page-shell'
+import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const LASH_LIFT_SLOT_MINUTES = 90
@@ -1167,8 +1168,8 @@ export default function AdminAvailabilityPage() {
                         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground">
-                            {new Date(blocked.start_at).toLocaleDateString()} {new Date(blocked.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
-                            {new Date(blocked.end_at).toLocaleDateString()} {new Date(blocked.end_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formatAppointmentDate(blocked.start_at)} {formatAppointmentTime(blocked.start_at)} -{' '}
+                            {formatAppointmentDate(blocked.end_at)} {formatAppointmentTime(blocked.end_at)}
                           </p>
                           {blocked.reason && <p className="mt-1 text-xs text-muted-foreground">{blocked.reason}</p>}
                         </div>

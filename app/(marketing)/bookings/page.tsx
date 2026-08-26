@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { format } from 'date-fns'
 import { Loader2, Calendar, Clock, DollarSign, Mail, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { formatPence } from '@/lib/types'
+import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
 
 const emailSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -312,12 +312,12 @@ export default function CustomerPortalPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-3 text-foreground">
                               <Calendar className="h-4 w-4 text-primary" />
-                              <span>{format(new Date(booking.start_at), 'EEEE, d MMMM yyyy')}</span>
+                              <span>{formatAppointmentDate(booking.start_at)}</span>
                             </div>
                             <div className="flex items-center gap-3 text-foreground">
                               <Clock className="h-4 w-4 text-primary" />
                               <span>
-                                {format(new Date(booking.start_at), 'HH:mm')} - {format(new Date(booking.end_at), 'HH:mm')}
+                                {formatAppointmentTime(booking.start_at)} - {formatAppointmentTime(booking.end_at)}
                               </span>
                             </div>
                             <div className="flex items-center gap-3 text-foreground">
