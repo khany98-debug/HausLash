@@ -6,6 +6,7 @@ import { isMissingDatabaseConfig } from "@/lib/service-fallbacks"
 import { isPatchTestService, normalisePublicService } from "@/lib/service-display"
 import { stripe } from "@/lib/stripe"
 import { Service } from "@/lib/types"
+import { getAppointmentTimeWindow } from "@/lib/appointment-time"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -54,17 +55,23 @@ export async function POST(request: NextRequest) {
     const service = normalisePublicService(serviceRows[0] as Service)
     const isPatchTest = isPatchTestService(service)
 
-    const startAt = `${date}T${time}:00Z`
+    let startAt: string
+    let endAt: string
 
-    const startMinutes =
-      parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1])
-
-    const endMinutes = startMinutes + (service.duration_minutes as number)
-
-    const endH = String(Math.floor(endMinutes / 60)).padStart(2, "0")
-    const endM = String(endMinutes % 60).padStart(2, "0")
-
-    const endAt = `${date}T${endH}:${endM}:00Z`
+    try {
+      const window = getAppointmentTimeWindow(
+        date,
+        time,
+        service.duration_minutes as number
+      )
+      startAt = window.startAt
+      endAt = window.endAt
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid appointment date or time" },
+        { status: 400 }
+      )
+    }
 
     const conflicts = await sql`
       SELECT id FROM bookings

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { isAdminRequest } from '@/lib/admin-auth'
+import { localDateTimeInputToUtcIso } from '@/lib/appointment-time'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,21 +45,73 @@ export async function PUT(request: NextRequest) {
 }
 
 // PATCH add blocked time
-export async function PATCH(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const body = await request.json()
-  const sql = getDb()
+expo…33930 tokens truncated…t.target.value)} className="mt-1 rounded-full" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Reason</label>
+                  <Input
+                    type="text"
+                    placeholder="Holiday, personal time, training"
+                    value={blockReason}
+                    onChange={(event) => setBlockReason(event.target.value)}
+                    className="mt-1 rounded-full"
+                  />
+                </div>
+              </div>
 
-  if (body.action === 'add') {
-    await sql`
-      INSERT INTO blocked_times (start_at, end_at, reason)
-      VALUES (${body.start_at}::timestamptz, ${body.end_at}::timestamptz, ${body.reason || null})
-    `
-  } else if (body.action === 'delete') {
-    await sql`DELETE FROM blocked_times WHERE id = ${body.id}`
-  }
+              <Button
+                onClick={addBlockedTime}
+                disabled={processingActionId === 'add-blocked' || !blockStart || !blockEnd}
+                className="rounded-full"
+              >
+                {processingActionId === 'add-blocked' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Add blocked time
+              </Button>
 
-  return NextResponse.json({ success: true })
+              <div className="grid gap-2">
+                {blockedTimes.length > 0 ? (
+                  blockedTimes.map((blocked) => (
+                    <div key={blocked.id} className="flex items-start justify-between gap-3 rounded-2xl border border-foreground/10 bg-background/70 p-3">
+                      <div className="flex min-w-0 items-start gap-2">
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground">
+                            {formatAppointmentDate(blocked.start_at)} {formatAppointmentTime(blocked.start_at)} -{' '}
+                            {formatAppointmentDate(blocked.end_at)} {formatAppointmentTime(blocked.end_at)}
+                          </p>
+                          {blocked.reason && <p className="mt-1 text-xs text-muted-foreground">{blocked.reason}</p>}
+                        </div>
+                      </div>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => deleteBlockedTime(blocked.id)}
+                        disabled={processingActionId === `delete-blocked-${blocked.id}`}
+                        className="rounded-full text-muted-foreground hover:text-destructive"
+                        aria-label="Delete blocked time"
+                      >
+                        {processingActionId === `delete-blocked-${blocked.id}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-foreground/15 bg-background/65 p-5 text-center">
+                    <p className="text-sm text-muted-foreground">No blocked time set.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+    </div>
+  )
 }

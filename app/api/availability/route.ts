@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { getFallbackAvailabilitySlots, isMissingDatabaseConfig } from '@/lib/service-fallbacks'
 import { BlockedTime, Booking } from '@/lib/types'
+import {
+  addMinutesToLocalDateTime,
+  localDateTimeToUtcIso,
+} from '@/lib/appointment-time'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +26,20 @@ export async function GET(request: NextRequest) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json(
       { error: 'Invalid date format' },
+      { status: 400 }
+    )
+  }
+
+  let dayStart: string
+  let dayEnd: string
+
+  try {
+    dayStart = localDateTimeToUtcIso(date, '00:00')
+    const nextDay = addMinutesToLocalDateTime(date, '00:00', 24 * 60)
+    dayEnd = localDateTimeToUtcIso(nextDay.date, nextDay.time)
+  } catch {
+    return NextResponse.json(
+      { error: 'Invalid date' },
       { status: 400 }
     )
   }
@@ -56,10 +74,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ slots: [] })
     }
 
-    // Get blocked times for this day
-    const dayStart = `${date}T00:00:00Z`
-    const dayEnd = `${date}T23:59:59Z`
-
+    // Get blocked times for this London calendar day.
     const blocked = (await sql`
       SELECT *
       FROM blocked_times
@@ -71,7 +86,8 @@ export async function GET(request: NextRequest) {
     const bookings = (await sql`
       SELECT start_at, end_at
       FROM bookings
-      WHERE start_at::date = ${date}::date
+      WHERE start_at < ${dayEnd}::timestamptz
+      AND end_at > ${dayStart}::timestamptz
       AND status IN ('confirmed','pending_payment')
       AND (status != 'pending_payment' OR expires_at > now())
     `) as Pick<Booking,'start_at'|'end_at'>[]
@@ -83,12 +99,12 @@ export async function GET(request: NextRequest) {
       const start = s.start_time.slice(0,5)
       const end = s.end_time.slice(0,5)
 
-      const slotStartISO = `${date}T${start}:00Z`
-      const slotEndISO = `${date}T${end}:00Z`
+      const slotStartISO = localDateTimeToUtcIso(date, start)
+      const slotEndISO = localDateTimeToUtcIso(date, end)
 
       // prevent past times
       const now = new Date()
-      const slotDateTime = new Date(`${date}T${start}:00`)
+      const slotDateTime = new Date(slotStartISO)
 
       if (slotDateTime <= now) continue
 
