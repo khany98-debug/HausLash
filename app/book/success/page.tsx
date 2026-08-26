@@ -5,10 +5,10 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Calendar, Clock } from 'lucide-react'
 import Link from 'next/link'
-import { format } from 'date-fns'
 import { AddToCalendarButton } from '@/components/booking/add-to-calendar'
 import { getAppointmentLocationDetails } from '@/lib/appointment-location'
 import { isPatchTestService } from '@/lib/service-display'
+import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,9 +96,8 @@ export default async function BookingSuccessPage({
 
   const booking = bookings[0]
 
-  const startDate = new Date(booking.start_at as string)
-  const formattedDate = format(startDate, 'EEEE d MMMM yyyy')
-  const formattedTime = format(startDate, 'HH:mm')
+  const formattedDate = formatAppointmentDate(booking.start_at as string)
+  const formattedTime = formatAppointmentTime(booking.start_at as string)
 
   const depositPence = booking.deposit_amount_pence as number
   const pricePence = booking.price_pence as number | null
