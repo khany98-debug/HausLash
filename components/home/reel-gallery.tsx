@@ -1,4 +1,4 @@
-import { ArrowUpRight, Instagram, Play } from "lucide-react";
+import { ArrowUpRight, Instagram } from "lucide-react";
 import { LoopingVideo } from "@/components/looping-video";
 
 // Selected from Hauslash's public Reels: treatment-focused films, not unrelated viral posts.
@@ -20,6 +20,12 @@ const reels = [
     title: "The finishing touch",
     video: "/videos/hauslash-finishing-touch.mp4",
     poster: "/images/work/hauslash-blue-eye-lift.jpg",
+  },
+  {
+    id: "DbNjO3ctDvO",
+    title: "A lift made for you",
+    video: "/videos/hauslash-returning-client-lift.mp4",
+    poster: "/images/work/hauslash-client-mirror-lift.jpg",
   },
 ];
 
@@ -45,7 +51,7 @@ export function ReelGallery() {
             Follow @hauslash_co <Instagram size={17} />
           </a>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-4">
           {reels.map((reel, index) => (
             <article
               key={reel.id}
@@ -60,12 +66,7 @@ export function ReelGallery() {
               <span className="absolute left-6 top-6 text-[10px] font-semibold uppercase tracking-[.2em] text-white">
                 Hauslash / Film 0{index + 1}
               </span>
-              <span className="absolute inset-0 flex items-center justify-center text-white">
-                <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/80 bg-black/20 backdrop-blur-sm transition group-hover:scale-110 group-hover:bg-black/40">
-                  <Play className="ml-1" size={23} />
-                </span>
-              </span>
-              <span className="absolute bottom-16 left-6 right-6 font-serif text-3xl text-white">
+              <span className="absolute bottom-[4.3rem] left-5 right-5 font-serif text-[clamp(1.9rem,3vw,2.5rem)] leading-[.92] text-white sm:left-6 sm:right-6">
                 {reel.title}
               </span>
               <a
@@ -73,7 +74,7 @@ export function ReelGallery() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Open ${reel.title} on Instagram`}
-                className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[#29231f]/95 px-6 py-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white transition-colors hover:bg-[#443b35]"
+                className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-white/10 bg-[#29231f]/95 px-5 py-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white transition-colors hover:bg-[#443b35] sm:px-6"
               >
                 View the original reel <ArrowUpRight size={17} />
               </a>

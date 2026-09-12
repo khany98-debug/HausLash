@@ -72,8 +72,9 @@ export function SiteHeader() {
     : "";
 
   return (
-    <header className={headerClass}>
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 xl:px-8">
+    <>
+      <header className={headerClass}>
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 xl:px-8">
         <div className="relative flex h-[76px] items-center justify-between min-[1400px]:hidden">
           <button
             onClick={() => setOpen((value) => !value)}
@@ -169,11 +170,12 @@ export function SiteHeader() {
             </Button>
           </nav>
         </div>
-      </div>
+        </div>
+      </header>
 
       {open && (
         <nav
-          className="fixed inset-x-0 bottom-0 top-[76px] z-40 overflow-y-auto bg-[#211d1b] px-6 py-8 text-[#f7f2eb] min-[1400px]:hidden"
+          className="fixed inset-x-0 bottom-0 top-[76px] z-40 overscroll-contain overflow-y-auto bg-[#211d1b] px-6 py-8 text-[#f7f2eb] min-[1400px]:hidden"
           aria-label="Mobile navigation"
         >
           <div className="mx-auto grid min-h-full max-w-xl content-between gap-12 pb-5">
@@ -237,6 +239,6 @@ export function SiteHeader() {
           </div>
         </nav>
       )}
-    </header>
+    </>
   );
 }
