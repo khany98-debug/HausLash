@@ -1,9 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { ReelGallery } from "./reel-gallery";
 import TestimonialsSection from "./testimonials-section";
 import { FaqSection } from "./faq-section";
+import { LoopingVideo } from "@/components/looping-video";
 
 const services = [
   {
@@ -30,16 +31,15 @@ export function EditorialHome() {
   return (
     <>
       <section className="relative overflow-hidden bg-[#211d1b] text-[#f7f2eb]">
-        <Image
-          src="/images/work/hauslash-editorial-mirror.jpg"
-          alt="Hauslash client admiring her lifted lashes"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[54%_46%] lg:object-[50%_57%]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(24,20,19,.83),rgba(24,20,19,.57)_42%,rgba(24,20,19,.08))] max-md:bg-[linear-gradient(0deg,rgba(24,20,19,.9),rgba(24,20,19,.3)_80%)]" />
-        <div className="relative mx-auto flex min-h-[690px] max-w-[1600px] flex-col justify-between px-6 pb-9 pt-8 sm:px-10 lg:min-h-[760px] lg:px-20 lg:pb-14">
+        <div className="absolute inset-0">
+          <LoopingVideo
+            src="/videos/hauslash-soft-lift-hero.mp4"
+            poster="/images/work/hauslash-editorial-mirror.jpg"
+            className="object-[50%_52%]"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(24,20,19,.86),rgba(24,20,19,.59)_43%,rgba(24,20,19,.08))] max-md:bg-[linear-gradient(0deg,rgba(24,20,19,.92),rgba(24,20,19,.18)_86%)]" />
+        <div className="relative mx-auto flex min-h-[760px] max-w-[1600px] flex-col justify-between px-6 pb-9 pt-[104px] sm:px-10 lg:min-h-[860px] lg:px-20 lg:pb-14 lg:pt-[128px]">
           <div className="flex justify-between gap-3 border-b border-white/30 pb-5 text-[10px] font-semibold uppercase tracking-[.24em]">
             <span>Hauslash / Stoke-on-Trent</span>
             <span>Natural beauty, considered</span>

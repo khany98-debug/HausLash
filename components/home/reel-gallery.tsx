@@ -1,22 +1,25 @@
-import Image from "next/image";
 import { ArrowUpRight, Instagram, Play } from "lucide-react";
+import { LoopingVideo } from "@/components/looping-video";
 
 // Selected from Hauslash's public Reels: treatment-focused films, not unrelated viral posts.
 const reels = [
   {
     id: "DWJ7JouiH3E",
     title: "Soft lift. Clean tint.",
-    image: "/images/work/hauslash-amber-eye-closeup.jpg",
+    video: "/videos/hauslash-soft-lift-hero.mp4",
+    poster: "/images/work/hauslash-amber-eye-closeup.jpg",
   },
   {
     id: "DbRTKX5gW6o",
     title: "Your sign to book",
-    image: "/images/work/hauslash-client-mirror-lift.jpg",
+    video: "/videos/hauslash-your-sign-to-book.mp4",
+    poster: "/images/work/hauslash-client-mirror-lift.jpg",
   },
   {
     id: "DcbSEI7gQ4q",
     title: "The finishing touch",
-    image: "/images/work/hauslash-blue-eye-lift.jpg",
+    video: "/videos/hauslash-finishing-touch.mp4",
+    poster: "/images/work/hauslash-blue-eye-lift.jpg",
   },
 ];
 
@@ -44,20 +47,14 @@ export function ReelGallery() {
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {reels.map((reel, index) => (
-            <a
+            <article
               key={reel.id}
-              href={`https://www.instagram.com/reel/${reel.id}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Watch ${reel.title} on Instagram`}
               className="group relative aspect-[9/13] overflow-hidden bg-[#d7c7b7]"
             >
-              <Image
-                src={reel.image}
-                alt="Hauslash lash lift result"
-                fill
-                sizes="(max-width: 640px) 100vw, 33vw"
-                className="object-cover transition duration-700 group-hover:scale-[1.04]"
+              <LoopingVideo
+                src={reel.video}
+                poster={reel.poster}
+                className="transition duration-700 group-hover:scale-[1.04]"
               />
               <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
               <span className="absolute left-6 top-6 text-[10px] font-semibold uppercase tracking-[.2em] text-white">
@@ -71,10 +68,16 @@ export function ReelGallery() {
               <span className="absolute bottom-16 left-6 right-6 font-serif text-3xl text-white">
                 {reel.title}
               </span>
-              <span className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[#29231f] px-6 py-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white">
-                Watch on Instagram <ArrowUpRight size={17} />
-              </span>
-            </a>
+              <a
+                href={`https://www.instagram.com/reel/${reel.id}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${reel.title} on Instagram`}
+                className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-[#29231f]/95 px-6 py-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white transition-colors hover:bg-[#443b35]"
+              >
+                View the original reel <ArrowUpRight size={17} />
+              </a>
+            </article>
           ))}
         </div>
         <div className="mt-9 flex flex-col justify-between gap-5 border-t border-[#b7a99b] pt-6 md:flex-row md:items-center">
