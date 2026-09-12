@@ -1,28 +1,29 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { ArrowUpRight, Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { BrandMark } from '@/components/brand-mark'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { label: 'Treatments', href: '/services' },
-  { label: 'Results', href: '/#results' },
-  { label: 'Reviews', href: '/reviews' },
-  { label: 'About', href: '/about' },
-  { label: 'Aftercare', href: '/aftercare' },
-  { label: 'Contact', href: '/contact' },
-]
+  { label: "Treatments", href: "/services" },
+  { label: "Results", href: "/#results" },
+  { label: "Films", href: "/#reels" },
+  { label: "Reviews", href: "/reviews" },
+  { label: "About", href: "/about" },
+  { label: "Aftercare", href: "/aftercare" },
+  { label: "Contact", href: "/contact" },
+];
 
-const LEFT_NAV_ITEMS = NAV_ITEMS.slice(0, 3)
-const INSTAGRAM_DM_URL = 'https://ig.me/m/hauslash_co'
+const LEFT_NAV_ITEMS = NAV_ITEMS.slice(0, 4);
+const INSTAGRAM_DM_URL = "https://ig.me/m/hauslash_co";
 
 export function SiteHeader() {
-  const [open, setOpen] = useState(false)
-  const pathname = usePathname()
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/90 backdrop-blur-xl">
@@ -31,7 +32,7 @@ export function SiteHeader() {
           <button
             onClick={() => setOpen(!open)}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/15 text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/[0.04]"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -47,13 +48,27 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-1.5">
-            <Button asChild variant="outline" size="sm" className="h-10 rounded-full border-foreground/15 bg-transparent px-3 text-xs">
-              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="h-10 rounded-full border-foreground/15 bg-transparent px-3 text-xs"
+            >
+              <a
+                href={INSTAGRAM_DM_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setOpen(false)}
+              >
                 <span className="min-[430px]:hidden">DM</span>
                 <span className="hidden min-[430px]:inline">Enquire</span>
               </a>
             </Button>
-            <Button asChild size="sm" className="h-10 rounded-full px-4 text-xs">
+            <Button
+              asChild
+              size="sm"
+              className="h-10 rounded-full px-4 text-xs"
+            >
               <Link href="/book" onClick={() => setOpen(false)}>
                 Book
               </Link>
@@ -62,14 +77,17 @@ export function SiteHeader() {
         </div>
 
         <div className="hidden h-[82px] grid-cols-[minmax(0,1fr)_220px_minmax(0,1fr)] items-center gap-8 min-[1400px]:grid">
-          <nav className="flex min-w-0 items-center gap-6 justify-self-start" aria-label="Primary navigation">
+          <nav
+            className="flex min-w-0 items-center gap-6 justify-self-start"
+            aria-label="Primary navigation"
+          >
             {LEFT_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
-                  pathname === item.href && 'text-foreground',
+                  "whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground",
+                  pathname === item.href && "text-foreground",
                 )}
               >
                 {item.label}
@@ -77,21 +95,33 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <Link href="/" aria-label="Hauslash home" className="flex items-center justify-self-center px-3 py-2">
+          <Link
+            href="/"
+            aria-label="Hauslash home"
+            className="flex items-center justify-self-center px-3 py-2"
+          >
             <BrandMark className="text-[2rem]" />
           </Link>
 
-          <nav className="flex min-w-0 items-center justify-end gap-5 justify-self-end" aria-label="Booking and information navigation">
+          <nav
+            className="flex min-w-0 items-center justify-end gap-5 justify-self-end"
+            aria-label="Booking and information navigation"
+          >
             <Link
               href="/contact"
               className={cn(
-                'whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground',
-                pathname === '/contact' && 'text-foreground',
+                "whitespace-nowrap text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground",
+                pathname === "/contact" && "text-foreground",
               )}
             >
               Contact
             </Link>
-            <Button asChild variant="outline" size="sm" className="rounded-full border-foreground/15 bg-transparent px-5">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-full border-foreground/15 bg-transparent px-5"
+            >
               <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
                 Enquire Now
               </a>
@@ -104,7 +134,10 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-foreground/10 bg-background px-5 py-8 min-[1400px]:hidden" aria-label="Mobile navigation">
+        <nav
+          className="border-t border-foreground/10 bg-background px-5 py-8 min-[1400px]:hidden"
+          aria-label="Mobile navigation"
+        >
           <div className="mx-auto flex max-w-7xl flex-col">
             {NAV_ITEMS.map((item) => (
               <Link
@@ -130,8 +163,18 @@ export function SiteHeader() {
                 Book an appointment
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="mt-3 rounded-full border-foreground/15 bg-transparent">
-              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="mt-3 rounded-full border-foreground/15 bg-transparent"
+            >
+              <a
+                href={INSTAGRAM_DM_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setOpen(false)}
+              >
                 Enquire Now on Instagram
               </a>
             </Button>
@@ -139,5 +182,5 @@ export function SiteHeader() {
         </nav>
       )}
     </header>
-  )
+  );
 }
