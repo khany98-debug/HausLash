@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowUpRight, Clock3, Sparkles } from "lucide-react";
 import { getDb } from "@/lib/db";
 import {
@@ -8,6 +9,12 @@ import {
 import { normalisePublicServices } from "@/lib/service-display";
 import { Service, formatDuration, formatPence } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "Treatments & prices",
+  description:
+    "Explore Hauslash Korean lash lift, mobile treatment and patch-test options in Stoke-on-Trent.",
+};
 
 export const dynamic = "force-dynamic";
 

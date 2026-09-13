@@ -29,7 +29,7 @@ const services = [
 
 export function EditorialHome() {
   return (
-    <>
+    <main>
       <section className="relative overflow-hidden bg-[#211d1b] text-[#f7f2eb]">
         <div className="absolute inset-0">
           <LoopingVideo
@@ -263,6 +263,6 @@ export function EditorialHome() {
           Book with Hauslash <ArrowUpRight size={17} />
         </Link>
       </section>
-    </>
+    </main>
   );
 }

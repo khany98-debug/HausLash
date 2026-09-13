@@ -1,7 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowUpRight, Eye, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "About the studio",
+  description:
+    "Discover the considered Hauslash approach to Korean lash lifts in Stoke-on-Trent.",
+};
 
 const VALUES = [
   {
