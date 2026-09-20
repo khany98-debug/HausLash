@@ -1,38 +1,48 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowUpRight, Eye, Heart, Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import Image from "next/image";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowUpRight, Eye, Heart, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "About the studio",
+  description:
+    "Discover the considered Hauslash approach to Korean lash lifts in Stoke-on-Trent.",
+};
 
 const VALUES = [
   {
     icon: Eye,
-    title: 'Every eye is different',
-    copy: 'Your lift begins with a consultation and patch test conversation so the treatment feels considered from the start.',
+    title: "Every eye is different",
+    copy: "Your lift begins with a consultation and patch test conversation so the treatment feels considered from the start.",
   },
   {
     icon: Sparkles,
-    title: 'Refinement over excess',
-    copy: 'The goal is a beautifully open eye and a polished result that still feels like you.',
+    title: "Refinement over excess",
+    copy: "The goal is a beautifully open eye and a polished result that still feels like you.",
   },
   {
     icon: Heart,
-    title: 'Care in every detail',
-    copy: 'From consultation to aftercare, your comfort and lash health stay at the centre.',
+    title: "Care in every detail",
+    copy: "From consultation to aftercare, your comfort and lash health stay at the centre.",
   },
-]
+];
 
 export default function AboutPage() {
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 md:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
+      <section className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
         <div>
           <p className="eyebrow">About Hauslash</p>
-          <h1 className="mt-5 display-title">
+          <h1 className="mt-5 font-serif text-[clamp(3.2rem,5.8vw,6.5rem)] leading-[1.01] tracking-[-.055em]">
             A considered approach to
             <span className="block italic">natural beauty.</span>
           </h1>
           <p className="mt-7 max-w-lg text-base leading-8 text-muted-foreground">
-            Hauslash is a Stoke-on-Trent lash studio devoted to precise, personalised treatments. We specialise in Korean lash lifts that enhance what is already yours: no extensions, no heavy upkeep, just beautifully elevated lashes.
+            Hauslash is a Stoke-on-Trent lash studio devoted to precise,
+            personalised treatments. We specialise in Korean lash lifts that
+            enhance what is already yours: no extensions, no heavy upkeep, just
+            beautifully elevated lashes.
           </p>
           <Button asChild size="lg" className="mt-8 h-12 rounded-full px-7">
             <Link href="/book">
@@ -43,7 +53,7 @@ export default function AboutPage() {
         </div>
 
         <div className="relative min-h-[540px]">
-          <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden rounded-[2rem] border border-foreground/10 bg-muted shadow-[0_40px_110px_-60px_rgba(42,34,28,0.75)]">
+          <div className="absolute inset-y-0 right-0 w-[82%] overflow-hidden border border-foreground/10 bg-muted shadow-[0_40px_110px_-60px_rgba(42,34,28,0.75)]">
             <Image
               src="/images/work/hauslash-client-mirror-lift.jpg"
               alt="Hauslash Korean lash lift result"
@@ -54,7 +64,7 @@ export default function AboutPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
           </div>
-          <div className="absolute bottom-8 left-0 w-[43%] overflow-hidden rounded-[1.5rem] border-[6px] border-background shadow-xl">
+          <div className="absolute bottom-8 left-0 w-[43%] overflow-hidden border-[6px] border-background shadow-xl">
             <div className="relative aspect-[3/4]">
               <Image
                 src="/images/work/hauslash-blue-eye-detail.jpg"
@@ -80,10 +90,15 @@ export default function AboutPage() {
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {VALUES.map((value) => (
-                <article key={value.title} className="luxury-card p-6">
+                <article
+                  key={value.title}
+                  className="border-t border-[#ad9d8d] p-6"
+                >
                   <value.icon className="h-5 w-5 text-muted-foreground" />
                   <h3 className="mt-8 font-serif text-xl">{value.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{value.copy}</p>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    {value.copy}
+                  </p>
                 </article>
               ))}
             </div>
@@ -92,7 +107,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-2 lg:items-center lg:gap-20">
-        <div className="relative aspect-[5/4] overflow-hidden rounded-[2rem]">
+        <div className="relative aspect-[5/4] overflow-hidden">
           <Image
             src="/images/work/hauslash-green-eye-detail.jpg"
             alt="Finished Hauslash treatment"
@@ -108,14 +123,20 @@ export default function AboutPage() {
             <span className="block italic">never rushed.</span>
           </h2>
           <p className="mt-6 text-base leading-8 text-muted-foreground">
-            Your appointment starts with a consultation and ends with tailored aftercare. Between those moments, every step is performed with patience and precision so you can relax and leave feeling polished, confident, and completely yourself.
+            Your appointment starts with a consultation and ends with tailored
+            aftercare. Between those moments, every step is performed with
+            patience and precision so you can relax and leave feeling polished,
+            confident, and completely yourself.
           </p>
-          <Link href="/aftercare" className="mt-8 inline-flex items-center gap-2 text-sm font-medium">
+          <Link
+            href="/aftercare"
+            className="mt-8 inline-flex items-center gap-2 text-sm font-medium"
+          >
             Read the aftercare guide
             <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
     </main>
-  )
+  );
 }

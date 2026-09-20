@@ -44,10 +44,14 @@ async function ensureAccessCodeSchema() {
 
 function hashCode(email: string, code: string) {
   const secret =
+    process.env.CUSTOMER_BOOKING_ACCESS_SECRET ||
     process.env.CRON_SECRET ||
     process.env.ADMIN_PASSWORD ||
-    process.env.STRIPE_WEBHOOK_SECRET ||
-    'hauslash-booking-access'
+    process.env.STRIPE_WEBHOOK_SECRET
+
+  if (!secret) {
+    throw new Error('A booking access secret is not configured')
+  }
 
   return createHash('sha256').update(`${email}:${code}:${secret}`).digest('hex')
 }

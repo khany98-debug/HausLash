@@ -7,6 +7,10 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { format, addDays, isSameDay, parseISO } from 'date-fns'
+import {
+  formatAppointmentTime,
+  getAppointmentDateKey,
+} from '@/lib/appointment-time'
 import { Clock, Phone, Mail, CheckCircle, XCircle, Loader2, CalendarDays, CreditCard, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { AdminEmptyState, AdminPageHeader, AdminStatCard } from '@/components/admin/admin-page-shell'
@@ -52,9 +56,11 @@ export default function AdminCalendarPage() {
   }, [token])
 
   // Get bookings for selected date
-  const selectedDateStr = date ? date.toISOString().split('T')[0] : null
+  const selectedDateStr = date ? format(date, 'yyyy-MM-dd') : null
   const bookingsForDate = selectedDateStr
-    ? bookings.filter((b) => b.start_at && b.start_at.startsWith(selectedDateStr))
+    ? bookings.filter(
+        (b) => b.start_at && getAppointmentDateKey(b.start_at) === selectedDateStr
+      )
     : []
 
   // Get upcoming bookings (next 7 days)
@@ -257,7 +263,7 @@ export default function AdminCalendarPage() {
                 {/* Group bookings by day */}
                 {Array.from(
                   upcomingBookings.reduce((acc, booking) => {
-                    const dateKey = format(parseISO(booking.start_at), 'yyyy-MM-dd')
+                    const dateKey = getAppointmentDateKey(booking.start_at)
                     if (!acc.has(dateKey)) {
                       acc.set(dateKey, [])
                     }
@@ -288,7 +294,6 @@ export default function AdminCalendarPage() {
                         {dayBookings
                           .sort((a, b) => parseISO(a.start_at).getTime() - parseISO(b.start_at).getTime())
                           .map((booking) => {
-                            const bookingDate = parseISO(booking.start_at)
                             const config = getStatusConfig(booking.status)
                             const isServiceMobile = booking.service_name.toLowerCase().includes('mobile') || booking.service_name.toLowerCase().includes('outcall')
 
@@ -302,7 +307,7 @@ export default function AdminCalendarPage() {
                                   <div className="flex-shrink-0 flex items-center gap-3">
                                     <div className="text-center">
                                       <p className="text-2xl font-bold text-foreground">
-                                        {format(bookingDate, 'HH:mm')}
+                                        {formatAppointmentTime(booking.start_at)}
                                       </p>
                                       <p className="text-xs text-muted-foreground">
                                         {booking.duration_minutes}min
@@ -476,8 +481,8 @@ export default function AdminCalendarPage() {
                             <div className="flex items-center gap-2">
                               <Clock className="h-3.5 w-3.5" />
                               <span>
-                                {format(parseISO(booking.start_at), 'HH:mm')} -{' '}
-                                {format(parseISO(booking.end_at), 'HH:mm')} ({booking.duration_minutes}min)
+                                {formatAppointmentTime(booking.start_at)} -{' '}
+                                {formatAppointmentTime(booking.end_at)} ({booking.duration_minutes}min)
                               </span>
                             </div>
                             <div className="flex items-center gap-2">

@@ -4,9 +4,13 @@ import { resend } from '@/lib/email'
 import BookingCancellationEmail from '@/emails/booking-cancellation'
 import BookingRescheduleEmail from '@/emails/booking-reschedule'
 import { formatPence } from '@/lib/types'
-import { format } from 'date-fns'
 import { isAdminRequest } from '@/lib/admin-auth'
 import { enforceRateLimit } from '@/lib/rate-limit'
+import {
+  formatAppointmentDate,
+  formatAppointmentTime,
+  getAppointmentTimeWindow,
+} from '@/lib/appointment-time'
 import {
   createBookingCalendarAttachment,
   createBookingCalendarEvent,
@@ -20,14 +24,19 @@ async function rejectUnauthorizedAdmin(request: NextRequest) {
     return null
   }
 
-  const limited = await enforceRateLimit(request, {
-    bucket: 'admin-auth-attempt',
-    limit: 8,
-    windowMs: 15 * 60 * 1000,
-    message: 'Too many admin sign-in attempts. Please wait before trying again.',
-  })
+  try {
+    const limited = await enforceRateLimit(request, {
+      bucket: 'admin-auth-attempt',
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+      message: 'Too many admin sign-in attempts. Please wait before trying again.',
+    })
 
-  return limited || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return limited || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  } catch (error) {
+    console.error('Admin sign-in rate limit unavailable:', error)
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 }
 
 async function recordEmailResult(
@@ -160,9 +169,8 @@ export async function PATCH(request: NextRequest) {
         RETURNING *
       `
 
-      const startDate = new Date(booking.start_at)
-      const formattedDate = format(startDate, 'EEEE, d MMMM yyyy')
-      const formattedTime = format(startDate, 'HH:mm')
+      const formattedDate = formatAppointmentDate(booking.start_at)
+      const formattedTime = formatAppointmentTime(booking.start_at)
       const depositAmount = formatPence(booking.deposit_amount_pence ?? booking.deposit_pence ?? 0)
       const calendarEvent = createBookingCalendarEvent({
         bookingId,
@@ -210,13 +218,23 @@ export async function PATCH(request: NextRequest) {
         )
       }
 
-      const newStartAt = `${newDate}T${newTime}:00Z`
-      const startMinutes =
-        parseInt(newTime.split(':')[0]) * 60 + parseInt(newTime.split(':')[1])
-      const endMinutes = startMinutes + (booking.duration_minutes || 60)
-      const endH = String(Math.floor(endMinutes / 60)).padStart(2, '0')
-      const endM = String(endMinutes % 60).padStart(2, '0')
-      const newEndAt = `${newDate}T${endH}:${endM}:00Z`
+      let newStartAt: string
+      let newEndAt: string
+
+      try {
+        const window = getAppointmentTimeWindow(
+          newDate,
+          newTime,
+          booking.duration_minutes || 60
+        )
+        newStartAt = window.startAt
+        newEndAt = window.endAt
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid appointment date or time' },
+          { status: 400 }
+        )
+      }
 
       const conflicts = await sql`
         SELECT id FROM bookings
@@ -243,13 +261,11 @@ export async function PATCH(request: NextRequest) {
         RETURNING *
       `
 
-      const oldStartDate = new Date(booking.start_at)
-      const oldFormattedDate = format(oldStartDate, 'EEEE, d MMMM yyyy')
-      const oldFormattedTime = format(oldStartDate, 'HH:mm')
+      const oldFormattedDate = formatAppointmentDate(booking.start_at)
+      const oldFormattedTime = formatAppointmentTime(booking.start_at)
 
-      const newStartDate = new Date(newStartAt)
-      const newFormattedDate = format(newStartDate, 'EEEE, d MMMM yyyy')
-      const newFormattedTime = format(newStartDate, 'HH:mm')
+      const newFormattedDate = formatAppointmentDate(newStartAt)
+      const newFormattedTime = formatAppointmentTime(newStartAt)
       const calendarEvent = createBookingCalendarEvent({
         bookingId,
         service: booking.service_name,

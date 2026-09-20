@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   AlertCircle,
@@ -12,6 +13,12 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+
+export const metadata: Metadata = {
+  title: 'Lash lift aftercare',
+  description:
+    'The Hauslash aftercare guide for keeping your Korean lash lift soft, glossy and comfortable.',
+}
 
 const TIMELINE = [
   {

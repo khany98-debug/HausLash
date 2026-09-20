@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { isAdminRequest } from '@/lib/admin-auth'
+import { getAppointmentDateKey } from '@/lib/appointment-time'
 
 export async function GET(req: NextRequest) {
 
@@ -34,8 +35,7 @@ export async function GET(req: NextRequest) {
 
     // For coloring, extract booked days
     const bookedDays = bookings.map((b:any)=>{
-      const d = new Date(b.start_at)
-      return d.toISOString().split('T')[0]
+      return getAppointmentDateKey(b.start_at)
     })
 
     return NextResponse.json({

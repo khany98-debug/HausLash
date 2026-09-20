@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useAdminAuth } from './layout'
 import { formatPence } from '@/lib/types'
-import { format } from 'date-fns'
+import {
+  formatAppointmentDate,
+  formatAppointmentTime,
+  getAppointmentDateKey,
+} from '@/lib/appointment-time'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -106,10 +110,10 @@ export default function AdminBookingsPage() {
       ['confirmed', 'pending_payment'].includes(booking.status) &&
       new Date(booking.start_at).getTime() >= Date.now()
   )
-  const todayKey = format(new Date(), 'yyyy-MM-dd')
+  const todayKey = getAppointmentDateKey(new Date())
   const todayBookings = bookings.filter(
     (booking) =>
-      format(new Date(booking.start_at), 'yyyy-MM-dd') === todayKey &&
+      getAppointmentDateKey(booking.start_at) === todayKey &&
       !['cancelled', 'refunded'].includes(booking.status)
   )
   const depositTotal = bookings
@@ -124,9 +128,8 @@ export default function AdminBookingsPage() {
 
   const handleRescheduleClick = (booking: BookingRow) => {
     setSelectedBookingForReschedule(booking)
-    const startDate = new Date(booking.start_at)
-    setRescheduleDate(format(startDate, 'yyyy-MM-dd'))
-    setRescheduleTime(format(startDate, 'HH:mm'))
+    setRescheduleDate(getAppointmentDateKey(booking.start_at))
+    setRescheduleTime(formatAppointmentTime(booking.start_at))
     setRescheduleReason('')
     setShowRescheduleDialog(true)
   }
@@ -327,9 +330,9 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">{b.service_name}</td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {format(new Date(b.start_at), 'EEE d MMM yyyy')}
+                      {formatAppointmentDate(b.start_at)}
                       <br />
-                      <span className="text-xs">{format(new Date(b.start_at), 'HH:mm')}</span>
+                      <span className="text-xs">{formatAppointmentTime(b.start_at)}</span>
                     </td>
                     <td className="px-5 py-4">
                       <span
@@ -408,7 +411,7 @@ export default function AdminBookingsPage() {
                   <div>
                     <p className="text-xs text-muted-foreground">Date & Time</p>
                     <p className="font-medium text-foreground">
-                      {format(new Date(b.start_at), 'MMM d, HH:mm')}
+                      {formatAppointmentDate(b.start_at)} at {formatAppointmentTime(b.start_at)}
                     </p>
                   </div>
                 </div>
@@ -472,7 +475,7 @@ export default function AdminBookingsPage() {
             <AlertDialogDescription>
               Are you sure you want to cancel the appointment for{' '}
               <strong>{selectedBookingForCancel?.customer_name}</strong> on{' '}
-              <strong>{selectedBookingForCancel && format(new Date(selectedBookingForCancel.start_at), 'EEEE, d MMMM yyyy')}</strong>?
+              <strong>{selectedBookingForCancel && formatAppointmentDate(selectedBookingForCancel.start_at)}</strong>?
               <br />
               <br />
               A cancellation email will be sent to the customer.

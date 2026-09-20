@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -92,9 +92,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), 'Inter Fallback';
-  --font-serif: var(--font-playfair), 'Playfair Display Fallback', serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-inter), "Inter Fallback";
+  --font-serif: var(--font-playfair), "Playfair Display Fallback", serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -145,8 +145,16 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at 12% 8%, rgb(255 255 255 / 0.65), transparent 28rem),
-      radial-gradient(circle at 88% 32%, rgb(210 190 167 / 0.15), transparent 30rem);
+      radial-gradient(
+        circle at 12% 8%,
+        rgb(255 255 255 / 0.65),
+        transparent 28rem
+      ),
+      radial-gradient(
+        circle at 88% 32%,
+        rgb(210 190 167 / 0.15),
+        transparent 30rem
+      );
     min-width: 320px;
     overflow-x: hidden;
     text-rendering: optimizeLegibility;
@@ -162,6 +170,13 @@
 }
 
 @layer components {
+  .premium-button {
+    @apply inline-flex min-h-12 items-center justify-center gap-5 px-7 text-xs font-semibold uppercase tracking-[0.13em] transition-colors;
+  }
+
+  .premium-text-link {
+    @apply inline-flex w-fit shrink-0 items-center gap-3 border-b border-current pb-2 text-xs font-semibold uppercase tracking-[0.15em];
+  }
   .eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground;
   }

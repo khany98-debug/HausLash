@@ -1,7 +1,5 @@
 import 'server-only'
 
-import { format } from 'date-fns'
-
 import AdminBookingNotificationEmail from '@/emails/admin-booking-notification'
 import BookingConfirmationEmail from '@/emails/booking-confirmation'
 import {
@@ -13,6 +11,7 @@ import { getDb } from '@/lib/db'
 import { resend } from '@/lib/email'
 import { stripe } from '@/lib/stripe'
 import { formatPence } from '@/lib/types'
+import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
 
 type BookingDetails = {
   id: string
@@ -101,7 +100,6 @@ async function sendCustomerEmail(booking: BookingDetails) {
     throw new Error('RESEND_API_KEY is not configured')
   }
 
-  const startDate = new Date(booking.start_at)
   const depositPence = booking.deposit_amount_pence
   const remainingPence = booking.price_pence
     ? booking.price_pence - depositPence
@@ -124,8 +122,8 @@ async function sendCustomerEmail(booking: BookingDetails) {
     react: BookingConfirmationEmail({
       name: booking.customer_name,
       service: booking.service_name,
-      date: format(startDate, 'EEEE d MMMM yyyy'),
-      time: format(startDate, 'HH:mm'),
+      date: formatAppointmentDate(booking.start_at),
+      time: formatAppointmentTime(booking.start_at),
       deposit: formatPence(depositPence),
       remaining: remainingPence ? formatPence(remainingPence) : null,
       calendarUrl: createGoogleCalendarUrl(calendarEvent),
@@ -168,7 +166,6 @@ async function sendAdminEmail(booking: BookingDetails) {
     throw new Error('RESEND_API_KEY is not configured')
   }
 
-  const startDate = new Date(booking.start_at)
   const depositPence = booking.deposit_amount_pence
   const remainingPence = booking.price_pence
     ? booking.price_pence - depositPence
@@ -193,8 +190,8 @@ async function sendAdminEmail(booking: BookingDetails) {
       customerEmail: booking.customer_email,
       customerPhone: booking.customer_phone,
       service: booking.service_name,
-      date: format(startDate, 'EEEE d MMMM yyyy'),
-      time: format(startDate, 'HH:mm'),
+      date: formatAppointmentDate(booking.start_at),
+      time: formatAppointmentTime(booking.start_at),
       deposit: formatPence(depositPence),
       remaining: remainingPence ? formatPence(remainingPence) : null,
       notes: booking.notes,
