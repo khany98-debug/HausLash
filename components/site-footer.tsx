@@ -1,21 +1,21 @@
-import Link from 'next/link'
-import { ArrowUpRight, Instagram, Mail, MapPin } from 'lucide-react'
-import { BrandMark } from '@/components/brand-mark'
+import Link from "next/link";
+import { ArrowUpRight, Instagram, Mail, MapPin } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 
 const LINKS = [
-  { label: 'Treatments', href: '/services' },
-  { label: 'About', href: '/about' },
-  { label: 'Aftercare', href: '/aftercare' },
-  { label: 'Client reviews', href: '/reviews' },
-  { label: 'Policies', href: '/policies' },
-  { label: 'My bookings', href: '/bookings' },
-]
+  { label: "Treatments", href: "/services" },
+  { label: "About", href: "/about" },
+  { label: "Aftercare", href: "/aftercare" },
+  { label: "Client reviews", href: "/reviews" },
+  { label: "Policies", href: "/policies" },
+  { label: "My bookings", href: "/bookings" },
+];
 
 const LEGAL_LINKS = [
-  { label: 'Terms', href: '/terms' },
-  { label: 'Privacy', href: '/privacy' },
-  { label: 'Cookies', href: '/cookies' },
-]
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Cookies", href: "/cookies" },
+];
 
 export function SiteFooter() {
   return (
@@ -25,10 +25,11 @@ export function SiteFooter() {
           <div>
             <BrandMark className="text-4xl text-[#f4f0e9]" />
             <h2 className="mt-8 max-w-xl font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl">
-              Quiet luxury for your natural lashes.
+              The art of looking effortless.
             </h2>
             <p className="mt-5 max-w-md text-sm leading-7 text-[#bdb5aa]">
-              Bespoke Korean lash lifts and tinting in Stoke-on-Trent, shaped around your eyes and your style.
+              Bespoke Korean lash lifts and tinting in Stoke-on-Trent, shaped
+              around your eyes and your style.
             </p>
             <Link
               href="/book"
@@ -43,7 +44,11 @@ export function SiteFooter() {
             <p className="eyebrow text-[#8f877d]">Explore</p>
             <div className="mt-6 flex flex-col gap-3">
               {LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="text-sm text-[#d8d1c8] transition-colors hover:text-white">
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-[#d8d1c8] transition-colors hover:text-white"
+                >
                   {link.label}
                 </Link>
               ))}
@@ -57,7 +62,10 @@ export function SiteFooter() {
                 <MapPin className="h-4 w-4 text-[#8f877d]" />
                 Stoke-on-Trent, England
               </span>
-              <a href="mailto:Hauslash@outlook.com" className="flex items-center gap-3 transition-colors hover:text-white">
+              <a
+                href="mailto:Hauslash@outlook.com"
+                className="flex items-center gap-3 transition-colors hover:text-white"
+              >
                 <Mail className="h-4 w-4 text-[#8f877d]" />
                 Hauslash@outlook.com
               </a>
@@ -89,7 +97,11 @@ export function SiteFooter() {
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-2 sm:justify-end">
             {LEGAL_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="transition-colors hover:text-white">
+              <Link
+                key={link.href}
+                href={link.href}
+                className="transition-colors hover:text-white"
+              >
                 {link.label}
               </Link>
             ))}
@@ -97,5 +109,5 @@ export function SiteFooter() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
