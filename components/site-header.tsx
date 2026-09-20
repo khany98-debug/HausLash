@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Instagram, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/brand-mark";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 const PRIMARY_NAV_ITEMS = [
   { label: "Treatments", href: "/services" },
   { label: "Results", href: "/#results" },
-  { label: "Films", href: "/#reels" },
   { label: "Reviews", href: "/reviews" },
 ];
 
@@ -103,12 +102,17 @@ export function SiteHeader() {
             <Button
               asChild
               variant="outline"
-              size="sm"
-              className={cn("h-10 rounded-full px-3 text-xs", outlineButton)}
+              size="icon"
+              className={cn("h-10 w-10 rounded-full", outlineButton)}
             >
-              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
-                <span className="min-[430px]:hidden">DM</span>
-                <span className="hidden min-[430px]:inline">Enquire</span>
+              <a
+                href={INSTAGRAM_DM_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Message Hauslash on Instagram"
+                onClick={() => setOpen(false)}
+              >
+                <Instagram className="h-4 w-4" aria-hidden="true" />
               </a>
             </Button>
             <Button
@@ -158,11 +162,16 @@ export function SiteHeader() {
             <Button
               asChild
               variant="outline"
-              size="sm"
-              className={cn("rounded-full px-5", outlineButton)}
+              size="icon"
+              className={cn("h-10 w-10 rounded-full", outlineButton)}
             >
-              <a href={INSTAGRAM_DM_URL} target="_blank" rel="noreferrer">
-                Enquire Now
+              <a
+                href={INSTAGRAM_DM_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Message Hauslash on Instagram"
+              >
+                <Instagram className="h-4 w-4" aria-hidden="true" />
               </a>
             </Button>
             <Button asChild size="sm" className={cn("rounded-full px-5", bookButton)}>

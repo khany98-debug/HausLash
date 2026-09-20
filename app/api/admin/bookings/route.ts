@@ -24,14 +24,19 @@ async function rejectUnauthorizedAdmin(request: NextRequest) {
     return null
   }
 
-  const limited = await enforceRateLimit(request, {
-    bucket: 'admin-auth-attempt',
-    limit: 8,
-    windowMs: 15 * 60 * 1000,
-    message: 'Too many admin sign-in attempts. Please wait before trying again.',
-  })
+  try {
+    const limited = await enforceRateLimit(request, {
+      bucket: 'admin-auth-attempt',
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+      message: 'Too many admin sign-in attempts. Please wait before trying again.',
+    })
 
-  return limited || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return limited || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  } catch (error) {
+    console.error('Admin sign-in rate limit unavailable:', error)
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 }
 
 async function recordEmailResult(

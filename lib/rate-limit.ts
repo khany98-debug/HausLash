@@ -15,7 +15,12 @@ let schemaReady: Promise<void> | null = null
 function getClientIdentifier(request: NextRequest) {
   const forwardedFor = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
-  const ip = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown-ip'
+  const platformIp = request.headers.get('x-vercel-forwarded-for')
+  const ip =
+    platformIp ||
+    realIp ||
+    forwardedFor?.split(',').at(-1)?.trim() ||
+    'unknown-ip'
   const userAgent = request.headers.get('user-agent') || 'unknown-agent'
 
   return `${ip}:${userAgent.slice(0, 120)}`

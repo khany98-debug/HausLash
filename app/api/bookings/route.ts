@@ -125,10 +125,7 @@ export async function POST(request: NextRequest) {
 
     const bookingId = bookingRows[0].id as string
 
-    const origin =
-      request.headers.get("origin") || request.headers.get("host") || ""
-
-    const baseUrl = origin.startsWith("http") ? origin : `https://${origin}`
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hauslash.co.uk"
 
     if (isFreeBooking) {
       try {

@@ -52,7 +52,7 @@ export function ReelGallery() {
           </a>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-4">
-          {reels.map((reel, index) => (
+          {reels.map((reel) => (
             <article
               key={reel.id}
               className="group relative aspect-[9/13] overflow-hidden bg-[#d7c7b7]"
@@ -63,9 +63,6 @@ export function ReelGallery() {
                 className="transition duration-700 group-hover:scale-[1.04]"
               />
               <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
-              <span className="absolute left-6 top-6 text-[10px] font-semibold uppercase tracking-[.2em] text-white">
-                Hauslash / Film 0{index + 1}
-              </span>
               <span className="absolute bottom-[4.3rem] left-5 right-5 font-serif text-[clamp(1.9rem,3vw,2.5rem)] leading-[.92] text-white sm:left-6 sm:right-6">
                 {reel.title}
               </span>

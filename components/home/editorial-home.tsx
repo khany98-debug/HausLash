@@ -114,7 +114,7 @@ export function EditorialHome() {
             </Link>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {services.map((service, i) => (
+            {services.map((service) => (
               <Link
                 key={service.href}
                 href={service.href}
@@ -128,9 +128,6 @@ export function EditorialHome() {
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
-                  <span className="absolute left-5 top-5 bg-[#f7f3ed] px-3 py-2 text-xs">
-                    0{i + 1}
-                  </span>
                 </div>
                 <div className="flex min-h-36 items-end justify-between gap-4 px-6 pb-7 pt-5">
                   <div>
