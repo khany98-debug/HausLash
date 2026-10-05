@@ -40,9 +40,9 @@ export function EditorialHome() {
         </div>
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(24,20,19,.86),rgba(24,20,19,.59)_43%,rgba(24,20,19,.08))] max-md:bg-[linear-gradient(0deg,rgba(24,20,19,.92),rgba(24,20,19,.18)_86%)]" />
         <div className="relative mx-auto flex min-h-[760px] max-w-[1600px] flex-col justify-between px-6 pb-9 pt-[104px] sm:px-10 lg:min-h-[860px] lg:px-20 lg:pb-14 lg:pt-[128px]">
-          <div className="flex flex-col gap-2 border-b border-white/30 pb-5 text-[clamp(8px,1.1vw,10px)] font-semibold uppercase tracking-[.2em] lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center justify-between gap-2 border-b border-white/30 pb-5 text-[clamp(7px,1.7vw,10px)] font-semibold uppercase tracking-[.13em]">
             <span className="shrink-0 whitespace-nowrap">Hauslash / Stoke-on-Trent</span>
-            <span className="shrink-0 self-end whitespace-nowrap text-right lg:self-auto">Natural beauty, considered</span>
+            <span className="shrink-0 whitespace-nowrap text-right">Natural beauty, considered</span>
           </div>
           <Link
             href="/book"
