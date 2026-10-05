@@ -38,6 +38,9 @@ export interface Booking {
   status: 'pending_payment' | 'confirmed' | 'cancelled' | 'completed' | 'refunded'
   stripe_checkout_session_id: string | null
   deposit_amount_pence: number
+  promotion_code: string | null
+  discount_amount_pence: number
+  final_price_pence: number | null
   created_at: string
   updated_at: string
   expires_at: string | null

@@ -9,6 +9,7 @@ import { AddToCalendarButton } from '@/components/booking/add-to-calendar'
 import { getAppointmentLocationDetails } from '@/lib/appointment-location'
 import { isPatchTestService } from '@/lib/service-display'
 import { formatAppointmentDate, formatAppointmentTime } from '@/lib/appointment-time'
+import { ensureBookingPromotionSchema } from '@/lib/booking-promotion-schema'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,7 @@ export default async function BookingSuccessPage({
     console.error('Could not complete booking confirmation email:', error)
   }
 
+  await ensureBookingPromotionSchema()
   const sql = getDb()
   const bookings = sessionId
     ? await sql`
@@ -101,7 +103,10 @@ export default async function BookingSuccessPage({
 
   const depositPence = booking.deposit_amount_pence as number
   const pricePence = booking.price_pence as number | null
-  const remainingPence = pricePence ? pricePence - depositPence : null
+  const finalPricePence = (booking.final_price_pence as number | null) ?? pricePence
+  const discountPence = (booking.discount_amount_pence as number | null) ?? 0
+  const promotionCode = booking.promotion_code as string | null
+  const remainingPence = finalPricePence ? finalPricePence - depositPence : null
   const isPatchTest = isPatchTestService({
     name: booking.service_name as string,
     slug: booking.service_slug as string,
@@ -173,6 +178,13 @@ export default async function BookingSuccessPage({
             </div>
 
             <div className="mt-4 border-t border-border/60 pt-4">
+
+              {promotionCode && discountPence > 0 && (
+                <div className="mb-3 flex justify-between text-sm text-muted-foreground">
+                  <span>{promotionCode} website offer</span>
+                  <span className="font-medium text-foreground">You saved {formatPence(discountPence)}</span>
+                </div>
+              )}
 
               {depositPence > 0 ? (
                 <>

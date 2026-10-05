@@ -118,6 +118,8 @@ export default function BookingConfirmationEmail({
   time,
   deposit,
   remaining,
+  promotionCode,
+  discount,
   calendarUrl,
 }: {
   name: string
@@ -126,6 +128,8 @@ export default function BookingConfirmationEmail({
   time: string
   deposit: string
   remaining?: string | null
+  promotionCode?: string | null
+  discount?: string | null
   calendarUrl?: string
 }) {
   const locationDetails = getAppointmentLocationDetails(service)
@@ -168,6 +172,11 @@ export default function BookingConfirmationEmail({
               <Text style={styles.value}>
                 {isPatchTest ? "Refundable deposit paid" : "Deposit paid"}: {deposit}
               </Text>
+              {promotionCode && discount && (
+                <Text style={styles.value}>
+                  {promotionCode} applied: you saved {discount}
+                </Text>
+              )}
               <Text style={styles.copy}>
                 {isPatchTest
                   ? "Your £5 patch test attendance deposit is refunded once you attend."

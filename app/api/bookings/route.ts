@@ -7,6 +7,8 @@ import { isPatchTestService, normalisePublicService } from "@/lib/service-displa
 import { stripe } from "@/lib/stripe"
 import { Service } from "@/lib/types"
 import { getAppointmentTimeWindow } from "@/lib/appointment-time"
+import { ensureBookingPromotionSchema } from "@/lib/booking-promotion-schema"
+import { calculatePromotion, promotionErrorMessage } from "@/lib/promotions"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -19,6 +21,7 @@ const bookingSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(7).max(20),
   notes: z.string().max(1000).nullable().optional(),
+  promotionCode: z.string().trim().max(32).nullable().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { serviceId, date, time, name, email, phone, notes } = parsed.data
+    const { serviceId, date, time, name, email, phone, notes, promotionCode } = parsed.data
     const sql = getDb()
 
     const serviceRows = await sql`
@@ -88,12 +91,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const depositPence = service.deposit_pence as number
+    const standardDepositPence = service.deposit_pence as number
+    const promotionResult = calculatePromotion({
+      code: promotionCode,
+      pricePence: service.price_pence,
+      depositPence: standardDepositPence,
+      eligible: !isPatchTest,
+    })
+
+    if (promotionResult.error) {
+      return NextResponse.json(
+        { error: promotionErrorMessage(promotionResult.error) },
+        { status: 400 }
+      )
+    }
+
+    const promotion = promotionResult.promotion
+    const depositPence = promotion?.depositPence ?? standardDepositPence
     const isFreeBooking = depositPence <= 0
 
     const expiresAt = isFreeBooking
       ? null
       : new Date(Date.now() + 30 * 60 * 1000).toISOString()
+
+    await ensureBookingPromotionSchema()
 
     const bookingRows = await sql`
       INSERT INTO bookings (
@@ -106,6 +127,9 @@ export async function POST(request: NextRequest) {
         notes,
         status,
         deposit_amount_pence,
+        promotion_code,
+        discount_amount_pence,
+        final_price_pence,
         expires_at
       )
       VALUES (
@@ -118,6 +142,9 @@ export async function POST(request: NextRequest) {
         ${notes || null},
         ${isFreeBooking ? 'confirmed' : 'pending_payment'},
         ${depositPence},
+        ${promotion?.code ?? null},
+        ${promotion?.discountPence ?? 0},
+        ${promotion?.finalPricePence ?? service.price_pence ?? null},
         ${expiresAt ? `${expiresAt}` : null}::timestamptz
       )
       RETURNING id
@@ -163,6 +190,7 @@ export async function POST(request: NextRequest) {
         serviceId,
         date,
         time,
+        promotionCode: promotion?.code ?? '',
       },
       customer_email: email,
       success_url: `${baseUrl}/book/success?session_id={CHECKOUT_SESSION_ID}`,
