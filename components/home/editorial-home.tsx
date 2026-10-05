@@ -44,6 +44,14 @@ export function EditorialHome() {
             <span>Hauslash / Stoke-on-Trent</span>
             <span>Natural beauty, considered</span>
           </div>
+          <Link
+            href="/book"
+            className="mt-4 flex w-fit flex-wrap items-center gap-x-3 gap-y-1 border border-[#e2cbb8]/55 bg-[#211d1b]/40 px-4 py-3 text-[10px] font-semibold uppercase tracking-[.2em] text-[#f7f2eb] transition hover:border-[#e2cbb8] hover:bg-[#211d1b]/70"
+          >
+            <span className="text-[#e2cbb8]">October offer</span>
+            <span>Use OCTOBER10 for 10% off</span>
+            <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
           <div className="max-w-[760px] pt-44 md:pt-24">
             <p className="text-[11px] font-semibold uppercase tracking-[.3em] text-[#e2cbb8]">
               The Korean lash lift studio

@@ -60,6 +60,9 @@ CREATE TABLE IF NOT EXISTS bookings (
     CHECK (status IN ('pending_payment','confirmed','cancelled','completed','refunded')),
   stripe_checkout_session_id TEXT,
   deposit_amount_pence INT NOT NULL DEFAULT 1500,
+  promotion_code TEXT,
+  discount_amount_pence INT NOT NULL DEFAULT 0,
+  final_price_pence INT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at TIMESTAMPTZ

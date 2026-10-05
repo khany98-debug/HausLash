@@ -8,6 +8,7 @@ import {
   createGoogleCalendarUrl,
 } from '@/lib/calendar'
 import { getDb } from '@/lib/db'
+import { ensureBookingPromotionSchema } from '@/lib/booking-promotion-schema'
 import { resend } from '@/lib/email'
 import { stripe } from '@/lib/stripe'
 import { formatPence } from '@/lib/types'
@@ -25,6 +26,9 @@ type BookingDetails = {
   duration_minutes: number | null
   price_pence: number | null
   deposit_amount_pence: number
+  promotion_code: string | null
+  discount_amount_pence: number
+  final_price_pence: number | null
 }
 
 type ConfirmationResult = {
@@ -101,8 +105,9 @@ async function sendCustomerEmail(booking: BookingDetails) {
   }
 
   const depositPence = booking.deposit_amount_pence
-  const remainingPence = booking.price_pence
-    ? booking.price_pence - depositPence
+  const finalPricePence = booking.final_price_pence ?? booking.price_pence
+  const remainingPence = finalPricePence
+    ? finalPricePence - depositPence
     : null
   const calendarEvent = createBookingCalendarEvent({
     bookingId: booking.id,
@@ -126,6 +131,10 @@ async function sendCustomerEmail(booking: BookingDetails) {
       time: formatAppointmentTime(booking.start_at),
       deposit: formatPence(depositPence),
       remaining: remainingPence ? formatPence(remainingPence) : null,
+      promotionCode: booking.promotion_code,
+      discount: booking.discount_amount_pence
+        ? formatPence(booking.discount_amount_pence)
+        : null,
       calendarUrl: createGoogleCalendarUrl(calendarEvent),
     }),
   })
@@ -167,8 +176,9 @@ async function sendAdminEmail(booking: BookingDetails) {
   }
 
   const depositPence = booking.deposit_amount_pence
-  const remainingPence = booking.price_pence
-    ? booking.price_pence - depositPence
+  const finalPricePence = booking.final_price_pence ?? booking.price_pence
+  const remainingPence = finalPricePence
+    ? finalPricePence - depositPence
     : null
   const calendarEvent = createBookingCalendarEvent({
     bookingId: booking.id,
@@ -194,6 +204,10 @@ async function sendAdminEmail(booking: BookingDetails) {
       time: formatAppointmentTime(booking.start_at),
       deposit: formatPence(depositPence),
       remaining: remainingPence ? formatPence(remainingPence) : null,
+      promotionCode: booking.promotion_code,
+      discount: booking.discount_amount_pence
+        ? formatPence(booking.discount_amount_pence)
+        : null,
       notes: booking.notes,
       calendarUrl: createGoogleCalendarUrl(calendarEvent),
     }),
@@ -255,6 +269,7 @@ export async function confirmPaidBooking(
     }
   }
 
+  await ensureBookingPromotionSchema()
   const sql = getDb()
 
   await sql`
@@ -276,6 +291,9 @@ export async function confirmPaidBooking(
       b.start_at,
       b.end_at,
       b.deposit_amount_pence,
+      b.promotion_code,
+      b.discount_amount_pence,
+      b.final_price_pence,
       s.name AS service_name,
       s.duration_minutes,
       s.price_pence
@@ -319,6 +337,7 @@ export async function confirmPaidBooking(
 export async function sendConfirmedBookingEmails(
   bookingId: string
 ): Promise<ConfirmationResult> {
+  await ensureBookingPromotionSchema()
   const sql = getDb()
 
   const bookingRows = await sql`
@@ -331,6 +350,9 @@ export async function sendConfirmedBookingEmails(
       b.start_at,
       b.end_at,
       b.deposit_amount_pence,
+      b.promotion_code,
+      b.discount_amount_pence,
+      b.final_price_pence,
       s.name AS service_name,
       s.duration_minutes,
       s.price_pence

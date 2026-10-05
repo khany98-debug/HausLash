@@ -127,6 +127,8 @@ export default function AdminBookingNotificationEmail({
   time,
   deposit,
   remaining,
+  promotionCode,
+  discount,
   notes,
   calendarUrl,
 }: {
@@ -138,6 +140,8 @@ export default function AdminBookingNotificationEmail({
   time: string
   deposit: string
   remaining?: string | null
+  promotionCode?: string | null
+  discount?: string | null
   notes?: string | null
   calendarUrl: string
 }) {
@@ -180,6 +184,11 @@ export default function AdminBookingNotificationEmail({
               <Text style={styles.value}>
                 {isPatchTest ? "Refundable deposit paid" : "Deposit paid"}: {deposit}
               </Text>
+              {promotionCode && discount && (
+                <Text style={styles.value}>
+                  {promotionCode} applied: client saved {discount}
+                </Text>
+              )}
               <Text style={styles.copy}>
                 {isPatchTest
                   ? "Patch test deposit is refundable once the client attends."

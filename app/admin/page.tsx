@@ -57,6 +57,8 @@ interface BookingRow {
   status: string
   deposit_amount_pence: number
   price_pence: number | null
+  promotion_code: string | null
+  discount_amount_pence: number
   notes: string | null
   created_at: string
   duration_minutes: number
@@ -343,6 +345,11 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">
                       {formatPence(b.deposit_amount_pence)}
+                      {b.promotion_code && b.discount_amount_pence > 0 && (
+                        <div className="mt-1 text-xs text-emerald-700">
+                          {b.promotion_code} −{formatPence(b.discount_amount_pence)}
+                        </div>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex gap-2">
@@ -421,6 +428,11 @@ export default function AdminBookingsPage() {
                   <div>
                     <p className="text-xs text-muted-foreground">Deposit</p>
                     <p className="font-medium text-foreground">{formatPence(b.deposit_amount_pence)}</p>
+                    {b.promotion_code && b.discount_amount_pence > 0 && (
+                      <p className="mt-1 text-xs text-emerald-700">
+                        {b.promotion_code} applied · saved {formatPence(b.discount_amount_pence)}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Phone</p>
