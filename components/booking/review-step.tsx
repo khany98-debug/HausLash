@@ -4,13 +4,11 @@ import { useState } from 'react'
 import { BookingData } from './booking-wizard'
 import { Service, formatPence, formatDuration } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ChevronLeft, Loader2, Calendar, Clock, User, Mail, Phone, Tag, X } from 'lucide-react'
+import { ChevronLeft, Loader2, Calendar, Clock, User, Mail, Phone } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { getAppointmentLocationDetails } from '@/lib/appointment-location'
 import { isPatchTestService } from '@/lib/service-display'
-import { calculatePromotion, OCTOBER10_CODE, promotionErrorMessage } from '@/lib/promotions'
 
 export function ReviewStep({
   data,
@@ -22,46 +20,16 @@ export function ReviewStep({
   onBack: () => void
 }) {
   const [submitting, setSubmitting] = useState(false)
-  const [promotionInput, setPromotionInput] = useState('')
-  const [appliedPromotionCode, setAppliedPromotionCode] = useState<string | null>(null)
-  const [promotionError, setPromotionError] = useState<string | null>(null)
 
   const formattedDate = format(new Date(data.date), 'EEEE d MMMM yyyy')
   const isFreeBooking = service.deposit_pence <= 0
   const isPatchTest = isPatchTestService(service)
-  const promotionResult = calculatePromotion({
-    code: appliedPromotionCode,
-    pricePence: service.price_pence,
-    depositPence: service.deposit_pence,
-    eligible: !isPatchTest,
-  })
-  const promotion = promotionResult.promotion
-  const depositPence = promotion?.depositPence ?? service.deposit_pence
-  const finalPricePence = promotion?.finalPricePence ?? service.price_pence
+  const depositPence = service.deposit_pence
   const remainingPence =
-    finalPricePence && finalPricePence > depositPence
-      ? finalPricePence - depositPence
+    service.price_pence && service.price_pence > depositPence
+      ? service.price_pence - depositPence
       : null
   const locationDetails = getAppointmentLocationDetails(service.name)
-
-  function applyPromotion() {
-    const result = calculatePromotion({
-      code: promotionInput,
-      pricePence: service.price_pence,
-      depositPence: service.deposit_pence,
-      eligible: !isPatchTest,
-    })
-
-    if (result.error) {
-      setAppliedPromotionCode(null)
-      setPromotionError(promotionErrorMessage(result.error))
-      return
-    }
-
-    setAppliedPromotionCode(result.promotion?.code ?? null)
-    setPromotionInput(result.promotion?.code ?? '')
-    setPromotionError(null)
-  }
 
   async function handleConfirm() {
     setSubmitting(true)
@@ -77,7 +45,6 @@ export function ReviewStep({
           email: data.email.trim().toLowerCase(),
           phone: data.phone.trim(),
           notes: data.notes.trim() || null,
-          promotionCode: appliedPromotionCode,
         }),
       })
 
@@ -158,77 +125,6 @@ export function ReviewStep({
         )}
 
         <div className="mt-6 border-t border-border/60 pt-4">
-          {!isFreeBooking && !isPatchTest && service.price_pence && (
-            <div className="mb-5 rounded-lg border border-border/60 bg-muted/40 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Tag className="h-4 w-4" />
-                Website booking offer
-              </div>
-              {promotion ? (
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-md bg-background px-3 py-2 text-sm">
-                  <span className="font-medium text-foreground">{promotion.code} applied — {promotion.percentage}% off</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAppliedPromotionCode(null)
-                      setPromotionInput('')
-                    }}
-                    className="rounded-sm p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label="Remove promotional code"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div className="mt-3 flex gap-2">
-                  <Input
-                    value={promotionInput}
-                    onChange={(event) => {
-                      setPromotionInput(event.target.value)
-                      setPromotionError(null)
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        applyPromotion()
-                      }
-                    }}
-                    placeholder="Promotional code"
-                    aria-label="Promotional code"
-                    className="bg-background uppercase"
-                    disabled={submitting}
-                  />
-                  <Button type="button" variant="outline" onClick={applyPromotion} disabled={!promotionInput.trim() || submitting}>
-                    Apply
-                  </Button>
-                </div>
-              )}
-              {promotionError && <p className="mt-2 text-xs text-destructive">{promotionError}</p>}
-              {promotion && (
-                <div className="mt-3 flex justify-between text-xs text-muted-foreground">
-                  <span>You save</span>
-                  <span>-{formatPence(promotion.discountPence)}</span>
-                </div>
-              )}
-            </div>
-          )}
-          {isPatchTest && (
-            <p className="mb-5 text-xs leading-5 text-muted-foreground">
-              Promotional codes apply to paid lash-lift appointments, not refundable patch-test deposits.
-            </p>
-          )}
-          {promotion && service.price_pence && (
-            <>
-              <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                <span>Service total</span>
-                <span className="line-through">{formatPence(service.price_pence)}</span>
-              </div>
-              <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
-                <span>{OCTOBER10_CODE} discount</span>
-                <span>-{formatPence(promotion.discountPence)}</span>
-              </div>
-            </>
-          )}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               {isFreeBooking
